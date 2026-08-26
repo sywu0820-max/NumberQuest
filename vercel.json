@@ -8,5 +8,8 @@
         { "key": "Cache-Control", "value": "no-cache" }
       ]
     }
-  ]
+  ],
+  "meta": {
+    "previewTrigger": "v0.3-staging"
+  }
 }
