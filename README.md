@@ -1,31 +1,15 @@
-# Number Quest 數字探險隊 v0.1
+# Number Quest 數字探險隊
 
-給約 7 歲孩子使用的觸控優先數學小遊戲，練習：
-
-- 九九乘法（1–9）
-- 100 以內加法
-- 100 以內減法（結果不為負數）
+給約 7 歲孩子使用的觸控優先數學闖關遊戲，練習九九乘法（1–9）與 100 以內加減。
 
 ## 產品原則
+不是「題庫換皮」，而是短回合探險：世界地圖、解鎖、星等、XP 與寶石。答錯不扣生命、不清除進度，改為鼓勵提示＋再挑戰。
 
-這不是「題庫皮膚化」，而是短回合的闖關遊戲：世界地圖、解鎖、星等、連擊、XP、寶石、貼紙收藏與角色夥伴。答錯不扣生命，改為提示＋再挑戰，降低考試感。
+## 裝置
+iPad Safari 與 Surface Pro Edge 都是第一級目標。核心遊戲無帳號、無後端、無 API、無廣告；進度保存在裝置 localStorage。
 
-## Surface Pro 使用
+## PWA 部署
+GitHub Pages 從 `main` / repository root 發布。詳細步驟見 `docs/DEPLOY_PWA.md`。
 
-最簡單：在資料夾內執行：
-
-```bash
-python -m http.server 8080
-```
-
-然後用 Edge 開啟 `http://localhost:8080`。
-
-Edge 可使用「應用程式 → 將此網站安裝為應用程式」，之後可像 App 一樣從 Surface Pro 開啟。第一次載入後 Service Worker 會快取主要檔案，可離線使用。
-
-## 驗證
-
-```bash
-npm test
-```
-
-核心規則測試包含：百內加法上限、減法不出現負數、九九乘法因數範圍、選項唯一性與 XP / 星等規則。
+## AI 開發工作流
+`AGENTS.md` 是 engineering contract；`docs/CODEX_HANDOFF.md` 定義 Codex → branch/PR → ChatGPT review/repair 的 bounded workflow。
