@@ -8,67 +8,42 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="數字探險">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="v03.css">
-<title>Number Quest v0.3</title>
+<link rel="stylesheet" href="v04.css">
+<title>Number Quest v0.4</title>
 </head>
 <body>
 <main class="wrap">
   <div class="top">
-    <div class="stats">
-      <div class="pill">💎 <span id="gems">0</span></div>
-      <div class="pill">⚡ Lv.<span id="level">1</span></div>
-      <div class="pill">🔥 <span id="streakDays">1</span> 天</div>
-    </div>
-    <button class="ghost" id="collectionBtn">🎒 圖鑑 <span id="collectionCount">0</span>/20</button>
+    <div class="stats"><div class="pill">💎 <span id="gems">0</span></div><div class="pill">⚡ Lv.<span id="level">1</span></div><div class="pill">🔥 <span id="streakDays">1</span> 天</div></div>
+    <div class="top-actions"><button class="ghost" id="masteryBtn">📘 九九徽章 <span id="masteredCount">0</span>/9</button><button class="ghost" id="collectionBtn">🎒 圖鑑 <span id="collectionCount">0</span>/20</button></div>
   </div>
 
   <section id="home">
-    <div class="hero">
-      <div class="rocket">🚀</div>
-      <h1>數字探險隊</h1>
-      <p>今天也來收一個新寶物吧！</p>
+    <div class="hero"><div class="rocket">🚀</div><h1>數字探險隊</h1><p>v0.4 挑戰學院 · 想多做幾題？今天你決定！</p></div>
+
+    <div class="section-title"><h2>🎮 這趟要挑戰幾題？</h2><span>長挑戰會出現神秘空格題</span></div>
+    <div id="lengths" class="lengths"></div>
+
+    <div class="challenge-grid">
+      <button class="challenge focus" id="focusBtn"><strong>🎯 弱點特訓</strong><span>10 題 · 系統偷偷挑你最需要練的</span></button>
+      <button class="challenge academy" id="academyBtn"><strong>🏆 數字大師遠征</strong><span>20 題 · 已解鎖題型全部混合</span></button>
     </div>
-    <div class="section-title"><h2>✨ 今日任務</h2><span id="dailyBonus"></span></div>
-    <div id="daily" class="daily"></div>
-    <div class="section-title"><h2>🗺️ 探險地圖</h2><span>每第 3 趟會遇到 Boss</span></div>
-    <div id="worlds" class="worlds"></div>
+
+    <div class="section-title"><h2>✨ 今日任務</h2><span>每天一點點，越來越強</span></div><div id="daily" class="daily"></div>
+    <div class="section-title"><h2>🗺️ 探險地圖</h2><span>每第 3 趟會遇到 Boss</span></div><div id="worlds" class="worlds"></div>
   </section>
 
   <section id="game" class="game">
-    <div class="game-head">
-      <button class="ghost" id="homeBtn">← 地圖</button>
-      <div id="mode" class="mode"></div>
-      <div class="pill">💎 <span id="gameGems">0</span></div>
-    </div>
-    <h2 id="worldTitle"></h2>
-    <div id="bossPanel" class="boss-panel">
-      <div class="boss-face">👾</div>
-      <b>Boss 能量</b>
-      <div class="hpbar"><i id="hpbar"></i></div>
-    </div>
-    <div class="progress"><div class="bar" id="bar"></div></div>
-    <div id="combo" class="combo"></div>
-    <div class="mascot" id="mascot">🦊</div>
-    <div class="question" id="question"></div>
-    <div class="answers" id="answers"></div>
-    <div class="msg" id="msg">選一個答案！</div>
+    <div class="game-head"><button class="ghost" id="homeBtn">← 地圖</button><div id="mode" class="mode"></div><div class="pill">💎 <span id="gameGems">0</span></div></div>
+    <h2 id="worldTitle"></h2><div id="bossPanel" class="boss-panel"><div class="boss-face">👾</div><b>Boss 能量</b><div class="hpbar"><i id="hpbar"></i></div></div>
+    <div class="progress"><div class="bar" id="bar"></div></div><div class="run-meta"><span id="counter">0 / 10</span><span id="combo" class="combo"></span></div>
+    <div class="mascot" id="mascot">🦊</div><div class="question" id="question"></div><div class="answers" id="answers"></div><div class="msg" id="msg">選一個答案！</div>
   </section>
 </main>
 
-<div id="resultOverlay" class="overlay"><div class="card">
-  <div id="resultEmoji" class="big">🏆</div>
-  <h2 id="resultTitle">探險完成！</h2>
-  <p id="resultText"></p>
-  <div id="newCollectible" style="font-size:22px;font-weight:900;margin:16px"></div>
-  <button class="primary" id="resultBtn">回到地圖</button>
-</div></div>
+<div id="resultOverlay" class="overlay"><div class="card"><div id="resultEmoji" class="big">🏆</div><h2 id="resultTitle">探險完成！</h2><p id="resultText"></p><div id="newCollectible" class="reward"></div><button class="primary" id="resultBtn">回到地圖</button></div></div>
+<div id="collectionOverlay" class="overlay"><div class="card"><div class="big">🎒</div><h2>探險圖鑑</h2><p>普通寶物靠探險收集，稀有寶物要打倒 Boss。</p><div id="collectionGrid" class="collection-grid"></div><button class="primary" id="closeCollection">繼續探險</button></div></div>
+<div id="masteryOverlay" class="overlay"><div class="card mastery-card-wrap"><div class="big">📘</div><h2>我的數字能力</h2><p>練得夠多而且穩定答對，就會拿到九九徽章。</p><h3>九九乘法</h3><div id="mulMastery" class="mul-mastery"></div><h3>加減法</h3><div id="arithMastery" class="arith-mastery"></div><button class="primary" id="closeMastery">繼續變強</button></div></div>
 
-<div id="collectionOverlay" class="overlay"><div class="card">
-  <div class="big">🎒</div><h2>探險圖鑑</h2>
-  <p>普通寶物靠探險收集，稀有寶物要打倒 Boss。</p>
-  <div id="collectionGrid" class="collection-grid"></div>
-  <button class="primary" id="closeCollection">繼續探險</button>
-</div></div>
-
-<script type="module" src="v03-app.js"></script>
+<script type="module" src="v04-app.js"></script>
 </body></html>
