@@ -1,1 +1,9 @@
-{"id":"./","name":"Number Quest 數字探險隊","short_name":"數字探險","description":"九九乘法與百內加減的遊戲化練習","start_url":"./?source=pwa","scope":"./","display":"standalone","background_color":"#10172a","theme_color":"#10172a","orientation":"any","lang":"zh-Hant"}
+{
+  "name":"Number Quest 數字探險隊",
+  "short_name":"數字探險",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#172443",
+  "theme_color":"#172443",
+  "description":"給孩子的遊戲化九九乘法與百內加減探險。"
+}

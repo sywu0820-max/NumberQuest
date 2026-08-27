@@ -1,1 +1,74 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#10172a"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="數字探險"><link rel="manifest" href="manifest.webmanifest"><title>Number Quest 數字探險隊</title><style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;background:linear-gradient(160deg,#10172a,#24335d);color:#fff;min-height:100dvh;padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));user-select:none}.wrap{max-width:900px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.pill{background:#ffffff18;border:1px solid #ffffff30;padding:9px 14px;border-radius:99px}.hero{text-align:center;padding:20px 0 10px}.hero h1{font-size:clamp(30px,6vw,52px);margin:4px}.hero p{opacity:.8}.worlds{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.world{border:0;border-radius:22px;padding:18px;text-align:left;color:#fff;background:#ffffff14;box-shadow:0 8px 25px #0003;font:inherit;min-height:112px}.world:not(:disabled):active{transform:scale(.98)}.world:disabled{opacity:.38}.world b{font-size:20px;display:block;margin-bottom:5px}.game{display:none;text-align:center}.progress{height:15px;background:#ffffff20;border-radius:20px;overflow:hidden;margin:14px 0}.bar{height:100%;background:linear-gradient(90deg,#ffd75e,#ff9f43);width:0;transition:.3s}.mascot{font-size:64px;filter:drop-shadow(0 8px 8px #0004)}.question{font-size:clamp(48px,11vw,86px);font-weight:900;margin:12px 0}.answers{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.ans{border:0;border-radius:22px;padding:22px;font-size:34px;font-weight:800;background:#fff;color:#18213b;box-shadow:0 8px 0 #cbd3e8}.ans:active{transform:translateY(5px);box-shadow:0 3px 0 #cbd3e8}.msg{min-height:48px;font-size:22px;font-weight:700;margin:15px}.back{border:0;background:#ffffff18;color:#fff;border-radius:99px;padding:10px 16px}.stars{font-size:25px}.celebrate{animation:pop .35s}@keyframes pop{50%{transform:scale(1.15)}}@media(min-width:760px){.worlds{grid-template-columns:repeat(4,1fr)}.world{min-height:145px}.answers{max-width:650px;margin:auto}}</style></head><body><main class="wrap"><div class="top"><div class="pill">💎 <span id="gems">0</span></div><div class="pill">⚡ Lv.<span id="level">1</span> · <span id="xp">0</span> XP</div></div><section id="home"><div class="hero"><div style="font-size:65px">🚀</div><h1>數字探險隊</h1><p>選一座島，幫探險隊收集星星！</p></div><div id="worlds" class="worlds"></div></section><section id="game" class="game"><button class="back" onclick="goHome()">← 探險地圖</button><h2 id="worldTitle"></h2><div class="stars" id="stars">☆☆☆☆☆</div><div class="progress"><div class="bar" id="bar"></div></div><div class="mascot" id="mascot">🦊</div><div class="question" id="question"></div><div class="answers" id="answers"></div><div class="msg" id="msg">選一個答案！</div></section></main><script>const W=[['🌱','加法草原','20 內加法','add20'],['🌲','減法森林','20 內減法','sub20'],['🌊','數字海灣','50 內加減','mix50'],['⛰️','乘法山谷','1、2、5 乘法','mul125'],['🌋','九九火山','3、4、6 乘法','mul346'],['🪐','星空乘法站','7、8、9 乘法','mul789'],['🏰','百數王城','100 內加減','mix100'],['👑','數字大師塔','九九＋百內加減','master']];let S=JSON.parse(localStorage.getItem('nq-state')||'{"gems":0,"xp":0,"unlocked":1,"best":{}}'),wi=0,q=null,correct=0,attempted=false;const $=x=>document.getElementById(x),rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,save=()=>{localStorage.setItem('nq-state',JSON.stringify(S));hud()};function hud(){$('gems').textContent=S.gems;$('xp').textContent=S.xp;$('level').textContent=Math.floor(S.xp/100)+1}function render(){hud();$('worlds').innerHTML='';W.forEach((w,i)=>{let b=document.createElement('button');b.className='world';b.disabled=i>=S.unlocked;b.innerHTML=`<b>${w[0]} ${w[1]}</b><span>${i<S.unlocked?w[2]:'🔒 繼續闖關解鎖'}</span><div>${'★'.repeat(S.best[i]||0)}${'☆'.repeat(5-(S.best[i]||0))}</div>`;b.onclick=()=>start(i);$('worlds').append(b)})}function start(i){wi=i;correct=0;$('home').style.display='none';$('game').style.display='block';$('worldTitle').textContent=W[i][0]+' '+W[i][1];updateProgress();next()}function make(){let t=W[wi][3],a,b,op,ans;if(t.startsWith('mul')||t==='master'&&Math.random()<.5){let sets=t==='mul125'?[1,2,5]:t==='mul346'?[3,4,6]:t==='mul789'?[7,8,9]:[1,2,3,4,5,6,7,8,9];a=sets[rnd(0,sets.length-1)];b=rnd(1,9);op='×';ans=a*b}else{let max=t==='add20'||t==='sub20'?20:t==='mix50'?50:100;let sub=t.startsWith('sub')||t.startsWith('mix')&&Math.random()<.5||t==='master'&&Math.random()<.5;if(sub){a=rnd(1,max);b=rnd(0,a);op='−';ans=a-b}else{a=rnd(0,max);b=rnd(0,max-a);op='＋';ans=a+b}}let opts=[ans];while(opts.length<4){let x=Math.max(0,ans+rnd(-10,10));if(!opts.includes(x))opts.push(x)}opts.sort(()=>Math.random()-.5);return{txt:`${a} ${op} ${b} = ?`,ans,opts}}function next(){attempted=false;q=make();$('question').textContent=q.txt;$('msg').textContent='選一個答案！';$('answers').innerHTML='';q.opts.forEach(n=>{let b=document.createElement('button');b.className='ans';b.textContent=n;b.onclick=()=>answer(n,b);$('answers').append(b)})}function answer(n,b){if(n===q.ans){correct++;S.gems+=attempted?1:2;S.xp+=attempted?6:10;$('mascot').classList.add('celebrate');setTimeout(()=>$('mascot').classList.remove('celebrate'),350);$('msg').textContent=attempted?'✨ 找到了！很棒！':'🎉 一次答對！超厲害！';save();updateProgress();[...$('answers').children].forEach(x=>x.disabled=true);if(correct>=5)setTimeout(finish,650);else setTimeout(next,650)}else{attempted=true;b.disabled=true;b.style.opacity=.35;$('msg').textContent='💡 差一點！再試一次，你可以的！'}}function updateProgress(){$('bar').style.width=(correct/5*100)+'%';$('stars').textContent='★'.repeat(correct)+'☆'.repeat(5-correct)}function finish(){S.best[wi]=Math.max(S.best[wi]||0,5);if(S.unlocked===wi+1&&S.unlocked<W.length)S.unlocked++;S.gems+=10;S.xp+=25;save();$('msg').textContent='🏆 闖關成功！新島嶼正在發光！';$('mascot').textContent='🦕';setTimeout(goHome,1400)}function goHome(){$('game').style.display='none';$('home').style.display='block';$('mascot').textContent='🦊';render()}render();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');</script></body></html>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#172443">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="數字探險">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="v03.css">
+<title>Number Quest v0.3</title>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <div class="stats">
+      <div class="pill">💎 <span id="gems">0</span></div>
+      <div class="pill">⚡ Lv.<span id="level">1</span></div>
+      <div class="pill">🔥 <span id="streakDays">1</span> 天</div>
+    </div>
+    <button class="ghost" id="collectionBtn">🎒 圖鑑 <span id="collectionCount">0</span>/20</button>
+  </div>
+
+  <section id="home">
+    <div class="hero">
+      <div class="rocket">🚀</div>
+      <h1>數字探險隊</h1>
+      <p>今天也來收一個新寶物吧！</p>
+    </div>
+    <div class="section-title"><h2>✨ 今日任務</h2><span id="dailyBonus"></span></div>
+    <div id="daily" class="daily"></div>
+    <div class="section-title"><h2>🗺️ 探險地圖</h2><span>每第 3 趟會遇到 Boss</span></div>
+    <div id="worlds" class="worlds"></div>
+  </section>
+
+  <section id="game" class="game">
+    <div class="game-head">
+      <button class="ghost" id="homeBtn">← 地圖</button>
+      <div id="mode" class="mode"></div>
+      <div class="pill">💎 <span id="gameGems">0</span></div>
+    </div>
+    <h2 id="worldTitle"></h2>
+    <div id="bossPanel" class="boss-panel">
+      <div class="boss-face">👾</div>
+      <b>Boss 能量</b>
+      <div class="hpbar"><i id="hpbar"></i></div>
+    </div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div id="combo" class="combo"></div>
+    <div class="mascot" id="mascot">🦊</div>
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers"></div>
+    <div class="msg" id="msg">選一個答案！</div>
+  </section>
+</main>
+
+<div id="resultOverlay" class="overlay"><div class="card">
+  <div id="resultEmoji" class="big">🏆</div>
+  <h2 id="resultTitle">探險完成！</h2>
+  <p id="resultText"></p>
+  <div id="newCollectible" style="font-size:22px;font-weight:900;margin:16px"></div>
+  <button class="primary" id="resultBtn">回到地圖</button>
+</div></div>
+
+<div id="collectionOverlay" class="overlay"><div class="card">
+  <div class="big">🎒</div><h2>探險圖鑑</h2>
+  <p>普通寶物靠探險收集，稀有寶物要打倒 Boss。</p>
+  <div id="collectionGrid" class="collection-grid"></div>
+  <button class="primary" id="closeCollection">繼續探險</button>
+</div></div>
+
+<script type="module" src="v03-app.js"></script>
+</body></html>
