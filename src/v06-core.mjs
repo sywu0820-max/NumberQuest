@@ -64,6 +64,7 @@ function tensAndOnes(value){return {tens:Math.floor(value/10),ones:value%10}}
 function parseFirstNumber(text){return Number(String(text||'').match(/\d+/)?.[0]||0)}
 function expressionTotal(text){const values=String(text||'').match(/\d+/g)?.map(Number)||[];return values.reduce((sum,value)=>sum+value,0)}
 function itemGroups(groupCount,itemCount){return Array.from({length:groupCount},()=>Array.from({length:itemCount},()=> 'star'))}
+function missingMultiplicationGroupSize(q){return /^\s*\?/.test(String(q?.txt||''))||(q?.a===q?.ans&&q?.b!==q?.ans)}
 
 export function visualHintModel(q,{level=1}={}){
   const strength=level>=2?2:1;
@@ -83,8 +84,17 @@ export function visualHintModel(q,{level=1}={}){
     const inverseMissing=q.variant==='missing'&&q.op==='sub'&&q.a===q.ans;
     return {kind:'number-journey',strength,start:inverseMissing?Number(q.result)||0:Number(q.a)||0,steps:inverseMissing?steps.map(step=>-step):steps,end:'?',copy:inverseMissing?'從剩下的數往前走，把用掉的能量加回去。':q.op==='add'?'從原本的數出發，往前走。':'從原本的數出發，往回走。'};
   }
-  if(q?.op==='mul')return {kind:'equal-groups',strength,groups:itemGroups(Number(q.b)||0,Number(q.a)||0),copy:'每一箱都要放一樣多。'};
+  if(q?.op==='mul'){
+    if(q.variant==='missing'){
+      const missingGroupSize=missingMultiplicationGroupSize(q);
+      return missingGroupSize
+        ?{kind:'unknown-equal-groups',strength,knownTotal:Number(q.result)||0,groupCount:Number(q.b)||0,groupSize:'?',sampleItems:[],poolCount:strength>=2?Number(q.result)||0:0,copy:`總共有 ${q.result} 顆星，分成 ${q.b} 組；每組先留成問號。`}
+        :{kind:'unknown-equal-groups',strength,knownTotal:Number(q.result)||0,groupCount:'?',groupSize:Number(q.a)||0,sampleItems:Array.from({length:Number(q.a)||0},()=> 'star'),poolCount:strength>=2?Number(q.result)||0:0,copy:`每組放 ${q.a} 顆星，要幾組才會有 ${q.result} 顆？`};
+    }
+    return {kind:'equal-groups',strength,groups:itemGroups(Number(q.b)||0,Number(q.a)||0),copy:'每一箱都要放一樣多。'};
+  }
   if(q?.op==='div'){
+    if(q.variant==='missing-divisor')return {kind:'unknown-equal-groups',strength,knownTotal:Number(q.dividend)||0,groupCount:'?',groupSize:Number(q.quotient)||0,sampleItems:Array.from({length:Number(q.quotient)||0},()=> 'star'),poolCount:strength>=2?Number(q.dividend)||0:0,copy:`總共有 ${q.dividend} 顆星，每組 ${q.quotient} 顆；組數先留成問號。`};
     const divisor=Number(q.divisor)||1,quotient=Number(q.quotient)||1;
     const groups=itemGroups(divisor,quotient);
     return {kind:'equal-sharing',strength,groups,copy:`把星星平均放進 ${divisor} 個寶箱。`};
@@ -107,7 +117,7 @@ export function visualHintModel(q,{level=1}={}){
   return {kind:'strategy-card',strength,copy:'把題目裡的數量畫成小點，再一步一步移動。'};
 }
 
-export function visualHintRevealsAnswer(model){
+export function visualHintRevealsAnswer(model,q){
   if(!model||typeof model!=='object')return true;
   const forbidden=/^(ans|answer|result|solution|finalAnswer|answerText)$/i;
   const visit=value=>{
@@ -116,7 +126,14 @@ export function visualHintRevealsAnswer(model){
     if(value&&typeof value==='object')return Object.entries(value).some(([key,nested])=>forbidden.test(key)||visit(nested));
     return false;
   };
-  return visit(model);
+  if(visit(model))return true;
+  if(q?.op==='mul'&&q.variant==='missing'){
+    const missingGroupSize=missingMultiplicationGroupSize(q);
+    if(missingGroupSize)return Boolean(model.groupSize===q.ans||model.groups?.some(group=>group?.length===q.ans));
+    return Boolean(model.groupCount===q.ans||model.groups?.length===q.ans);
+  }
+  if(q?.op==='div'&&q.variant==='missing-divisor')return Boolean(model.groupCount===q.ans||model.groups?.length===q.ans);
+  return false;
 }
 
 export function storyLearningSnapshot(s,key){return {...learningSkill(s,key)} }

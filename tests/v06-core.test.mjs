@@ -6,6 +6,7 @@ import {
 } from '../src/v06-core.mjs';
 
 const rngSeq=(values)=>{let i=0;return()=>values[(i++)%values.length]};
+const itemGroupsForTest=(groupCount,itemCount)=>Array.from({length:groupCount},()=>Array.from({length:itemCount},()=> 'star'));
 const seedExposure=(s)=>{s.unlocked=8;for(const family of [1,2,5])recordSkillSuccess(s,`mul:${family}`);recordSkillSuccess(s,'mul:1');recordSkillSuccess(s,'mul:2')};
 function assertChoices(q){assert.equal(q.opts.length,4);assert.equal(new Set(q.opts).size,4);assert.equal(q.opts.filter(value=>value===q.ans).length,1)}
 
@@ -61,7 +62,7 @@ test('visual hint models exactly encode representative add sub mul div make10 an
   assert.equal(div.groups.length,7);assert.ok(div.groups.every(group=>group.length===6));
   assert.equal(make10.cells.filter(x=>x==='filled').length,7);assert.equal(make10.cells.filter(x=>x==='open').length,3);
   assert.equal(make100.rods.filter(x=>x==='filled').length,6);assert.equal(make100.rods.filter(x=>x==='open').length,4);
-  for(const q of questions)for(const level of [1,2])assert.equal(visualHintRevealsAnswer(visualHintModel(q,{level})),false);
+  for(const q of questions)for(const level of [1,2])assert.equal(visualHintRevealsAnswer(visualHintModel(q,{level}),q),false);
 });
 
 test('comparison visual estimates stay paired with shuffled expression choices',()=>{
@@ -80,6 +81,31 @@ test('missing-number visual journeys keep the hidden operand behind a question m
   assert.deepEqual(missingAdd,{kind:'number-journey',strength:1,start:28,steps:['?'],end:65,copy:'從已知的加數走到總數，問號是中間走了多遠。'});
   assert.deepEqual(missingSubtrahend,{kind:'number-journey',strength:1,start:73,steps:['?'],end:47,copy:'從原本的數走到剩下的數，問號是往回走了多遠。'});
   assert.equal(missingMinuend.start,47);assert.deepEqual(missingMinuend.steps,[20,6]);assert.equal(missingMinuend.end,'?');
+});
+
+test('missing multiplication factors remain structurally unknown at both hint levels',()=>{
+  const missingGroupSize={op:'mul',variant:'missing',a:7,b:6,result:42,ans:7,txt:'? × 6 = 42'};
+  const missingGroupCount={op:'mul',variant:'missing',a:7,b:6,result:42,ans:6,txt:'7 × ? = 42'};
+  for(const level of [1,2]){
+    const sizeModel=visualHintModel(missingGroupSize,{level});
+    assert.equal(sizeModel.kind,'unknown-equal-groups');assert.equal(sizeModel.groupCount,6);assert.equal(sizeModel.groupSize,'?');assert.deepEqual(sizeModel.sampleItems,[]);assert.equal(sizeModel.groups,undefined);
+    assert.equal(sizeModel.poolCount,level===2?42:0);assert.equal(visualHintRevealsAnswer(sizeModel,missingGroupSize),false);
+    const countModel=visualHintModel(missingGroupCount,{level});
+    assert.equal(countModel.kind,'unknown-equal-groups');assert.equal(countModel.groupCount,'?');assert.equal(countModel.groupSize,7);assert.equal(countModel.sampleItems.length,7);assert.equal(countModel.groups,undefined);
+    assert.equal(countModel.poolCount,level===2?42:0);assert.equal(visualHintRevealsAnswer(countModel,missingGroupCount),false);
+  }
+  assert.equal(visualHintRevealsAnswer({kind:'equal-groups',groups:itemGroupsForTest(6,7)},missingGroupSize),true);
+  assert.equal(visualHintRevealsAnswer({kind:'equal-groups',groups:itemGroupsForTest(6,7)},missingGroupCount),true);
+});
+
+test('missing division divisor remains an unknown group count at both hint levels',()=>{
+  const q={op:'div',variant:'missing-divisor',dividend:42,divisor:7,quotient:6,result:6,ans:7};
+  for(const level of [1,2]){
+    const model=visualHintModel(q,{level});
+    assert.equal(model.kind,'unknown-equal-groups');assert.equal(model.knownTotal,42);assert.equal(model.groupCount,'?');assert.equal(model.groupSize,6);assert.equal(model.sampleItems.length,6);assert.equal(model.groups,undefined);
+    assert.equal(model.poolCount,level===2?42:0);assert.equal(visualHintRevealsAnswer(model,q),false);
+  }
+  assert.equal(visualHintRevealsAnswer({kind:'equal-sharing',groups:itemGroupsForTest(7,6)},q),true);
 });
 
 test('a missed story keeps its identity through retry spacing and independent revisit',()=>{

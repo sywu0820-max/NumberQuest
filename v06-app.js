@@ -89,6 +89,16 @@ function renderVisualHint(level){
     model.steps.forEach(step=>row.append(el('span','jump',typeof step==='number'?`${step>0?'+':'−'}${Math.abs(step)}`:'?')));row.append(el('span',model.end==='?'?'point unknown':'point',String(model.end)));root.append(row);
   }else if(model.kind==='equal-groups'||model.kind==='equal-sharing'){
     const grid=el('div','group-grid');model.groups.forEach(group=>{const box=el('div','visual-group');group.forEach(()=>box.append(el('i','visual-dot')));grid.append(box)});root.append(grid);
+  }else if(model.kind==='unknown-equal-groups'){
+    const equation=el('div','group-equation');
+    if(model.groupCount==='?'){
+      const sample=el('div','visual-group');model.sampleItems.forEach(()=>sample.append(el('i','visual-dot')));
+      equation.append(sample,el('span','unknown-multiplier','× ? 組'));
+    }else{
+      const grid=el('div','group-grid');for(let i=0;i<model.groupCount;i++)grid.append(el('div','visual-group unknown-size','?'));equation.append(grid);
+    }
+    root.append(equation,el('div','known-total',`合起來共有 ${model.knownTotal} 顆`));
+    if(model.poolCount){const pool=el('div','pool-dots');for(let i=0;i<model.poolCount;i++)pool.append(el('i','visual-dot'));root.append(pool)}
   }else if(model.kind==='ten-frame'){
     const grid=el('div','ten-frame');model.cells.forEach(state=>grid.append(el('i',`ten-cell ${state}`)));root.append(grid);
   }else if(model.kind==='hundred-tens'){
