@@ -10,7 +10,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="v04.css">
 <link rel="stylesheet" href="v05.css">
-<title>Number Quest v0.5</title>
+<link rel="stylesheet" href="v06.css">
+<title>Number Quest v0.6</title>
 </head>
 <body>
 <main class="wrap">
@@ -20,12 +21,13 @@
   </div>
 
   <section id="home">
-    <div class="hero"><div class="rocket">🚀</div><h1>數字探險隊</h1><p>v0.5 能力探險 · 每次挑戰，都讓下一段冒險更適合你！</p></div>
+    <div class="hero"><div class="rocket">🚀</div><h1>數字探險隊</h1><p>v0.6 故事探險 · 讀故事、找關係、用圖想一想！</p></div>
 
     <div class="section-title"><h2>🎮 這趟要挑戰幾題？</h2><span>長挑戰會出現神秘空格題</span></div>
     <div id="lengths" class="lengths"></div>
 
     <div class="challenge-grid">
+      <button class="challenge story" id="storyBtn"><strong>📖 故事任務</strong><span id="storyStatus">10 題 · 看故事、找關係、用圖想一想</span></button>
       <button class="challenge focus" id="focusBtn"><strong>🎯 弱點特訓</strong><span>10 題 · 系統偷偷挑你最需要練的</span></button>
       <button class="challenge academy" id="academyBtn"><strong>🏆 數字大師遠征</strong><span>20 題 · 已解鎖題型全部混合</span></button>
       <button class="challenge bridge" id="divisionBtn"><strong>🌉 除法橋</strong><span id="divisionStatus">先完成 5 題乘法，橋就會亮起來</span></button>
@@ -39,7 +41,7 @@
     <div class="game-head"><button class="ghost" id="homeBtn">← 地圖</button><div id="mode" class="mode"></div><div class="pill">💎 <span id="gameGems">0</span></div></div>
     <h2 id="worldTitle"></h2><div id="bossPanel" class="boss-panel"><div class="boss-face">👾</div><b>Boss 能量</b><div class="hpbar"><i id="hpbar"></i></div></div>
     <div class="progress"><div class="bar" id="bar"></div></div><div class="run-meta"><span id="counter">0 / 10</span><span id="combo" class="combo"></span></div>
-    <div class="mascot" id="mascot">🦊</div><div class="question" id="question"></div><div class="answers" id="answers"></div><div class="msg" id="msg">選一個答案！</div>
+    <div class="mascot" id="mascot">🦊</div><div class="question" id="question"></div><button class="story-read" id="readBtn" aria-label="朗讀故事題目">🔊 朗讀題目</button><div class="visual-hint" id="visualHint" aria-live="polite"></div><div class="answers" id="answers"></div><div class="msg" id="msg">選一個答案！</div>
   </section>
 </main>
 
@@ -49,5 +51,5 @@
 
 <div id="divisionIntro" class="overlay"><div class="card division-intro-card"><div class="big">🌉</div><h2>乘法的另一座橋</h2><p>你已經認識乘法了。除法只是從答案走回去，不是全新的大怪獸。</p><div class="intro-equation"><span>6 × 7 = 42</span><b>↔</b><span>42 ÷ 7 = 6</span></div><div class="intro-steps"><div>🔎 看到 <b>42 ÷ 7</b>，先想「7 乘幾會到 42？」</div><div>🧩 每一題都能用你學過的 1～9 乘法找到線索。</div><div>🌱 不確定也沒關係，提示會陪你想，但不會直接說答案。</div></div><button class="primary" id="divisionIntroBtn">跨上除法橋</button></div></div>
 
-<script type="module" src="v05-app.js"></script>
+<script type="module" src="v06-app.js"></script>
 </body></html>
