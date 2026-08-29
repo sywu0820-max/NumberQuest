@@ -4,7 +4,7 @@ import {
   makeDivisionQuestion,makeStoryQuestion,visualHintModel,takeDueReview,queueSpacedReview,completeSpacedReview,
   recordSkillMiss,recordSkillSuccess,skillMastery,challengeWeights,mixedSkillKeys,divisionUnlocked,
   beginLearningSession,finishRun,finishSpecialRun,claimReadyDaily,memoryChestStatus,dueMemoryReviews,
-  makeMemoryReviewQuestion,recordMemoryPractice,recordMemoryMiss,recordMemorySuccess
+  makeMemoryReviewQuestion,recordMemoryPractice,recordMemoryMiss,completeMemoryRetrieval
 } from './src/v07-core.mjs';
 
 const STATE_KEY='nq-state-v05',LEGACY_KEY='nq-state-v04';
@@ -121,7 +121,7 @@ function renderVisualHint(level){
 function answer(n,b){
   if(locked)return;
   if(n===q.ans){
-    locked=true;cancelSpeech();correct++;S.daily.solved++;S.gems+=attempted?1:2;S.xp+=attempted?6:10;if(q.isReview&&!attempted)completeSpacedReview(S,q);recordSkillSuccess(S,q.skillKey,{firstTry:!attempted,isRevisit:Boolean(q.isReview||q.isMemoryReview)});if(q.isMemoryReview)recordMemorySuccess(S,q,{day:localDayKey(),firstTry:!attempted});else recordMemoryPractice(S,q,{day:localDayKey(),missed:attempted});
+    locked=true;cancelSpeech();correct++;S.daily.solved++;S.gems+=attempted?1:2;S.xp+=attempted?6:10;if(q.isMemoryReview)completeMemoryRetrieval(S,q,{day:localDayKey(),firstTry:!attempted});else{if(q.isReview&&!attempted)completeSpacedReview(S,q);recordSkillSuccess(S,q.skillKey,{firstTry:!attempted,isRevisit:Boolean(q.isReview)});recordMemoryPractice(S,q,{day:localDayKey(),missed:attempted})}
     if(attempted){combo=0;$('msg').textContent=q.isMemoryReview?'✨ 找回來了！明天它會再發光。':q.isReview?'✨ 找到線索了！它之後還會再來。':'✨ 找到了！先繼續冒險，等等再挑戰一次。'}
     else{combo++;maxCombo=Math.max(maxCombo,combo);S.daily.maxCombo=Math.max(S.daily.maxCombo,maxCombo);if(combo>=10&&combo%10===0&&!comboRewards.has(combo)){comboRewards.add(combo);S.gems+=5;$('msg').textContent=`🌟 ${combo} 連擊寶箱！+💎5`}else $('msg').textContent=q.isMemoryReview?'✨ 這個能力記得更久了！':q.isReview?'🧠 自己想起來了！這個能力更亮了！':combo>=3?`⚡ ${combo} 連擊！超強！`:'🎉 一次答對！'}
     if(boss)bossHP--;[...$('answers').children].forEach(x=>x.disabled=true);save();updateBars();if(correct>=totalNeeded)setTimeout(finish,650);else setTimeout(next,560)

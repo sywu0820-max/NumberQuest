@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  freshState,normalizeState,recordSkillSuccess,recordSkillMiss,questionFingerprint,
+  freshState,normalizeState,recordSkillSuccess,recordSkillMiss,questionFingerprint,learningSkill,skillMastery,
+  queueSpacedReview,takeDueReview,
   MEMORY_INTERVAL_DAYS,MEMORY_RUN_LIMIT,addMemoryDays,memoryDayDistance,memoryScheduleSnapshot,
   recordMemoryPractice,recordMemoryMiss,recordMemorySuccess,dueMemoryReviews,memoryChestStatus,
-  memoryReviewWeight,makeMemoryReviewQuestion
+  memoryReviewWeight,makeMemoryReviewQuestion,completeMemoryRetrieval
 } from '../src/v07-core.mjs';
 
 const symbolic=(skillKey='add:20',a=8,b=7)=>({op:'add',variant:'normal',a,b,result:a+b,ans:a+b,skillKey,optionMin:0,optionMax:20,txt:`${a} ＋ ${b} = ?`,hint:'hint',opts:[a+b,a+b-1,a+b+1,a+b+2]});
@@ -40,6 +41,33 @@ test('one per-skill schedule prevents duplicate review identities while keeping 
   const schedule=memoryScheduleSnapshot(s);assert.deepEqual(Object.keys(schedule),['add:20']);assert.equal(schedule['add:20'].fingerprint,questionFingerprint(replacement));assert.equal(schedule['add:20'].question.story,true);
 });
 
+test('ordinary practice cannot overwrite an already-due cross-day identity',()=>{
+  const s=freshState('2026-08-29'),first=symbolic('add:20',8,7),sameSkill=symbolic('add:20',4,9);
+  recordMemoryPractice(s,first,{day:'2026-08-29'});
+  const before=memoryScheduleSnapshot(s)['add:20'];
+  recordMemoryPractice(s,sameSkill,{day:'2026-08-30'});
+  recordMemoryPractice(s,sameSkill,{day:'2026-08-30',missed:true});
+  const after=memoryScheduleSnapshot(s)['add:20'];
+  assert.equal(after.fingerprint,before.fingerprint);assert.equal(after.dueDay,'2026-08-30');assert.equal(after.question.txt,first.txt);
+});
+
+test('first-try Memory Chest retrieval retires the matching inherited pending review exactly once',()=>{
+  const dayOne=freshState('2026-08-29'),q=symbolic();
+  recordSkillMiss(dayOne,q.skillKey,{day:'2026-08-29'});assert.equal(queueSpacedReview(dayOne,q),true);recordMemoryPractice(dayOne,q,{day:'2026-08-29',missed:true});
+  const dayTwo=normalizeState(dayOne,'2026-08-30'),memoryQuestion=makeMemoryReviewQuestion(dueMemoryReviews(dayTwo,{day:'2026-08-30'})[0],()=>.4);
+  const outcome=completeMemoryRetrieval(dayTwo,memoryQuestion,{day:'2026-08-30',firstTry:true});
+  assert.equal(outcome.retired,true);assert.equal(dayTwo.learning.pendingReviews.length,0);assert.equal(learningSkill(dayTwo,q.skillKey).pendingRevisits,0);assert.equal(learningSkill(dayTwo,q.skillKey).successfulRevisits,1);
+  for(const key of ['mul:1','mul:2','mul:3'])recordSkillSuccess(dayTwo,key,{day:'2026-08-30'});
+  assert.equal(takeDueReview(dayTwo),null);assert.equal(memoryScheduleSnapshot(dayTwo)[q.skillKey].dueDay,'2026-09-02');
+});
+
+test('Memory Chest retrieval preserves an unrelated pending identity for the same skill',()=>{
+  const s=freshState('2026-08-29'),scheduled=symbolic('add:20',8,7),ordinary=symbolic('add:20',4,9);
+  recordMemoryPractice(s,scheduled,{day:'2026-08-29'});recordSkillMiss(s,ordinary.skillKey,{day:'2026-08-30'});assert.equal(queueSpacedReview(s,ordinary),true);
+  const memoryQuestion=makeMemoryReviewQuestion(dueMemoryReviews(s,{day:'2026-08-30'})[0],()=>.4),outcome=completeMemoryRetrieval(s,memoryQuestion,{day:'2026-08-30',firstTry:true});
+  assert.equal(outcome.retired,false);assert.equal(s.learning.pendingReviews.length,1);assert.equal(questionFingerprint(s.learning.pendingReviews[0].q),questionFingerprint(ordinary));assert.equal(learningSkill(s,ordinary.skillKey).pendingRevisits,1);
+});
+
 test('daily normalization preserves the long-term schedule and safely migrates v0.5/v0.6 state',()=>{
   const old=freshState('2026-08-29'),oldBefore=structuredClone(old),migrated=normalizeState(old,'2026-08-29');assert.deepEqual(migrated.learning.memorySchedule,{});assert.deepEqual(old,oldBefore);
   recordMemoryPractice(migrated,story(),{day:'2026-08-29'});const saved=structuredClone(migrated),nextDay=normalizeState(saved,'2026-08-30');
@@ -49,7 +77,7 @@ test('daily normalization preserves the long-term schedule and safely migrates v
 
 test('due selection is capped at five adaptive items and ordinary play is not blocked',()=>{
   const s=freshState('2026-08-29');for(let i=0;i<7;i++){const q=symbolic(`add:${20+i}`,i+1,2);recordMemoryPractice(s,q,{day:'2026-08-29'});if(i===6)recordSkillMiss(s,q.skillKey,{day:'2026-08-29'})}
-  const due=dueMemoryReviews(s,{day:'2026-08-30'}),status=memoryChestStatus(s,{day:'2026-08-30'});assert.equal(due.length,MEMORY_RUN_LIMIT);assert.equal(due[0].skillKey,'add:26');assert.deepEqual(status,{ready:true,dueCount:7,runCount:5,label:'🧠 5 個記憶寶箱在發光'});
+  const due=dueMemoryReviews(s,{day:'2026-08-30',rng:()=>.999999}),status=memoryChestStatus(s,{day:'2026-08-30'});assert.equal(due.length,MEMORY_RUN_LIMIT);assert.equal(due[0].skillKey,'add:26');assert.deepEqual(status,{ready:true,dueCount:7,runCount:5,label:'🧠 5 個記憶寶箱在發光'});
   assert.equal(memoryChestStatus(s,{day:'2026-08-29'}).ready,false);
 });
 
@@ -57,6 +85,14 @@ test('mastered and stale review weights stay bounded with a low nonzero mastered
   const mastered=freshState('2026-08-29'),weak=freshState('2026-08-29'),q=symbolic();for(let i=0;i<6;i++)recordSkillSuccess(mastered,q.skillKey,{day:'2026-08-20'});recordMemoryPractice(mastered,q,{day:'2026-08-20'});recordMemoryPractice(weak,q,{day:'2026-08-20'});for(let i=0;i<5;i++)recordSkillMiss(weak,q.skillKey,{day:'2026-08-20'});
   const masteredEntry=memoryScheduleSnapshot(mastered)[q.skillKey],weakEntry=memoryScheduleSnapshot(weak)[q.skillKey],masteredWeight=memoryReviewWeight(mastered,masteredEntry,{day:'2026-08-29'}),weakWeight=memoryReviewWeight(weak,weakEntry,{day:'2026-08-29'});
   assert.ok(masteredWeight>=.25&&masteredWeight<=12);assert.ok(weakWeight>=.25&&weakWeight<=12);assert.ok(masteredWeight>0);assert.ok(weakWeight>masteredWeight);
+});
+
+test('weighted selection gives a mastered due skill nonzero inclusion probability beyond the five-item cap',()=>{
+  const s=freshState('2026-08-29');
+  for(let i=0;i<7;i++){const q=symbolic(`add:${20+i}`,i+1,2);recordMemoryPractice(s,q,{day:'2026-08-29'});if(i<6)for(let miss=0;miss<4;miss++)recordSkillMiss(s,q.skillKey,{day:'2026-08-29'});else for(let success=0;success<6;success++)recordSkillSuccess(s,q.skillKey,{day:'2026-08-29'});}
+  assert.equal(skillMastery(s,'add:26').mastered,true);
+  const selected=dueMemoryReviews(s,{day:'2026-08-30',rng:()=>.999999});
+  assert.equal(selected.length,MEMORY_RUN_LIMIT);assert.equal(selected[0].skillKey,'add:26');assert.ok(selected.some(entry=>entry.skillKey==='add:26'));
 });
 
 test('memory questions preserve symbolic or story identity and valid answer choices',()=>{

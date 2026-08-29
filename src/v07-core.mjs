@@ -1,6 +1,6 @@
 import {
   localDayKey,normalizeState as normalizeV06State,questionFingerprint,makeReviewQuestion,
-  skillMastery,learningSkill
+  skillMastery,learningSkill,recordSkillSuccess,completeSpacedReview
 } from './v06-core.mjs';
 
 export * from './v06-core.mjs';
@@ -72,6 +72,10 @@ function setMemoryEntry(s,q,{day,intervalIndex,dueDay,lastOutcome}){
 export function recordMemoryPractice(s,q,{day=localDayKey(),missed=false}={}){
   const question=cloneMemoryQuestion(q);if(!question)return null;
   const existing=ensureMemorySchedule(s)[question.skillKey];
+  // Once a cross-day identity is due, ordinary play cannot replace it with a
+  // question the child has just seen. Memory Chest retains ownership until it
+  // is independently retrieved (or explicitly missed there).
+  if(existing&&validDayKey(existing.dueDay)&&memoryDayDistance(existing.dueDay,day)>=0)return existing;
   if(missed)return setMemoryEntry(s,question,{day,intervalIndex:0,dueDay:addMemoryDays(day,1),lastOutcome:'miss'});
   if(!existing)return setMemoryEntry(s,question,{day,intervalIndex:0,dueDay:addMemoryDays(day,1),lastOutcome:'practice'});
   existing.question=question;existing.fingerprint=questionFingerprint(question);return existing;
@@ -88,6 +92,18 @@ export function recordMemorySuccess(s,q,{day=localDayKey(),firstTry=true}={}){
   return setMemoryEntry(s,question,{day,intervalIndex,dueDay:addMemoryDays(day,MEMORY_INTERVAL_DAYS[intervalIndex]),lastOutcome:firstTry?'success':'miss'});
 }
 
+export function completeMemoryRetrieval(s,q,{day=localDayKey(),firstTry=true}={}){
+  const history=learningSkill(s,q.skillKey),pendingBefore=history.pendingRevisits;
+  const retired=firstTry?completeSpacedReview(s,q):false;
+  recordSkillSuccess(s,q.skillKey,{firstTry,isRevisit:true,day});
+  // recordSkillSuccess counts an independent retrieval and normally retires
+  // one pending revisit. Preserve unrelated same-skill pending identities when
+  // this Memory Chest question did not own one of them.
+  if(firstTry&&!retired)history.pendingRevisits=pendingBefore;
+  const entry=recordMemorySuccess(s,q,{day,firstTry});
+  return {entry,retired,history};
+}
+
 export function memoryReviewWeight(s,entry,{day=localDayKey()}={}){
   if(!entry?.skillKey)return 0;
   const history=learningSkill(s,entry.skillKey),mastery=skillMastery(s,entry.skillKey),late=Math.max(0,memoryDayDistance(entry.dueDay,day));
@@ -96,9 +112,18 @@ export function memoryReviewWeight(s,entry,{day=localDayKey()}={}){
   return Math.max(.25,Math.min(12,weight));
 }
 
-export function dueMemoryReviews(s,{day=localDayKey(),limit=MEMORY_RUN_LIMIT}={}){
+export function dueMemoryReviews(s,{day=localDayKey(),limit=MEMORY_RUN_LIMIT,rng=Math.random}={}){
   const entries=Object.values(ensureMemorySchedule(s)).filter(entry=>validDayKey(entry.dueDay)&&memoryDayDistance(entry.dueDay,day)>=0);
-  return entries.sort((a,b)=>memoryReviewWeight(s,b,{day})-memoryReviewWeight(s,a,{day})||a.dueDay.localeCompare(b.dueDay)||a.skillKey.localeCompare(b.skillKey)).slice(0,Math.max(0,Math.trunc(Number(limit)||0)));
+  const count=Math.min(entries.length,Math.max(0,Math.trunc(Number(limit)||0))),pool=entries.sort((a,b)=>a.dueDay.localeCompare(b.dueDay)||a.skillKey.localeCompare(b.skillKey));
+  if(count===entries.length)return pool;
+  const chosen=[];
+  while(chosen.length<count){
+    const weights=pool.map(entry=>memoryReviewWeight(s,entry,{day})),total=weights.reduce((sum,weight)=>sum+weight,0);
+    let roll=Math.min(.999999999,Math.max(0,Number(rng())||0))*total,index=pool.length-1;
+    for(let i=0;i<pool.length;i++){roll-=weights[i];if(roll<0){index=i;break}}
+    chosen.push(pool.splice(index,1)[0]);
+  }
+  return chosen;
 }
 
 export function memoryChestStatus(s,{day=localDayKey()}={}){

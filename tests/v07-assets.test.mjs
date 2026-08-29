@@ -17,6 +17,10 @@ test('v0.7 shell exposes an optional Memory Chest without disabling ordinary adv
   assert.doesNotMatch(app,/storyBtn.*disabled.*memory|focusBtn.*disabled.*memory|academyBtn.*disabled.*memory/);
 });
 
+test('v0.7 app routes Memory Chest success through cross-scheduler reconciliation',()=>{
+  assert.match(app,/completeMemoryRetrieval\(S,q/);assert.doesNotMatch(app,/q\.isMemoryReview\)recordMemorySuccess/);
+});
+
 test('v0.7 worker isolates its cache family and includes the full dependency chain',()=>{
   assert.match(html,/v07-app\.js/);assert.match(html,/v07\.css/);assert.match(worker,/number-quest-v07-/);assert.match(worker,/k\.startsWith\('number-quest-v07-'\)/);
   for(const asset of ['v07-app.js','src/v07-core.mjs','src/v06-core.mjs','src/v05-core.mjs'])assert.match(worker,new RegExp(asset.replace(/[./]/g,'\\$&')));
