@@ -11,7 +11,8 @@
 <link rel="stylesheet" href="v04.css">
 <link rel="stylesheet" href="v05.css">
 <link rel="stylesheet" href="v06.css">
-<title>Number Quest v0.6</title>
+<link rel="stylesheet" href="v07.css">
+<title>Number Quest v0.7</title>
 </head>
 <body>
 <main class="wrap">
@@ -21,12 +22,13 @@
   </div>
 
   <section id="home">
-    <div class="hero"><div class="rocket">🚀</div><h1>數字探險隊</h1><p>v0.6 故事探險 · 讀故事、找關係、用圖想一想！</p></div>
+    <div class="hero"><div class="rocket">🚀</div><h1>數字探險隊</h1><p>v0.7 記憶寶箱 · 昨天的力量，今天再發光！</p></div>
 
     <div class="section-title"><h2>🎮 這趟要挑戰幾題？</h2><span>長挑戰會出現神秘空格題</span></div>
     <div id="lengths" class="lengths"></div>
 
     <div class="challenge-grid">
+      <button class="challenge memory" id="memoryBtn"><strong>🧠 記憶寶箱</strong><span id="memoryStatus">明天再來看看哪些力量回來</span></button>
       <button class="challenge story" id="storyBtn"><strong>📖 故事任務</strong><span id="storyStatus">10 題 · 看故事、找關係、用圖想一想</span></button>
       <button class="challenge focus" id="focusBtn"><strong>🎯 弱點特訓</strong><span>10 題 · 系統偷偷挑你最需要練的</span></button>
       <button class="challenge academy" id="academyBtn"><strong>🏆 數字大師遠征</strong><span>20 題 · 已解鎖題型全部混合</span></button>
@@ -51,5 +53,5 @@
 
 <div id="divisionIntro" class="overlay"><div class="card division-intro-card"><div class="big">🌉</div><h2>乘法的另一座橋</h2><p>你已經認識乘法了。除法只是從答案走回去，不是全新的大怪獸。</p><div class="intro-equation"><span>6 × 7 = 42</span><b>↔</b><span>42 ÷ 7 = 6</span></div><div class="intro-steps"><div>🔎 看到 <b>42 ÷ 7</b>，先想「7 乘幾會到 42？」</div><div>🧩 每一題都能用你學過的 1～9 乘法找到線索。</div><div>🌱 不確定也沒關係，提示會陪你想，但不會直接說答案。</div></div><button class="primary" id="divisionIntroBtn">跨上除法橋</button></div></div>
 
-<script type="module" src="v06-app.js"></script>
+<script type="module" src="v07-app.js"></script>
 </body></html>

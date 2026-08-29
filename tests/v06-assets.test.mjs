@@ -10,10 +10,10 @@ test('v0.6 keeps the accepted local state namespace and never writes legacy stat
   assert.match(app,/STATE_KEY='nq-state-v05'/);assert.match(app,/LEGACY_KEY='nq-state-v04'/);assert.doesNotMatch(app,/localStorage\.setItem\(LEGACY_KEY/);
 });
 
-test('v0.6 shell and worker isolate the new product assets without deleting older caches',()=>{
-  assert.match(html,/v06-app\.js/);assert.match(html,/v06\.css/);assert.doesNotMatch(html,/src="v05-app\.js"/);
-  assert.match(worker,/number-quest-v06-/);assert.match(worker,/k\.startsWith\('number-quest-v06-'\)/);assert.doesNotMatch(worker,/caches\.match\(e\.request\)/);
-  assert.match(worker,/v06-app\.js/);assert.match(worker,/src\/v06-core\.mjs/);assert.match(worker,/src\/v05-core\.mjs/);
+test('v0.7 successor keeps the v0.6 dependency chain while isolating its active cache',()=>{
+  assert.match(html,/v07-app\.js/);assert.match(html,/v06\.css/);assert.match(html,/v07\.css/);assert.doesNotMatch(html,/src="v06-app\.js"/);
+  assert.match(worker,/number-quest-v07-/);assert.match(worker,/k\.startsWith\('number-quest-v07-'\)/);assert.doesNotMatch(worker,/caches\.match\(e\.request\)/);
+  assert.match(worker,/v07-app\.js/);assert.match(worker,/src\/v07-core\.mjs/);assert.match(worker,/src\/v06-core\.mjs/);assert.match(worker,/src\/v05-core\.mjs/);
 });
 
 test('read aloud is opt-in, cancels duplicate speech, and has an unsupported fallback',()=>{

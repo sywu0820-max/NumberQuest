@@ -1,0 +1,5 @@
+.challenge.memory{background:linear-gradient(145deg,#72e8ff2b,#8f7cff24);border-color:#72e8ff55}
+.challenge.memory.ready{box-shadow:0 0 0 2px #72e8ff55,0 0 24px #72e8ff2c;animation:memory-glow 2.4s ease-in-out infinite}
+.challenge.memory.ready strong{color:#d9f8ff}
+@keyframes memory-glow{50%{box-shadow:0 0 0 2px #ffd75e55,0 0 30px #72e8ff42}}
+@media(prefers-reduced-motion:reduce){.challenge.memory.ready{animation:none}}
