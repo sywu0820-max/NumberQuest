@@ -11,6 +11,9 @@
 
 This documentation-only commit does not change gameplay assets or product behavior relative to the reviewed v0.5 head.
 
+## Deployment channel
+The Vercel `number-quest-beta` project tracks this `beta` branch as Production. This documentation touch intentionally triggers the first `beta` deployment after Branch Tracking was configured.
+
 ## Promotion contract
 Feature branches must never publish directly to the public Beta URL.
 
