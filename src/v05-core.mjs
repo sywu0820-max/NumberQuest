@@ -60,8 +60,23 @@ function cleanHistory(x={}){
 }
 function cloneQuestion(q){
   if(!q||typeof q!=='object')return null;
-  const keep=['op','a','b','result','skillKey','max','variant','ans','optionMin','optionMax','txt','hint','story','dividend','divisor','quotient','bounds'];
-  return Object.fromEntries(keep.filter(k=>q[k]!==undefined).map(k=>[k,q[k]]));
+  const keep=['op','a','b','result','skillKey','max','variant','ans','optionMin','optionMax','txt','hint','story','dividend','divisor','quotient'];
+  const out=Object.fromEntries(keep.filter(k=>q[k]!==undefined).map(k=>[k,q[k]]));
+  if(Array.isArray(q.opts))out.opts=[...q.opts];
+  if(q.bounds&&typeof q.bounds==='object')out.bounds={...q.bounds,...(Array.isArray(q.bounds.totals)?{totals:[...q.bounds.totals]}:{})};
+  return out;
+}
+function restoreStoredQuestion(q){
+  const out=cloneQuestion(q);if(!out)return null;
+  if(out.variant==='compare'&&(!Array.isArray(out.opts)||out.opts.length!==4)&&Array.isArray(out.bounds?.totals)&&out.bounds.totals.length===4){
+    out.opts=out.bounds.totals.map(total=>`${total} ＋ 0`);const target=Number(out.bounds.target)||0;
+    out.ans=out.opts[out.bounds.totals.map(total=>Math.abs(total-target)).indexOf(Math.min(...out.bounds.totals.map(total=>Math.abs(total-target))))];
+  }
+  return out;
+}
+export function questionFingerprint(q){
+  const opts=Array.isArray(q?.opts)?q.opts.map(value=>`${typeof value}:${String(value)}`).sort():[];
+  return JSON.stringify([q?.skillKey,q?.variant,q?.txt,`${typeof q?.ans}:${String(q?.ans)}`,q?.a,q?.b,q?.result,q?.dividend,q?.divisor,q?.quotient,opts]);
 }
 export function normalizeState(raw, day=localDayKey()){
   const source=raw&&typeof raw==='object'?raw:{}, base=freshState(day);
@@ -76,14 +91,15 @@ export function normalizeState(raw, day=localDayKey()){
   for(const [key,value] of Object.entries(source.skillStats||{}))if(!skillHistory[key]){
     skillHistory[key]=cleanHistory({attempts:value?.seen,firstTryCorrect:value?.first,recentMisses:Math.ceil(Number(source.weak?.[key]||0)/2)});
   }
-  const pendingReviews=Array.isArray(oldLearning.pendingReviews)?oldLearning.pendingReviews.map(item=>({
-    dueSolved:Math.max(0,Number(item?.dueSolved)||0),q:cloneQuestion(item?.q)
-  })).filter(item=>item.q?.skillKey):[];
+  const pendingReviews=Array.isArray(oldLearning.pendingReviews)?oldLearning.pendingReviews.map(item=>{
+    const q=restoreStoredQuestion(item?.q);return {dueSolved:Math.max(0,Number(item?.dueSolved)||0),q,fingerprint:q?questionFingerprint(q):null};
+  }).filter(item=>item.q?.skillKey):[];
   s.learning={
     session:Math.max(0,Number(oldLearning.session)||0),solvedTotal:Math.max(0,Number(oldLearning.solvedTotal)||Number(source.daily?.solved)||0),
     recentSkills:Array.isArray(oldLearning.recentSkills)?oldLearning.recentSkills.filter(x=>typeof x==='string').slice(-4):[],
     skillHistory,pendingReviews,divisionIntroSeen:Boolean(oldLearning.divisionIntroSeen)
   };
+  for(const item of pendingReviews){const h=learningSkill(s,item.q.skillKey);h.pendingRevisits=Math.max(h.pendingRevisits,pendingReviews.filter(x=>x.q.skillKey===item.q.skillKey).length)}
   if(s.lastPlayDay!==day){s.streakDays=s.lastPlayDay===dayBefore(day)?Math.max(1,(Number(s.streakDays)||0)+1):1;s.lastPlayDay=day}
   s.daily=source.daily&&source.daily.day===day?{...dailyState(day),...source.daily,claimed:{...(source.daily.claimed||{})}}:dailyState(day);
   return s;
@@ -97,7 +113,7 @@ export function learningSkill(s,key){
 }
 function rememberSkill(s,key){s.learning.recentSkills=[...s.learning.recentSkills.filter(x=>x!==key),key].slice(-4)}
 export function recordSkillMiss(s,key,{day=localDayKey()}={}){
-  const h=learningSkill(s,key);h.recentMisses=Math.min(12,h.recentMisses+1);h.pendingRevisits+=1;h.lastPracticedDay=day;h.lastPracticedSession=s.learning.session;rememberSkill(s,key);return h;
+  const h=learningSkill(s,key);h.recentMisses=Math.min(12,h.recentMisses+1);h.lastPracticedDay=day;h.lastPracticedSession=s.learning.session;rememberSkill(s,key);return h;
 }
 export function recordSkillSuccess(s,key,{firstTry=true,isRevisit=false,day=localDayKey()}={}){
   const h=learningSkill(s,key);h.attempts+=1;if(firstTry)h.firstTryCorrect+=1;
@@ -118,6 +134,7 @@ export function skillMastery(s,key){
   return {...h,accuracy,score,mastered,power};
 }
 export function divisionUnlocked(s){return MULTIPLICATION_SKILLS.reduce((n,key)=>n+learningSkill(s,key).attempts,0)>=5}
+export function eligibleDivisionSkills(s){return DIVISION_SKILLS.filter((key,i)=>learningSkill(s,`mul:${i+1}`).attempts>=1)}
 
 export function weightedPick(items,weightFn,rng=Math.random){
   const weights=items.map(x=>Math.max(.01,Number(weightFn(x))||.01));const total=weights.reduce((a,b)=>a+b,0);let r=Math.min(.999999999,Math.max(0,rng()))*total;
@@ -168,7 +185,10 @@ function formatBase(base,level,rng,forceMissing=false){
 }
 
 export function makeDivisionQuestion(s,{family,rng=Math.random,variant}={}){
-  const divisor=family||rnd(1,9,rng),quotient=rnd(1,9,rng),dividend=divisor*quotient,kind=variant??rnd(0,3,rng);
+  const eligible=eligibleDivisionSkills(s).map(key=>Number(key.split(':')[1]));
+  if(!eligible.length)throw new Error('Division Bridge requires exposure to a matching multiplication family');
+  if(family!==undefined&&!eligible.includes(Number(family)))throw new Error(`Division family ${family} requires mul:${family} exposure`);
+  const divisor=family===undefined?eligible[rnd(0,eligible.length-1,rng)]:Number(family),quotient=rnd(1,9,rng),dividend=divisor*quotient,kind=variant??rnd(0,3,rng);
   const base={op:'div',skillKey:`div:${divisor}`,dividend,divisor,quotient,result:quotient,optionMin:1,optionMax:9,bounds:{dividendMax:81,factorMax:9}};
   if(kind===1)return addOptions({...base,variant:'missing-divisor',ans:divisor,txt:`${dividend} ÷ ? = ${quotient}`,hint:`💡 想一想：幾組 ${quotient} 會合起來變成 ${dividend}？`},rng);
   if(kind===2)return addOptions({...base,variant:'inverse',ans:quotient,txt:`? × ${divisor} = ${dividend}`,hint:`💡 除法橋的另一邊是乘法：從 ${divisor} 的乘法找線索。`},rng);
@@ -210,7 +230,7 @@ export function makeQuestion(wi,s,{rng=Math.random,challengeLevel=1}={}){
 export function mixedSkillKeys(s,{challengeLevel=3}={}){
   const count=Math.max(1,Math.min(WORLDS.length,Number(s.unlocked)||1)),keys=[];
   for(let i=0;i<count;i++)keys.push(...skillKeysForWorld(i,{challengeLevel}));
-  if(challengeLevel>1)keys.push(...NUMBER_SENSE_SKILLS);if(divisionUnlocked(s))keys.push(...DIVISION_SKILLS);return [...new Set(keys)];
+  if(challengeLevel>1)keys.push(...NUMBER_SENSE_SKILLS);if(divisionUnlocked(s))keys.push(...eligibleDivisionSkills(s));return [...new Set(keys)];
 }
 export function makeMixedQuestion(s,{rng=Math.random,challengeLevel=3}={}){
   const key=nextChallenge(s,mixedSkillKeys(s,{challengeLevel}),{rng});return makeQuestionForSkill(key,s,{rng,challengeLevel});
@@ -221,12 +241,16 @@ export function makeFocusQuestion(s,{rng=Math.random,challengeLevel=3}={}){
 }
 export function makeReviewQuestion(q,rng=Math.random){return addOptions({...cloneQuestion(q),isReview:true},rng)}
 export function queueSpacedReview(s,q,spacing=3){
-  if(s.learning.pendingReviews.some(x=>x.q.skillKey===q.skillKey&&x.q.txt===q.txt))return false;
-  s.learning.pendingReviews.push({q:cloneQuestion(q),dueSolved:s.learning.solvedTotal+Math.max(3,Number(spacing)||3)});return true;
+  const fingerprint=questionFingerprint(q),dueSolved=s.learning.solvedTotal+Math.max(3,Number(spacing)||3),existing=s.learning.pendingReviews.find(x=>(x.fingerprint||questionFingerprint(x.q))===fingerprint);
+  if(existing){existing.dueSolved=Math.max(existing.dueSolved,dueSolved);return false}
+  s.learning.pendingReviews.push({q:cloneQuestion(q),dueSolved,fingerprint});learningSkill(s,q.skillKey).pendingRevisits+=1;return true;
 }
 export function takeDueReview(s,rng=Math.random){
-  const idx=s.learning.pendingReviews.findIndex(x=>x.dueSolved<=s.learning.solvedTotal);if(idx<0)return null;
-  const [{q}]=s.learning.pendingReviews.splice(idx,1);return makeReviewQuestion(q,rng);
+  const item=s.learning.pendingReviews.find(x=>x.dueSolved<=s.learning.solvedTotal);return item?makeReviewQuestion(item.q,rng):null;
+}
+export function completeSpacedReview(s,q){
+  const fingerprint=questionFingerprint(q),idx=s.learning.pendingReviews.findIndex(x=>(x.fingerprint||questionFingerprint(x.q))===fingerprint);
+  if(idx<0)return false;s.learning.pendingReviews.splice(idx,1);return true;
 }
 export function beginLearningSession(s){s.learning.session+=1;s.learning.recentSkills=[];return s.learning.session}
 

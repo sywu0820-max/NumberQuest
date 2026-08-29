@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  WORLDS,CHALLENGE_LENGTHS,NUMBER_SENSE_SKILLS,freshState,normalizeState,migrateV4State,makeQuestion,
-  makeDivisionQuestion,makeNumberSenseQuestion,makeReviewQuestion,recordSkillMiss,recordSkillSuccess,
-  skillMastery,learningSkill,challengeWeights,nextChallenge,queueSpacedReview,takeDueReview,divisionUnlocked
+  WORLDS,CHALLENGE_LENGTHS,NUMBER_SENSE_SKILLS,localDayKey,freshState,normalizeState,migrateV4State,makeQuestion,
+  makeDivisionQuestion,makeNumberSenseQuestion,makeReviewQuestion,makeMixedQuestion,mixedSkillKeys,recordSkillMiss,recordSkillSuccess,
+  skillMastery,learningSkill,challengeWeights,nextChallenge,queueSpacedReview,takeDueReview,completeSpacedReview,
+  divisionUnlocked,eligibleDivisionSkills,questionFingerprint
 } from '../src/v05-core.mjs';
 
 const rngSeq=(vals)=>{let i=0;return()=>vals[(i++)%vals.length]};
@@ -22,12 +23,13 @@ test('all v0.4 world questions retain curriculum bounds and unique choices',()=>
 });
 
 test('division bridge always uses exact 1-9 fact families with no remainder',()=>{
-  const s=freshState();
-  for(let family=1;family<=9;family++)for(let variant=0;variant<4;variant++)for(let i=0;i<30;i++){
+  for(let family=1;family<=9;family++){const s=freshState();recordSkillSuccess(s,`mul:${family}`);
+    for(let variant=0;variant<4;variant++)for(let i=0;i<30;i++){
     const q=makeDivisionQuestion(s,{family,variant});
     assert.ok(q.divisor>=1&&q.divisor<=9);assert.ok(q.quotient>=1&&q.quotient<=9);
     assert.equal(q.dividend,q.divisor*q.quotient);assert.equal(q.dividend%q.divisor,0);
     assert.ok(q.dividend<=81);assert.equal(q.opts.length,4);assert.equal(new Set(q.opts).size,4);assert.ok(q.opts.includes(q.ans));
+    }
   }
 });
 
@@ -35,6 +37,16 @@ test('division unlock requires basic multiplication exposure',()=>{
   const s=freshState();assert.equal(divisionUnlocked(s),false);
   for(let i=0;i<5;i++)recordSkillSuccess(s,`mul:${i+1}`,{firstTry:true});
   assert.equal(divisionUnlocked(s),true);
+});
+
+test('division generation is limited to matching exposed multiplication families',()=>{
+  const s=freshState();for(const family of [1,2,5])for(let i=0;i<2;i++)recordSkillSuccess(s,`mul:${family}`);
+  assert.equal(divisionUnlocked(s),true);assert.deepEqual(eligibleDivisionSkills(s),['div:1','div:2','div:5']);
+  assert.deepEqual(mixedSkillKeys(s).filter(key=>key.startsWith('div:')),['div:1','div:2','div:5']);
+  for(let i=0;i<200;i++)assert.ok([1,2,5].includes(makeDivisionQuestion(s).divisor));
+  assert.throws(()=>makeDivisionQuestion(s,{family:8}),/mul:8 exposure/);
+  for(let i=0;i<100;i++){const q=makeMixedQuestion(s,{rng:rngSeq([.999,.4,.2,.8,.1])});if(q.op==='div')assert.ok([1,2,5].includes(q.divisor))}
+  recordSkillSuccess(s,'mul:8');assert.ok(eligibleDivisionSkills(s).includes('div:8'));assert.ok(mixedSkillKeys(s).includes('div:8'));assert.equal(makeDivisionQuestion(s,{family:8}).divisor,8);
 });
 
 test('every number-sense format has one valid answer and four unique choices',()=>{
@@ -49,6 +61,20 @@ test('every number-sense format has one valid answer and four unique choices',()
     }
   }
   void s;
+});
+
+test('every number-sense format survives miss, spacing, and review with valid choices',()=>{
+  for(const kind of NUMBER_SENSE_SKILLS){
+    const s=freshState(),q=makeNumberSenseQuestion(kind,{rng:rngSeq([.1,.7,.3,.9,.2,.8,.4,.6])});recordSkillMiss(s,q.skillKey);assert.equal(queueSpacedReview(s,q),true);
+    recordSkillSuccess(s,q.skillKey,{firstTry:false});recordSkillSuccess(s,'mul:1');recordSkillSuccess(s,'mul:2');
+    const review=takeDueReview(s,rngSeq([.8,.2,.6,.4]));assert.equal(review.isReview,true,kind);assert.equal(review.opts.length,4,kind);assert.equal(new Set(review.opts).size,4,kind);assert.equal(review.opts.filter(x=>x===review.ans).length,1,kind);
+    assert.equal(completeSpacedReview(s,review),true);recordSkillSuccess(s,review.skillKey,{firstTry:true,isRevisit:true});assert.equal(s.learning.pendingReviews.length,0,kind);
+  }
+});
+
+test('compare review fingerprint distinguishes different problems with the same prompt',()=>{
+  const s=freshState(),a=makeNumberSenseQuestion('sense:compare',{rng:rngSeq([.1,.1,.2,.3,.4,.5])}),b=makeNumberSenseQuestion('sense:compare',{rng:rngSeq([.1,.8,.7,.6,.5,.4])});
+  assert.equal(a.txt,b.txt);assert.notEqual(questionFingerprint(a),questionFingerprint(b));assert.equal(queueSpacedReview(s,a),true);assert.equal(queueSpacedReview(s,b),true);assert.equal(s.learning.pendingReviews.length,2);
 });
 
 test('mastery history records first try, miss, and independent spaced revisit',()=>{
@@ -69,10 +95,17 @@ test('scheduler favors weak and stale skills while every skill keeps nonzero wei
 });
 
 test('missed question returns only after the retry and two other solved questions',()=>{
-  const s=freshState(),q=makeDivisionQuestion(s,{family:7,variant:0,rng:rngSeq([.5,.2,.8,.1,.6])});
+  const s=freshState();recordSkillSuccess(s,'mul:7');const q=makeDivisionQuestion(s,{family:7,variant:0,rng:rngSeq([.5,.2,.8,.1,.6])});
   recordSkillMiss(s,q.skillKey);assert.equal(queueSpacedReview(s,q),true);assert.equal(takeDueReview(s),null);
   recordSkillSuccess(s,q.skillKey,{firstTry:false});recordSkillSuccess(s,'mul:2');assert.equal(takeDueReview(s),null);recordSkillSuccess(s,'mul:3');
   const review=takeDueReview(s);assert.equal(review.isReview,true);assert.equal(review.skillKey,q.skillKey);assert.equal(review.ans,q.ans);assert.equal(new Set(review.opts).size,4);
+});
+
+test('due review remains queued across reload until independently completed',()=>{
+  const s=freshState(),q=makeNumberSenseQuestion('sense:compare',{rng:rngSeq([.1,.2,.3,.4,.5,.6])});recordSkillMiss(s,q.skillKey);queueSpacedReview(s,q);recordSkillSuccess(s,q.skillKey,{firstTry:false});recordSkillSuccess(s,'mul:1');recordSkillSuccess(s,'mul:2');
+  const shown=takeDueReview(s);assert.equal(shown.isReview,true);assert.equal(s.learning.pendingReviews.length,1);
+  const reloaded=normalizeState(JSON.parse(JSON.stringify(s)),localDayKey());const shownAgain=takeDueReview(reloaded);assert.equal(questionFingerprint(shownAgain),questionFingerprint(shown));assert.equal(reloaded.learning.pendingReviews.length,1);
+  assert.equal(completeSpacedReview(reloaded,shownAgain),true);recordSkillSuccess(reloaded,shownAgain.skillKey,{firstTry:true,isRevisit:true});assert.equal(reloaded.learning.pendingReviews.length,0);assert.equal(learningSkill(reloaded,shownAgain.skillKey).pendingRevisits,0);
 });
 
 test('v0.4 migration preserves progress and never mutates source data',()=>{
