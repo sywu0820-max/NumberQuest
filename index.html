@@ -9,17 +9,18 @@
 <meta name="apple-mobile-web-app-title" content="數字探險">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="v04.css">
-<title>Number Quest v0.4</title>
+<link rel="stylesheet" href="v05.css">
+<title>Number Quest v0.5</title>
 </head>
 <body>
 <main class="wrap">
   <div class="top">
     <div class="stats"><div class="pill">💎 <span id="gems">0</span></div><div class="pill">⚡ Lv.<span id="level">1</span></div><div class="pill">🔥 <span id="streakDays">1</span> 天</div></div>
-    <div class="top-actions"><button class="ghost" id="masteryBtn">📘 九九徽章 <span id="masteredCount">0</span>/9</button><button class="ghost" id="collectionBtn">🎒 圖鑑 <span id="collectionCount">0</span>/20</button></div>
+    <div class="top-actions"><button class="ghost" id="masteryBtn">🗺️ 能力地圖 <span id="powerCount">0</span></button><button class="ghost" id="collectionBtn">🎒 圖鑑 <span id="collectionCount">0</span>/20</button></div>
   </div>
 
   <section id="home">
-    <div class="hero"><div class="rocket">🚀</div><h1>數字探險隊</h1><p>v0.4 挑戰學院 · 想多做幾題？今天你決定！</p></div>
+    <div class="hero"><div class="rocket">🚀</div><h1>數字探險隊</h1><p>v0.5 能力探險 · 每次挑戰，都讓下一段冒險更適合你！</p></div>
 
     <div class="section-title"><h2>🎮 這趟要挑戰幾題？</h2><span>長挑戰會出現神秘空格題</span></div>
     <div id="lengths" class="lengths"></div>
@@ -27,6 +28,7 @@
     <div class="challenge-grid">
       <button class="challenge focus" id="focusBtn"><strong>🎯 弱點特訓</strong><span>10 題 · 系統偷偷挑你最需要練的</span></button>
       <button class="challenge academy" id="academyBtn"><strong>🏆 數字大師遠征</strong><span>20 題 · 已解鎖題型全部混合</span></button>
+      <button class="challenge bridge" id="divisionBtn"><strong>🌉 除法橋</strong><span id="divisionStatus">先完成 5 題乘法，橋就會亮起來</span></button>
     </div>
 
     <div class="section-title"><h2>✨ 今日任務</h2><span>每天一點點，越來越強</span></div><div id="daily" class="daily"></div>
@@ -43,7 +45,9 @@
 
 <div id="resultOverlay" class="overlay"><div class="card"><div id="resultEmoji" class="big">🏆</div><h2 id="resultTitle">探險完成！</h2><p id="resultText"></p><div id="newCollectible" class="reward"></div><button class="primary" id="resultBtn">回到地圖</button></div></div>
 <div id="collectionOverlay" class="overlay"><div class="card"><div class="big">🎒</div><h2>探險圖鑑</h2><p>普通寶物靠探險收集，稀有寶物要打倒 Boss。</p><div id="collectionGrid" class="collection-grid"></div><button class="primary" id="closeCollection">繼續探險</button></div></div>
-<div id="masteryOverlay" class="overlay"><div class="card mastery-card-wrap"><div class="big">📘</div><h2>我的數字能力</h2><p>練得夠多而且穩定答對，就會拿到九九徽章。</p><h3>九九乘法</h3><div id="mulMastery" class="mul-mastery"></div><h3>加減法</h3><div id="arithMastery" class="arith-mastery"></div><button class="primary" id="closeMastery">繼續變強</button></div></div>
+<div id="masteryOverlay" class="overlay"><div class="card mastery-card-wrap"><div class="big">🗺️</div><h2>我的能力地圖</h2><p class="mastery-note">每次自己想出來，能力就會再亮一點。沒有分數，也不用跟別人比。</p><div id="nextAdventure" class="next-adventure"></div><h3>九九乘法力量</h3><div id="mulMastery" class="mul-mastery"></div><section id="divisionMasterySection"><h3>除法橋力量</h3><div id="divMastery" class="mul-mastery"></div></section><h3>加減與數感魔法</h3><div id="arithMastery" class="arith-mastery"></div><button class="primary" id="closeMastery">繼續探險</button></div></div>
 
-<script type="module" src="v04-app.js"></script>
+<div id="divisionIntro" class="overlay"><div class="card division-intro-card"><div class="big">🌉</div><h2>乘法的另一座橋</h2><p>你已經認識乘法了。除法只是從答案走回去，不是全新的大怪獸。</p><div class="intro-equation"><span>6 × 7 = 42</span><b>↔</b><span>42 ÷ 7 = 6</span></div><div class="intro-steps"><div>🔎 看到 <b>42 ÷ 7</b>，先想「7 乘幾會到 42？」</div><div>🧩 每一題都能用你學過的 1～9 乘法找到線索。</div><div>🌱 不確定也沒關係，提示會陪你想，但不會直接說答案。</div></div><button class="primary" id="divisionIntroBtn">跨上除法橋</button></div></div>
+
+<script type="module" src="v05-app.js"></script>
 </body></html>

@@ -1,9 +1,9 @@
 {
-  "name":"Number Quest 數字探險隊 v0.4",
+  "name":"Number Quest 數字探險隊 v0.5",
   "short_name":"數字探險",
   "start_url":"./",
   "display":"standalone",
   "background_color":"#172443",
   "theme_color":"#172443",
-  "description":"遊戲化九九乘法、百內加減、弱點特訓與長挑戰。"
+  "description":"遊戲化九九乘法、除法橋、百內數感與適性能力探險。"
 }
