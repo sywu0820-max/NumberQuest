@@ -18,7 +18,7 @@ test('child-first home makes Today’s Adventure primary and specialist modes se
 });
 
 test('first-run onboarding is bounded, no-account, and starts the daily journey',()=>{
-  assert.match(html,/id="onboardingOverlay"/);assert.match(app,/ONBOARDING_STEPS/);assert.match(app,/completeOnboarding\(S\)/);assert.match(app,/startJourney\(\)/);assert.match(app,/resetOnboarding\(S\)/);
+  assert.match(html,/id="onboardingOverlay"[^>]*aria-labelledby="onboardingTitle"/);assert.match(app,/ONBOARDING_STEPS/);assert.match(app,/completeOnboarding\(S\)/);assert.match(app,/startJourney\(\)/);assert.match(app,/resetOnboarding\(S\)/);
   assert.doesNotMatch(html,/姓名|年齡|年級|建立帳號|登入/);assert.doesNotMatch(core,/childName|userId|email|accountId/);
 });
 
@@ -45,5 +45,5 @@ test('v1.0 cache family is isolated and includes the complete successor dependen
 });
 
 test('v1.0 primary and secondary controls preserve the touch baseline and responsive layout',()=>{
-  assert.match(css,/\.journey-primary,.home-memory,.capability-peek button,.more-adventures>summary,.adult-entry,.text-button\{min-height:44px\}/);assert.doesNotMatch(css,/width:\s*100vw/);assert.match(css,/@media\(max-width:720px\)/);
+  assert.match(css,/\.journey-primary,.home-memory,.capability-peek button,.more-adventures>summary,.adult-entry,.text-button\{min-height:44px\}/);assert.doesNotMatch(css,/width:\s*100vw/);assert.match(css,/@media\(max-width:720px\)/);assert.doesNotMatch(html,/user-scalable=no/);
 });

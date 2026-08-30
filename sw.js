@@ -1,4 +1,4 @@
-const CACHE='number-quest-v10-3';
+const CACHE='number-quest-v10-4';
 // Accepted predecessor evidence only; activation below never deletes it: number-quest-v09- / keys.filter(k=>k.startsWith('number-quest-v09-') / number-quest-v08- / k.startsWith('number-quest-v08-')
 const CORE=['./','./index.html','./v04.css','./v05.css','./v06.css','./v07.css','./v09.css','./v10.css','./v10-app.js','./v09-app.js','./v08-app.js','./src/v10-core.mjs','./src/v09-core.mjs','./src/v08-core.mjs','./src/v07-core.mjs','./src/v06-core.mjs','./src/v05-core.mjs','./manifest.webmanifest'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));

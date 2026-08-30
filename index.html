@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172443">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -60,7 +60,7 @@
 
 <div id="adultOverlay" class="overlay"><div class="card adult-card"><div class="big">🌿</div><h2>給大人看</h2><p>這些內容只來自這台裝置，幫你陪孩子說說他怎麼想。</p><div id="adultSummary" class="adult-summary"></div><button class="text-button" id="resetOnboardingBtn">重新看一次新手引導</button><button class="primary" id="closeAdult">回到孩子的探險</button></div></div>
 
-<div id="onboardingOverlay" class="overlay onboarding-overlay" aria-modal="true" role="dialog"><div class="card onboarding-card"><div id="onboardingIcon" class="big">👆</div><div class="onboarding-progress" id="onboardingProgress">1 / 3</div><h2 id="onboardingTitle">選一個答案</h2><p id="onboardingCopy">先自己想一想，再點你覺得對的答案。</p><div class="onboarding-dots" id="onboardingDots" aria-hidden="true"></div><button class="primary" id="onboardingNext">下一步</button></div></div>
+<div id="onboardingOverlay" class="overlay onboarding-overlay" aria-modal="true" aria-labelledby="onboardingTitle" role="dialog"><div class="card onboarding-card"><div id="onboardingIcon" class="big">👆</div><div class="onboarding-progress" id="onboardingProgress">1 / 3</div><h2 id="onboardingTitle">選一個答案</h2><p id="onboardingCopy">先自己想一想，再點你覺得對的答案。</p><div class="onboarding-dots" id="onboardingDots" aria-hidden="true"></div><button class="primary" id="onboardingNext">下一步</button></div></div>
 
 <div id="divisionIntro" class="overlay"><div class="card division-intro-card"><div class="big">🌉</div><h2>乘法的另一座橋</h2><p>你已經認識乘法了。除法只是從答案走回去，不是全新的大怪獸。</p><div class="intro-equation"><span>6 × 7 = 42</span><b>↔</b><span>42 ÷ 7 = 6</span></div><div class="intro-steps"><div>🔎 看到 <b>42 ÷ 7</b>，先想「7 乘幾會到 42？」</div><div>🧩 每一題都能用你學過的 1～9 乘法找到線索。</div><div>🌱 不確定也沒關係，提示會陪你想，但不會直接說答案。</div></div><button class="primary" id="divisionIntroBtn">跨上除法橋</button></div></div>
 
