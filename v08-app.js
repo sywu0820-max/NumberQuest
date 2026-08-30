@@ -1,7 +1,7 @@
 import {
   WORLDS,CHALLENGE_LENGTHS,COLLECTIBLES,NUMBER_SENSE_SKILLS,MULTIPLICATION_SKILLS,DIVISION_SKILLS,
   localDayKey,normalizeState,dailyQuests,bossReady,makeQuestion,makeMixedQuestion,makeFocusQuestion,
-  makeDivisionQuestion,makeStoryQuestion,storyDiversitySummary,visualHintModel,takeDueReview,queueSpacedReview,completeSpacedReview,
+  makeDivisionQuestion,makeStoryQuestion,storyDiversitySummary,visualHintModel,visualHintKnownTotalLabel,takeDueReview,queueSpacedReview,completeSpacedReview,
   recordSkillMiss,recordSkillSuccess,skillMastery,challengeWeights,mixedSkillKeys,divisionUnlocked,
   beginLearningSession,finishRun,finishSpecialRun,claimReadyDaily,memoryChestStatus,dueMemoryReviews,
   makeMemoryReviewQuestion,recordMemoryPractice,recordMemoryMiss,completeMemoryRetrieval
@@ -113,7 +113,7 @@ function renderVisualHint(level){
     }else{
       const grid=el('div','group-grid');for(let i=0;i<model.groupCount;i++)grid.append(el('div','visual-group unknown-size','?'));equation.append(grid);
     }
-    root.append(equation,el('div','known-total',`合起來共有 ${model.knownTotal} 顆`));
+    root.append(equation,el('div','known-total',visualHintKnownTotalLabel(model)));
     if(model.poolCount){const pool=el('div','pool-dots');for(let i=0;i<model.poolCount;i++)pool.append(el('i','visual-dot'));root.append(pool)}
   }else if(model.kind==='ten-frame'){
     const grid=el('div','ten-frame');model.cells.forEach(state=>grid.append(el('i',`ten-cell ${state}`)));root.append(grid);

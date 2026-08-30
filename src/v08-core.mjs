@@ -169,6 +169,10 @@ export function visualHintModel(q,{level=1}={}){
   return inheritedVisualHintModel(q,{level});
 }
 
+export function visualHintKnownTotalLabel(model){
+  return Number.isFinite(Number(model?.knownTotal))?`總數：${Number(model.knownTotal)}`:'';
+}
+
 export function visualHintRevealsAnswer(model,q){
   if(q?.storyRelationshipId===R.DIV_SHARING&&Boolean(model?.groupSize===q.ans||model?.groups?.some(group=>group?.length===q.ans)))return true;
   if(q?.storyRelationshipId===R.DIV_GROUPING&&Boolean(model?.groupCount===q.ans||model?.groups?.length===q.ans))return true;

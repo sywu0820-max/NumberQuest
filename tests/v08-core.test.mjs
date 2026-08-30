@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   STORY_CATALOG,STORY_THEMES,STORY_RELATIONSHIPS,storySkillKeys,makeStoryQuestion,makeStoryRun,
-  storyDiversitySummary,selectStoryTemplate,visualHintModel,visualHintRevealsAnswer,
+  storyDiversitySummary,selectStoryTemplate,visualHintModel,visualHintKnownTotalLabel,visualHintRevealsAnswer,
   freshState,normalizeState,recordSkillSuccess,recordSkillMiss,queueSpacedReview,takeDueReview,
   completeSpacedReview,questionFingerprint,recordMemoryPractice,dueMemoryReviews,makeMemoryReviewQuestion,
   completeMemoryRetrieval,memoryScheduleSnapshot
@@ -88,6 +88,19 @@ test('division visual hints keep the unknown semantic dimension hidden at both l
   }
   assert.equal(visualHintRevealsAnswer({groupSize:sharing.ans},sharing),true);
   assert.equal(visualHintRevealsAnswer({groupCount:grouping.ans},grouping),true);
+});
+
+test('every division theme uses a unit-neutral known-total label at both hint levels',()=>{
+  const s=seedAll(),divisionTemplates=STORY_CATALOG.filter(item=>item.op==='div');
+  for(const definition of divisionTemplates){
+    const exclusions=divisionTemplates.filter(item=>item.relationshipId===definition.relationshipId&&item.id!==definition.id).map(item=>item.id);
+    const q=makeStoryQuestion(s,{skillKey:'div:7',relationshipId:definition.relationshipId,recentTemplateIds:exclusions,rng:()=>0});
+    assert.equal(q.storyTemplateId,definition.id);
+    for(const level of [1,2]){
+      const label=visualHintKnownTotalLabel(visualHintModel(q,{level}));
+      assert.equal(label,`總數：${q.dividend}`);assert.doesNotMatch(label,/顆|位|塊|枚|張|罐|根|公里|公尺/);
+    }
+  }
 });
 
 test('story prompts contain no operator symbols or explicit operation labels',()=>{

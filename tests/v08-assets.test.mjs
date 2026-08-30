@@ -29,6 +29,10 @@ test('ordinary modes, Memory Chest, and opt-in read aloud remain wired',()=>{
   assert.match(app,/completeMemoryRetrieval\(S,q/);assert.match(app,/speechSynthesis\.cancel\(\)/);assert.match(app,/暫時不能朗讀/);
 });
 
+test('unknown-group renderer uses the core unit-neutral total label',()=>{
+  assert.match(app,/visualHintKnownTotalLabel\(model\)/);assert.doesNotMatch(app,/knownTotal\} 顆/);assert.doesNotMatch(app,/合起來共有.*knownTotal/);
+});
+
 test('browser harness runs the shipped core without mutating local progress',()=>{
   assert.match(browserHarness,/\.\.\/src\/v08-core\.mjs/);assert.match(browserHarness,/DIV_SHARING/);assert.match(browserHarness,/DIV_GROUPING/);assert.match(browserHarness,/missingFactor/);assert.match(browserHarness,/memoryIdentity/);
   assert.doesNotMatch(browserHarness,/localStorage|sessionStorage/);
