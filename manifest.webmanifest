@@ -1,9 +1,9 @@
 {
-  "name":"Number Quest 數字探險隊 v0.5",
+  "name":"Number Quest 數字探險隊 v0.9",
   "short_name":"數字探險",
   "start_url":"./",
   "display":"standalone",
   "background_color":"#172443",
   "theme_color":"#172443",
-  "description":"遊戲化九九乘法、除法橋、百內數感與適性能力探險。"
+  "description":"在今日冒險中找回、轉換並穩固九九乘法、除法橋與百內數感。"
 }

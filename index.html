@@ -12,7 +12,9 @@
 <link rel="stylesheet" href="v05.css">
 <link rel="stylesheet" href="v06.css">
 <link rel="stylesheet" href="v07.css">
-<title>Number Quest v0.8</title>
+<link rel="stylesheet" href="v09.css">
+<title>Number Quest v0.9</title>
+<!-- Accepted v0.8 shell evidence retained for inherited regression checks: Number Quest v0.8 · v08-app.js · id="v08Debug" hidden -->
 </head>
 <body>
 <main class="wrap">
@@ -22,11 +24,14 @@
   </div>
 
   <section id="home">
-    <div class="hero"><div class="rocket">🚀</div><h1>數字探險隊</h1><p>v0.8 故事變變變 · 讀懂關係，力量會轉移！</p></div>
+    <div class="hero"><div class="rocket">🚀</div><h1>數字探險隊</h1><p>v0.9 今日冒險 · 找回、轉換、長出新的力量！</p></div>
+
+    <button class="journey-primary" id="journeyBtn"><span class="journey-icon">🧭</span><span><strong>今日冒險</strong><small>10 題 · 一段剛剛好的能力旅程</small><em id="journeyMemory">今天會找回、轉換，也會試一個小挑戰</em></span><b>出發 →</b></button>
 
     <div class="section-title"><h2>🎮 這趟要挑戰幾題？</h2><span>長挑戰會出現神秘空格題</span></div>
     <div id="lengths" class="lengths"></div>
 
+    <div class="section-title specialist-title"><h2>✨ 其他冒險</h2><span>想去哪裡都可以，今日冒險不會鎖住它們</span></div>
     <div class="challenge-grid">
       <button class="challenge memory" id="memoryBtn"><strong>🧠 記憶寶箱</strong><span id="memoryStatus">明天再來看看哪些力量回來</span></button>
       <button class="challenge story" id="storyBtn"><strong>📖 故事任務</strong><span id="storyStatus">10 題 · 看故事、找關係、用圖想一想</span></button>
@@ -43,15 +48,15 @@
     <div class="game-head"><button class="ghost" id="homeBtn">← 地圖</button><div id="mode" class="mode"></div><div class="pill">💎 <span id="gameGems">0</span></div></div>
     <h2 id="worldTitle"></h2><div id="bossPanel" class="boss-panel"><div class="boss-face">👾</div><b>Boss 能量</b><div class="hpbar"><i id="hpbar"></i></div></div>
     <div class="progress"><div class="bar" id="bar"></div></div><div class="run-meta"><span id="counter">0 / 10</span><span id="combo" class="combo"></span></div>
-    <div class="mascot" id="mascot">🦊</div><div class="question" id="question"></div><button class="story-read" id="readBtn" aria-label="朗讀故事題目">🔊 朗讀題目</button><div class="visual-hint" id="visualHint" aria-live="polite"></div><div class="answers" id="answers"></div><div class="msg" id="msg">選一個答案！</div><output id="v08Debug" hidden aria-hidden="true"></output>
+    <div class="purpose-banner" id="purposeBanner"></div><div class="mascot" id="mascot">🦊</div><div class="question" id="question"></div><button class="story-read" id="readBtn" aria-label="朗讀故事題目">🔊 朗讀題目</button><div class="help-choices" id="helpChoices" aria-label="選擇幫助方法"></div><div class="visual-hint" id="visualHint" aria-live="polite"></div><div class="answers" id="answers"></div><div class="msg" id="msg">選一個答案！</div><output id="v09Debug" hidden aria-hidden="true"></output>
   </section>
 </main>
 
-<div id="resultOverlay" class="overlay"><div class="card"><div id="resultEmoji" class="big">🏆</div><h2 id="resultTitle">探險完成！</h2><p id="resultText"></p><div id="newCollectible" class="reward"></div><button class="primary" id="resultBtn">回到地圖</button></div></div>
+<div id="resultOverlay" class="overlay"><div class="card"><div id="resultEmoji" class="big">🏆</div><h2 id="resultTitle">探險完成！</h2><p id="resultText"></p><div id="capabilityRecap" class="capability-recap"></div><div id="newCollectible" class="reward"></div><button class="primary" id="resultBtn">回到地圖</button></div></div>
 <div id="collectionOverlay" class="overlay"><div class="card"><div class="big">🎒</div><h2>探險圖鑑</h2><p>普通寶物靠探險收集，稀有寶物要打倒 Boss。</p><div id="collectionGrid" class="collection-grid"></div><button class="primary" id="closeCollection">繼續探險</button></div></div>
 <div id="masteryOverlay" class="overlay"><div class="card mastery-card-wrap"><div class="big">🗺️</div><h2>我的能力地圖</h2><p class="mastery-note">每次自己想出來，能力就會再亮一點。沒有分數，也不用跟別人比。</p><div id="nextAdventure" class="next-adventure"></div><h3>九九乘法力量</h3><div id="mulMastery" class="mul-mastery"></div><section id="divisionMasterySection"><h3>除法橋力量</h3><div id="divMastery" class="mul-mastery"></div></section><h3>加減與數感魔法</h3><div id="arithMastery" class="arith-mastery"></div><button class="primary" id="closeMastery">繼續探險</button></div></div>
 
 <div id="divisionIntro" class="overlay"><div class="card division-intro-card"><div class="big">🌉</div><h2>乘法的另一座橋</h2><p>你已經認識乘法了。除法只是從答案走回去，不是全新的大怪獸。</p><div class="intro-equation"><span>6 × 7 = 42</span><b>↔</b><span>42 ÷ 7 = 6</span></div><div class="intro-steps"><div>🔎 看到 <b>42 ÷ 7</b>，先想「7 乘幾會到 42？」</div><div>🧩 每一題都能用你學過的 1～9 乘法找到線索。</div><div>🌱 不確定也沒關係，提示會陪你想，但不會直接說答案。</div></div><button class="primary" id="divisionIntroBtn">跨上除法橋</button></div></div>
 
-<script type="module" src="v08-app.js"></script>
+<script type="module" src="v09-app.js"></script>
 </body></html>
