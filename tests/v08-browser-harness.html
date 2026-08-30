@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Number Quest v0.8 Browser Validation</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;padding:24px;background:#f5f7fb;color:#172443}main{max-width:920px;margin:auto}h1{font-size:28px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.case{background:#fff;border:1px solid #ccd5e4;border-radius:8px;padding:14px}.case h2{font-size:16px;margin:0 0 8px}.case p{margin:6px 0}.pass{color:#087443;font-weight:800}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#172443;color:#fff;padding:12px;border-radius:8px}
+</style>
+</head>
+<body>
+<main><h1>Number Quest v0.8 Browser Validation</h1><p id="status">Running...</p><div id="cases" class="grid"></div><pre id="evidence"></pre></main>
+<script type="module">
+import {
+  STORY_RELATIONSHIPS,freshState,normalizeState,recordSkillSuccess,recordSkillMiss,
+  makeStoryQuestion,visualHintModel,visualHintRevealsAnswer,queueSpacedReview,
+  recordMemoryPractice,dueMemoryReviews,makeMemoryReviewQuestion,completeMemoryRetrieval
+} from '../src/v08-core.mjs';
+
+const s=freshState('2026-08-29');s.unlocked=8;
+for(let family=1;family<=9;family++)recordSkillSuccess(s,`mul:${family}`,{day:'2026-08-29'});
+const operationFor=relationship=>relationship.split('-')[0];
+const skillFor=operation=>`${operation}:${operation==='mul'||operation==='div'?7:100}`;
+const questions=Object.values(STORY_RELATIONSHIPS).map((relationship,index)=>makeStoryQuestion(s,{skillKey:skillFor(operationFor(relationship)),relationshipId:relationship,rng:()=>((index+3)%10)/10}));
+const sharing=questions.find(q=>q.storyRelationshipId===STORY_RELATIONSHIPS.DIV_SHARING);
+const grouping=questions.find(q=>q.storyRelationshipId===STORY_RELATIONSHIPS.DIV_GROUPING);
+const divisionModels={
+  sharing:[visualHintModel(sharing,{level:1}),visualHintModel(sharing,{level:2})],
+  grouping:[visualHintModel(grouping,{level:1}),visualHintModel(grouping,{level:2})]
+};
+const divisionSafe={
+  sharing:divisionModels.sharing.every(model=>!visualHintRevealsAnswer(model,sharing)),
+  grouping:divisionModels.grouping.every(model=>!visualHintRevealsAnswer(model,grouping))
+};
+
+recordSkillMiss(s,grouping.skillKey,{day:'2026-08-29'});queueSpacedReview(s,grouping);recordMemoryPractice(s,grouping,{day:'2026-08-29',missed:true});
+const nextDay=normalizeState(s,'2026-08-30'),due=dueMemoryReviews(nextDay,{day:'2026-08-30'})[0],memory=makeMemoryReviewQuestion(due,()=>.4),outcome=completeMemoryRetrieval(nextDay,memory,{day:'2026-08-30',firstTry:true});
+const memoryIdentity={sameText:memory.txt===grouping.txt,sameTemplate:memory.storyTemplateId===grouping.storyTemplateId,sameTheme:memory.storyThemeId===grouping.storyThemeId,sameRelationship:memory.storyRelationshipId===grouping.storyRelationshipId,nextDue:outcome.entry.dueDay};
+
+const missingFactor={op:'mul',variant:'missing',a:7,b:6,result:42,ans:7,txt:'? × 6 = 42'},missingDivisor={op:'div',variant:'missing-divisor',dividend:42,divisor:7,quotient:6,result:6,ans:7};
+const inheritedGuards={
+  missingFactor:[1,2].every(level=>!visualHintRevealsAnswer(visualHintModel(missingFactor,{level}),missingFactor)),
+  missingDivisor:[1,2].every(level=>!visualHintRevealsAnswer(visualHintModel(missingDivisor,{level}),missingDivisor))
+};
+const evidence={relationships:questions.map(q=>({relationship:q.storyRelationshipId,template:q.storyTemplateId,theme:q.storyThemeId,text:q.txt,answer:q.ans})),divisionModels,divisionSafe,memoryIdentity,inheritedGuards};
+
+const cases=document.getElementById('cases');
+for(const q of questions){const card=document.createElement('section');card.className='case';card.innerHTML=`<h2>${q.storyRelationshipId}</h2><p>${q.txt}</p><p>Template: ${q.storyTemplateId}</p>`;cases.append(card)}
+document.getElementById('evidence').textContent=JSON.stringify(evidence,null,2);
+const passed=questions.length===8&&divisionSafe.sharing&&divisionSafe.grouping&&Object.values(memoryIdentity).slice(0,4).every(Boolean)&&Object.values(inheritedGuards).every(Boolean);
+document.getElementById('status').className=passed?'pass':'';document.getElementById('status').textContent=passed?'PASS: all browser semantic checks':'FAIL';
+</script>
+</body>
+</html>

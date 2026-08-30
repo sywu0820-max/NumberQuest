@@ -60,7 +60,7 @@ function cleanHistory(x={}){
 }
 function cloneQuestion(q){
   if(!q||typeof q!=='object')return null;
-  const keep=['op','a','b','result','skillKey','max','variant','ans','optionMin','optionMax','txt','hint','story','dividend','divisor','quotient'];
+  const keep=['op','a','b','result','skillKey','max','variant','ans','optionMin','optionMax','txt','hint','story','storyKind','storyTemplateId','storyThemeId','storyRelationshipId','dividend','divisor','quotient'];
   const out=Object.fromEntries(keep.filter(k=>q[k]!==undefined).map(k=>[k,q[k]]));
   if(Array.isArray(q.opts))out.opts=[...q.opts];
   if(q.bounds&&typeof q.bounds==='object')out.bounds={...q.bounds,...(Array.isArray(q.bounds.totals)?{totals:[...q.bounds.totals]}:{})};

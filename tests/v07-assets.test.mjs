@@ -21,8 +21,8 @@ test('v0.7 app routes Memory Chest success through cross-scheduler reconciliatio
   assert.match(app,/completeMemoryRetrieval\(S,q/);assert.doesNotMatch(app,/q\.isMemoryReview\)recordMemorySuccess/);
 });
 
-test('v0.7 worker isolates its cache family and includes the full dependency chain',()=>{
-  assert.match(html,/v07-app\.js/);assert.match(html,/v07\.css/);assert.match(worker,/number-quest-v07-/);assert.match(worker,/k\.startsWith\('number-quest-v07-'\)/);
-  for(const asset of ['v07-app.js','src/v07-core.mjs','src/v06-core.mjs','src/v05-core.mjs'])assert.match(worker,new RegExp(asset.replace(/[./]/g,'\\$&')));
-  assert.doesNotMatch(worker,/startsWith\('number-quest-v06-'\)/);
+test('v0.8 successor keeps the v0.7 assets and complete core dependency chain',()=>{
+  assert.match(html,/v08-app\.js/);assert.match(html,/v07\.css/);assert.match(worker,/number-quest-v08-/);assert.match(worker,/k\.startsWith\('number-quest-v08-'\)/);
+  for(const asset of ['v08-app.js','src/v08-core.mjs','src/v07-core.mjs','src/v06-core.mjs','src/v05-core.mjs'])assert.match(worker,new RegExp(asset.replace(/[./]/g,'\\$&')));
+  assert.doesNotMatch(worker,/startsWith\('number-quest-v07-'\)/);
 });
