@@ -88,6 +88,7 @@ test('mission recap is derived only from completed journey outcomes',()=>{
     {completed:false,isMemoryReview:true,firstTry:true,purpose:'retrieval',skillKey:'mul:7'}
   ],{skillLabel:key=>key==='add:20'?'20 內加法':'其他'});
   assert.deepEqual({retrieval:recap.independentlyRetrieved,transfer:recap.independentTransfers,recovery:recap.recoveries},{retrieval:1,transfer:1,recovery:1});assert.equal(recap.completed,3);assert.ok(recap.lines.every(line=>!/%|分數|錯誤|排名/.test(line)));
+  assert.equal(recap.secureSkillKey,'add:20');assert.ok(recap.lines.some(line=>line.includes('20 內加法')&&line.includes('變得更穩')));
   const empty=buildJourneyRecap([]);assert.equal(empty.independentlyRetrieved,0);assert.equal(empty.independentTransfers,0);assert.deepEqual(empty.lines,[]);
 });
 
