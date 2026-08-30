@@ -1,7 +1,7 @@
 import {
   normalizeState as normalizeV08State,localDayKey,mixedSkillKeys,storySkillKeys,
   makeQuestionForSkill,makeDivisionQuestion,makeStoryQuestion,makeMemoryReviewQuestion,makeReviewQuestion,
-  dueMemoryReviews,questionFingerprint,learningSkill,skillMastery,challengeWeights,
+  dueMemoryReviews,takeDueReview,questionFingerprint,learningSkill,skillMastery,challengeWeights,
   visualHintModel,visualHintRevealsAnswer
 } from './v08-core.mjs';
 
@@ -117,6 +117,25 @@ export function journeyPlanSummary(plan){
   return {count:(plan||[]).length,purposes,distinctSkills:new Set((plan||[]).map(item=>item.skillKey)).size,memoryCount:(plan||[]).filter(item=>item.isMemoryReview).length,duplicateConsecutive:(plan||[]).some((item,index)=>index>0&&questionFingerprint(item)===questionFingerprint(plan[index-1])),maxSkillStreak,maxFrictionStreak};
 }
 
+export function takeNextJourneyQuestion(s,queue,{seenFingerprints=new Set(),rng=Math.random}={}){
+  if(!Array.isArray(queue))return null;
+  const due=takeDueReview(s,rng);
+  if(due){
+    const fingerprint=questionFingerprint(due),plannedIndex=queue.findIndex(item=>questionFingerprint(item)===fingerprint);
+    if(plannedIndex>=0){
+      const [planned]=queue.splice(plannedIndex,1);
+      if(!seenFingerprints.has(fingerprint))return planned;
+    }else if(!seenFingerprints.has(fingerprint)){
+      return {...due,journeyPurpose:'repair',journeyRepresentation:representation(due)};
+    }
+  }
+  while(queue.length){
+    const planned=queue.shift();
+    if(!seenFingerprints.has(questionFingerprint(planned)))return planned;
+  }
+  return null;
+}
+
 export function helpChoicesForQuestion(q){
   const text=answerSafeTextHint(q),model=answerSafeVisualHintModel(q,{level:1}),visualSafe=!visualHintRevealsAnswer(model,q)&&model?.kind!=='strategy-card';
   return {text:{id:'text',label:'💬 給我一句線索',text},visual:visualSafe?{id:'visual',label:'👀 看圖想一想',model}:null};
@@ -144,8 +163,8 @@ export function buildJourneyRecap(events,{skillLabel=key=>key}={}){
   const independentlyRetrieved=completed.filter(event=>event.isMemoryReview&&event.firstTry).length;
   const independentTransfers=completed.filter(event=>event.purpose==='transfer'&&event.firstTry).length;
   const recoveries=completed.filter(event=>event.recovered).length;
-  const successBySkill=new Map();for(const event of completed)successBySkill.set(event.skillKey,(successBySkill.get(event.skillKey)||0)+1);
-  const secureSkillKey=[...successBySkill].sort((a,b)=>b[1]-a[1])[0]?.[0]||null,lines=[];
+  const independentBySkill=new Map();for(const event of completed.filter(event=>event.firstTry))independentBySkill.set(event.skillKey,(independentBySkill.get(event.skillKey)||0)+1);
+  const secureSkillKey=[...independentBySkill].filter(([,count])=>count>=2).sort((a,b)=>b[1]-a[1])[0]?.[0]||null,lines=[];
   if(independentlyRetrieved)lines.push(`🧠 今天自己想起來 ${independentlyRetrieved} 個以前學過的力量`);
   if(independentTransfers)lines.push(`🔄 ${independentTransfers} 次換個故事還是會`);
   if(recoveries)lines.push(`🧩 ${recoveries} 次卡住後自己找回來`);

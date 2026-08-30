@@ -19,6 +19,12 @@ test('Today’s Adventure is optional and all accepted specialist modes remain r
   assert.match(app,/planTodaysAdventure\(S/);assert.match(app,/runMode='journey'/);assert.match(app,/completeMemoryRetrieval\(S,q/);assert.match(html,/其他冒險/);
 });
 
+test('journey runtime delegates review ownership to the fingerprint-aware integration boundary',()=>{
+  assert.match(app,/takeNextJourneyQuestion\(S,journeyQueue,\{seenFingerprints:journeySeenFingerprints\}\)/);
+  const body=app.match(/function nextJourneyQuestion\(\)\{([\s\S]*?)\n\}/)?.[1]||'';
+  assert.doesNotMatch(body,/takeDueReview\(/);assert.match(body,/journeySeenFingerprints\.add\(questionFingerprint\(nextQuestion\)\)/);
+});
+
 test('first miss exposes bounded text and visual choices before the stronger second-miss scaffold',()=>{
   assert.match(html,/id="helpChoices"/);assert.match(core,/💬 給我一句線索/);assert.match(core,/👀 看圖想一想/);assert.match(app,/missCount===1/);assert.match(app,/showHelpChoices\(\)/);assert.match(app,/renderVisualHint\(2\)/);
   assert.match(app,/answerSafeTextHint\(q\)/);assert.match(app,/answerSafeVisualHintModel\(q/);

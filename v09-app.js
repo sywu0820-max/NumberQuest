@@ -6,7 +6,7 @@ import {
   recordSkillMiss,recordSkillSuccess,skillMastery,challengeWeights,mixedSkillKeys,divisionUnlocked,
   beginLearningSession,finishRun,finishSpecialRun,claimReadyDaily,memoryChestStatus,dueMemoryReviews,
   makeMemoryReviewQuestion,recordMemoryPractice,recordMemoryMiss,completeMemoryRetrieval,
-  planTodaysAdventure,journeyPlanSummary,rememberJourneyEvent,buildJourneyRecap
+  planTodaysAdventure,journeyPlanSummary,takeNextJourneyQuestion,rememberJourneyEvent,buildJourneyRecap
 } from './src/v09-core.mjs';
 
 const STATE_KEY='nq-state-v05',LEGACY_KEY='nq-state-v04';
@@ -15,7 +15,7 @@ const QA_MODE=new URLSearchParams(location.search).get('qa')==='v09';
 let S=normalizeState(load(),localDayKey());
 let wi=0,q=null,correct=0,attempted=false,missRecorded=false,missCount=0,combo=0,maxCombo=0,boss=false,bossHP=0,totalNeeded=10,locked=false;
 let runMode='world',challengeLevel=2,comboRewards=new Set(),introContinuation=null,activeUtterance=null,memoryQueue=[];
-let storyRecentTemplates=[],storyRecentThemes=[],storyRunLog=[],journeyQueue=[],journeyPlanSnapshot=[],journeyEvents=[];
+let storyRecentTemplates=[],storyRecentThemes=[],storyRunLog=[],journeyQueue=[],journeyPlanSnapshot=[],journeyEvents=[],journeySeenFingerprints=new Set();
 
 function load(){try{const current=localStorage.getItem(STATE_KEY);if(current)return JSON.parse(current);const legacy=localStorage.getItem(LEGACY_KEY);return legacy?JSON.parse(legacy):null}catch{return null}}
 function save(){localStorage.setItem(STATE_KEY,JSON.stringify(S));hud()}
@@ -34,7 +34,7 @@ function renderMemory(){const status=memoryChestStatus(S,{day:localDayKey()}),bu
 function renderHome(){cancelSpeech();S=normalizeState(S,localDayKey());claimReadyDaily(S);save();renderDaily();renderLengths();renderBridge();renderMemory();renderWorlds();$('home').style.display='block';$('game').style.display='none'}
 function levelForLength(n){return n>=20?3:n>=10?2:1}
 function updateQaOutput(){if(!QA_MODE)return;const output=$('v09Debug');if(output)output.textContent=JSON.stringify({currentQuestion:q?JSON.parse(JSON.stringify(q)):null,journeyPlan:journeyPlanSnapshot,journeySummary:journeyPlanSummary(journeyPlanSnapshot),journeyEvents,storyRun:storyRunLog.map(item=>({...item})),diversity:storyDiversitySummary(storyRunLog.map(item=>({story:true,storyTemplateId:item.templateId,storyThemeId:item.themeId,txt:item.text})))})}
-function resetRun(){correct=0;combo=0;maxCombo=0;locked=false;attempted=false;missRecorded=false;missCount=0;memoryQueue=[];storyRecentTemplates=[];storyRecentThemes=[];storyRunLog=[];journeyQueue=[];journeyPlanSnapshot=[];journeyEvents=[];comboRewards=new Set();cancelSpeech();clearVisualHint();clearHelpChoices();updateQaOutput();beginLearningSession(S);save()}
+function resetRun(){correct=0;combo=0;maxCombo=0;locked=false;attempted=false;missRecorded=false;missCount=0;memoryQueue=[];storyRecentTemplates=[];storyRecentThemes=[];storyRunLog=[];journeyQueue=[];journeyPlanSnapshot=[];journeyEvents=[];journeySeenFingerprints=new Set();comboRewards=new Set();cancelSpeech();clearVisualHint();clearHelpChoices();updateQaOutput();beginLearningSession(S);save()}
 function showGame(){$('home').style.display='none';$('game').style.display='block';$('bossPanel').style.display=boss?'block':'none';updateBars();next()}
 function startJourney(){resetRun();boss=false;runMode='journey';challengeLevel=3;journeyQueue=planTodaysAdventure(S,{count:10,day:localDayKey()});journeyPlanSnapshot=journeyQueue.map(item=>JSON.parse(JSON.stringify(item)));totalNeeded=journeyQueue.length;$('worldTitle').textContent='🧭 今日冒險';$('mode').textContent=`🧭 ${totalNeeded} 題能力旅程`;showGame()}
 function startWorld(i,isBoss){resetRun();wi=i;boss=isBoss;runMode='world';challengeLevel=levelForLength(S.selectedLength);totalNeeded=boss?Math.min(12,S.selectedLength+2):S.selectedLength;bossHP=boss?totalNeeded:0;$('worldTitle').textContent=`${WORLDS[i].icon} ${WORLDS[i].name}`;$('mode').textContent=boss?'⚔️ BOSS 戰':`🚀 ${totalNeeded} 題遠征`;showGame()}
@@ -45,8 +45,9 @@ function startDivision(){if(!divisionUnlocked(S))return;resetRun();boss=false;ru
 function startMemory(){const due=dueMemoryReviews(S,{day:localDayKey()});if(!due.length)return;resetRun();boss=false;runMode='memory';challengeLevel=2;memoryQueue=due.map(entry=>makeMemoryReviewQuestion(entry));totalNeeded=memoryQueue.length;$('worldTitle').textContent='🧠 記憶寶箱';$('mode').textContent=`🧠 ${totalNeeded} 題力量回憶`;showGame()}
 
 function nextJourneyQuestion(){
-  const due=takeDueReview(S);if(due)return {...due,journeyPurpose:'repair',journeyRepresentation:due.story?'story':'symbolic'};
-  return journeyQueue.shift()||null;
+  const nextQuestion=takeNextJourneyQuestion(S,journeyQueue,{seenFingerprints:journeySeenFingerprints});
+  if(nextQuestion)journeySeenFingerprints.add(questionFingerprint(nextQuestion));
+  return nextQuestion;
 }
 function next(){
   cancelSpeech();clearVisualHint();clearHelpChoices();attempted=false;missRecorded=false;missCount=0;locked=false;

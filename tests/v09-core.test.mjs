@@ -91,6 +91,15 @@ test('mission recap is derived only from completed journey outcomes',()=>{
   const empty=buildJourneyRecap([]);assert.equal(empty.independentlyRetrieved,0);assert.equal(empty.independentTransfers,0);assert.deepEqual(empty.lines,[]);
 });
 
+test('mission recap never claims stability from prompted recoveries alone',()=>{
+  const recap=buildJourneyRecap([
+    {completed:true,firstTry:false,recovered:true,purpose:'repair',skillKey:'sub:50'},
+    {completed:true,firstTry:false,recovered:true,purpose:'growth',skillKey:'sub:50'},
+    {completed:true,firstTry:false,recovered:true,purpose:'transfer',skillKey:'sub:50'}
+  ],{skillLabel:()=> '50 內減法'});
+  assert.equal(recap.recoveries,3);assert.equal(recap.secureSkillKey,null);assert.ok(recap.lines.some(line=>line.includes('找回來')));assert.ok(recap.lines.every(line=>!line.includes('變得更穩')));
+});
+
 test('older state normalization remains non-mutating and keeps journey state small',()=>{
   const old=richState(),before=structuredClone(old),migrated=normalizeState(old,'2026-08-30');assert.deepEqual(old,before);assert.deepEqual(migrated.learning.journey,{recentPurposes:[],recentRepresentations:[]});
   for(let i=0;i<20;i++)rememberJourneyEvent(migrated,{purpose:'growth',skillKey:`add:${i}`,representation:i%2?'story':'symbolic'});
