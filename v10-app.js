@@ -4,7 +4,7 @@ import {
   makeDivisionQuestion,makeStoryQuestion,storyDiversitySummary,answerSafeVisualHintModel,visualHintKnownTotalLabel,
   helpChoicesForQuestion,answerSafeTextHint,takeDueReview,queueSpacedReview,completeSpacedReview,questionFingerprint,
   recordSkillMiss,recordSkillSuccess,skillMastery,challengeWeights,mixedSkillKeys,divisionUnlocked,
-  beginLearningSession,finishDailyProductRun,claimReadyDaily,memoryChestStatus,dueMemoryReviews,
+  beginLearningSession,finishDailyProductRun,memoryChestStatus,dueMemoryReviews,
   makeMemoryReviewQuestion,recordMemoryPractice,recordMemoryMiss,completeMemoryRetrieval,
   planTodaysAdventure,journeyPlanSummary,takeNextJourneyQuestion,rememberJourneyEvent,buildJourneyRecap,
   ONBOARDING_STEPS,onboardingStatus,completeOnboarding,resetOnboarding,homeMissionSummary,
@@ -26,7 +26,7 @@ function hud(){
   $('gems').textContent=S.gems;$('gameGems').textContent=S.gems;$('level').textContent=Math.floor(S.xp/100)+1;$('collectionCount').textContent=S.collection.length;
   const keys=[...MULTIPLICATION_SKILLS,...DIVISION_SKILLS,'add:20','sub:20','add:50','sub:50','add:100','sub:100',...NUMBER_SENSE_SKILLS];$('powerCount').textContent=keys.filter(key=>capabilityState(S,key).rank>=2).length;
 }
-function renderDaily(){$('daily').innerHTML='';dailyQuests(S).forEach(x=>{const done=x.now>=x.target,el=document.createElement('div');el.className='quest'+(done?' done':'');const pct=Math.min(100,x.now/x.target*100);el.innerHTML=`<div class="qtop">${x.icon} ${x.label}</div><small>${Math.min(x.now,x.target)} / ${x.target} · 💎${x.reward}</small><div class="mini"><i style="width:${pct}%"></i></div>`;$('daily').append(el)})}
+function renderDaily(){$('daily').innerHTML='';dailyQuests(S).forEach(x=>{const done=x.now>=x.target,el=document.createElement('div');el.className='quest'+(done?' done':'');const pct=Math.min(100,x.now/x.target*100);el.innerHTML=`<div class="qtop">${x.icon} ${x.label}</div><small>${Math.min(x.now,x.target)} / ${x.target} · 今天的足跡</small><div class="mini"><i style="width:${pct}%"></i></div>`;$('daily').append(el)})}
 function renderLengths(){
   $('lengths').innerHTML='';CHALLENGE_LENGTHS.forEach(x=>{const b=document.createElement('button');b.className='length'+(S.selectedLength===x.count?' active':'');b.innerHTML=`<b>${x.icon} ${x.label}</b><small>${x.count===5?'輕鬆暖身':x.count===10?'剛剛好的冒險':'我還要更多！'}</small>`;b.onclick=()=>{S.selectedLength=x.count;save();renderLengths()};$('lengths').append(b)});
   $('storyStatus').textContent=`${S.selectedLength} 題 · 看故事、找關係、用圖想一想`;
@@ -35,7 +35,7 @@ function renderWorlds(){$('worlds').innerHTML='';WORLDS.forEach((w,i)=>{const b=
 function renderBridge(){const open=divisionUnlocked(S),b=$('divisionBtn');b.disabled=!open;b.classList.toggle('locked-bridge',!open);$('divisionStatus').textContent=open?'用熟悉的乘法跨過新橋':'先完成 5 題乘法，橋就會亮起來'}
 function renderMemory(){const status=memoryChestStatus(S,{day:localDayKey()}),button=$('memoryBtn');button.disabled=!status.ready;button.hidden=!status.ready;button.classList.toggle('ready',status.ready);$('memoryStatus').textContent=status.label}
 function renderMission(){const summary=homeMissionSummary(S,{day:localDayKey()});$('missionLength').textContent=`大約 ${summary.approxMinutes} · ${summary.questionCount} 個小挑戰`;$('journeyMemory').textContent=summary.theme;$('missionNote').textContent=summary.dueCount>summary.boundedMemory?`🧠 今天的冒險會帶走 ${summary.boundedMemory} 個記憶力量，另外 ${summary.dueCount-summary.boundedMemory} 個仍會在記憶寶箱等你。`:'🌱 卡住可以選幫助；完成今天這一趟就很夠了。'}
-function renderHome(){cancelSpeech();S=normalizeState(S,localDayKey());claimReadyDaily(S);save();renderDaily();renderLengths();renderBridge();renderMemory();renderMission();renderWorlds();$('home').style.display='block';$('game').style.display='none'}
+function renderHome(){cancelSpeech();S=normalizeState(S,localDayKey());save();renderDaily();renderLengths();renderBridge();renderMemory();renderMission();renderWorlds();$('home').style.display='block';$('game').style.display='none'}
 function levelForLength(n){return n>=20?3:n>=10?2:1}
 function updateQaOutput(){if(!QA_MODE)return;const output=$('v10Debug');if(output)output.textContent=JSON.stringify({currentQuestion:q?JSON.parse(JSON.stringify(q)):null,journeyPlan:journeyPlanSnapshot,journeySummary:journeyPlanSummary(journeyPlanSnapshot),journeyEvents,onboarding:onboardingStatus(S),parent:parentLearningSummary(S),storyRun:storyRunLog.map(item=>({...item})),diversity:storyDiversitySummary(storyRunLog.map(item=>({story:true,storyTemplateId:item.templateId,storyThemeId:item.themeId,txt:item.text})))})}
 function resetRun(){correct=0;combo=0;maxCombo=0;locked=false;attempted=false;missRecorded=false;missCount=0;memoryQueue=[];storyRecentTemplates=[];storyRecentThemes=[];storyRunLog=[];journeyQueue=[];journeyPlanSnapshot=[];journeyEvents=[];comboRewards=new Set();cancelSpeech();clearVisualHint();clearHelpChoices();updateQaOutput();beginLearningSession(S);save()}

@@ -58,6 +58,13 @@ test('parent summary exposes only local interpretable learning signals',()=>{
   const summary=parentLearningSummary(s),text=JSON.stringify(summary);assert.equal(summary.localOnly,true);assert.ok(summary.recentlyPracticed.includes('add:20'));assert.ok(summary.stableRetrieval.includes('sub:20'));assert.ok(summary.recentTransfer.includes('add:20'));assert.doesNotMatch(text,/rank|percentile|retention probability|scheduler|weight|behind grade|排名|百分位|落後|權重/i);
 });
 
+test('parent summary never infers independent retrieval from transfer-only strength',()=>{
+  const s=normalizeState(null,day),key='add:50';recordSkillSuccess(s,key,{firstTry:true,day});
+  for(let i=0;i<2;i++)recordCapabilityEvidence(s,{completed:true,firstTry:true,purpose:'transfer',skillKey:key},{day});
+  assert.equal(capabilityState(s,key).id,'strong');let summary=parentLearningSummary(s);assert.ok(summary.recentTransfer.includes(key));assert.ok(!summary.stableRetrieval.includes(key));
+  recordCapabilityEvidence(s,{completed:true,firstTry:true,isReview:true,purpose:'retrieval',skillKey:key},{day});summary=parentLearningSummary(s);assert.ok(summary.stableRetrieval.includes(key));
+});
+
 test('home mission communicates bounded Memory integration without turning remaining items into debt',()=>{
   const s=normalizeState(null,'2026-08-29');s.unlocked=8;for(const [index,key] of ['add:20','sub:20','add:50'].entries()){recordSkillSuccess(s,key,{firstTry:true,day:'2026-08-29'});recordMemoryPractice(s,makeQuestionForSkill(key,s,{rng:seeded(index+1)}),{day:'2026-08-29'})}
   const next=normalizeState(s,day),summary=homeMissionSummary(next,{day});assert.equal(summary.questionCount,10);assert.equal(summary.dueCount,3);assert.equal(summary.boundedMemory,2);assert.doesNotMatch(JSON.stringify(summary),/debt|overdue|欠|逾期/i);
@@ -77,7 +84,7 @@ test('cosmetic rewards cannot be farmed through short or repeated same-day runs'
   const s=normalizeState(null,day),start={gems:s.gems,xp:s.xp,collection:[...s.collection]};assert.equal(cosmeticRewardEligible(s,{day,questionCount:5}),false);
   const short=finishDailyProductRun(s,{kind:'world',worldIndex:0,questionCount:5,day});assert.equal(short.cosmeticAwarded,false);assert.deepEqual({gems:s.gems,xp:s.xp,collection:s.collection},start);assert.equal(s.worldRuns[0],1);
   const firstComplete=finishDailyProductRun(s,{mode:'journey',questionCount:10,day});assert.equal(firstComplete.cosmeticAwarded,true);assert.ok(s.gems>start.gems);const earned={gems:s.gems,xp:s.xp,collection:[...s.collection]};
-  const replay=finishDailyProductRun(s,{mode:'journey',questionCount:10,day});assert.equal(replay.cosmeticAwarded,false);assert.deepEqual({gems:s.gems,xp:s.xp,collection:s.collection},earned);
+  s.daily.maxCombo=8;s.daily.solved=25;const replay=finishDailyProductRun(s,{mode:'journey',questionCount:10,day});assert.equal(replay.cosmeticAwarded,false);assert.deepEqual({gems:s.gems,xp:s.xp,collection:s.collection},earned);assert.equal(s.daily.claimed.combo,undefined);assert.equal(s.daily.claimed.solve,undefined);
 });
 
 test('stress v1.0 normalization preserves adaptive Memory and same-session ownership interleavings',()=>{

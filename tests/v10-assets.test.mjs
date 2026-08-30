@@ -27,7 +27,7 @@ test('capability recap and healthy stopping precede cosmetic reward',()=>{
 });
 
 test('cosmetic rewards are gated behind one complete daily mission instead of per-answer farming',()=>{
-  assert.match(app,/finishDailyProductRun\(S/);assert.doesNotMatch(app,/S\.gems\+=attempted|S\.xp\+=attempted|連擊寶箱！\+💎/);assert.match(core,/questionCount\)\|\|0\)\)>=10/);assert.match(core,/dailyRewardDay!==day/);
+  assert.match(app,/finishDailyProductRun\(S/);assert.doesNotMatch(app,/claimReadyDaily|S\.gems\+=attempted|S\.xp\+=attempted|連擊寶箱！\+💎/);assert.doesNotMatch(app,/x\.reward|💎\$\{x\.reward\}/);assert.match(core,/questionCount\)\|\|0\)\)>=10/);assert.match(core,/dailyRewardDay!==day/);
 });
 
 test('capability map uses child-friendly earned states without punitive failure labels',()=>{
