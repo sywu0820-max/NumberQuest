@@ -44,6 +44,16 @@ test('Memory identity wins when the same fingerprint is also a due pending revie
   assert.equal(s.learning.pendingReviews.length,0);assert.equal(learningSkill(s,question.skillKey).pendingRevisits,0);assert.equal(learningSkill(s,question.skillKey).successfulRevisits,1);assert.equal(memoryScheduleSnapshot(s)[question.skillKey].dueDay,'2026-09-02');
 });
 
+test('an ordinary planned fingerprint collision cannot steal due review ownership',()=>{
+  const s=freshState('2026-08-30');s.unlocked=8;for(let i=0;i<4;i++)recordSkillSuccess(s,'add:20',{day:'2026-08-28'});
+  const review=makeQuestionForSkill('add:20',s,{challengeLevel:3,rng:()=>.5}),fingerprint=questionFingerprint(review);queueSpacedReview(s,review);s.learning.solvedTotal+=3;
+  const queue=planTodaysAdventure(s,{day:'2026-08-30',rng:()=>.5}),plannedCollision=queue.find(q=>questionFingerprint(q)===fingerprint);
+  assert.ok(plannedCollision);assert.equal(Boolean(plannedCollision.isReview),false);assert.equal(Boolean(plannedCollision.isMemoryReview),false);
+  const first=takeNextJourneyQuestion(s,queue,{rng:()=>.5});assert.equal(questionFingerprint(first),fingerprint);assert.equal(first.isReview,true);assert.equal(Boolean(first.isMemoryReview),false);
+  assert.equal(completeSpacedReview(s,first),true);recordSkillSuccess(s,first.skillKey,{firstTry:true,isRevisit:true,day:'2026-08-30'});
+  const next=takeNextJourneyQuestion(s,queue,{rng:()=>.5});assert.notEqual(questionFingerprint(next),fingerprint);assert.equal(s.learning.pendingReviews.length,0);assert.equal(learningSkill(s,'add:20').pendingRevisits,0);assert.equal(learningSkill(s,'add:20').successfulRevisits,1);
+});
+
 test('a pre-due review missed on first presentation returns after the bounded spacing',()=>{
   const s=readyState(),review=makeQuestionForSkill('sub:50',s,{rng:seeded(51)}),fingerprint=questionFingerprint(review);
   queueSpacedReview(s,review);s.learning.solvedTotal+=3;const queue=planTodaysAdventure(s,{day:'2026-08-30',rng:seeded(4)}),asked=[];

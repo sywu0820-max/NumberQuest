@@ -122,7 +122,10 @@ export function takeNextJourneyQuestion(s,queue,{rng=Math.random}={}){
   const due=takeDueReview(s,rng);
   if(due){
     const fingerprint=questionFingerprint(due),plannedIndex=queue.findIndex(item=>questionFingerprint(item)===fingerprint);
-    if(plannedIndex>=0)return queue.splice(plannedIndex,1)[0];
+    if(plannedIndex>=0){
+      const [planned]=queue.splice(plannedIndex,1);
+      if(planned.isMemoryReview||planned.isReview)return planned;
+    }
     return {...due,journeyPurpose:'repair',journeyRepresentation:representation(due)};
   }
   return queue.shift()||null;
