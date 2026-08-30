@@ -20,9 +20,9 @@ test('Today’s Adventure is optional and all accepted specialist modes remain r
 });
 
 test('journey runtime delegates review ownership to the fingerprint-aware integration boundary',()=>{
-  assert.match(app,/takeNextJourneyQuestion\(S,journeyQueue,\{seenFingerprints:journeySeenFingerprints\}\)/);
+  assert.match(app,/return takeNextJourneyQuestion\(S,journeyQueue\)/);
   const body=app.match(/function nextJourneyQuestion\(\)\{([\s\S]*?)\n\}/)?.[1]||'';
-  assert.doesNotMatch(body,/takeDueReview\(/);assert.match(body,/journeySeenFingerprints\.add\(questionFingerprint\(nextQuestion\)\)/);
+  assert.doesNotMatch(body,/takeDueReview\(|seenFingerprints/);assert.doesNotMatch(app,/journeySeenFingerprints/);
 });
 
 test('first miss exposes bounded text and visual choices before the stronger second-miss scaffold',()=>{
