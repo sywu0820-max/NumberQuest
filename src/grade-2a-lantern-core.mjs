@@ -31,7 +31,8 @@ export function lanternEligibility({numberRange=200}={}){
 
 function countMission(skillKey,max,rng){
   const missing=integer(102,max-2,rng),slot=integer(0,2,rng),sequence=[missing-slot,missing-slot+1,missing-slot+2];
-  return {op:'lantern',variant:'lantern-count',skillKey,a:sequence[0],b:slot,result:missing,ans:missing,optionMin:101,optionMax:max,txt:`航道訊號 ${sequence.map((value,index)=>index===slot?'？':value).join('、')}`,hint:'先找出前後的數字，再把缺少的那一盞燈轉到正確位置。'};
+  const starts=[-6,-4,-3,3,4,6].map(offset=>missing+offset).filter(value=>value>=101&&value<=max),dialStart=pick(starts,rng);
+  return {op:'lantern',variant:'lantern-count',skillKey,a:sequence[0],b:slot,result:missing,ans:missing,optionMin:101,optionMax:max,bounds:{dialStart},txt:`航道訊號 ${sequence.map((value,index)=>index===slot?'？':value).join('、')}`,hint:'先找出前後的數字，再把缺少的那一盞燈轉到正確位置。'};
 }
 function composeMission(skillKey,max,rng){
   const result=integer(101,max,rng),d=digits(result);
@@ -62,6 +63,15 @@ export function lanternMissionModel(q){
   return {kind,target:Number(q.result),left:Number(q.a),right:Number(q.b),direction:q.variant?.endsWith('earlier')?'earlier':'stronger',digits:digits(Number(q.result)),prompt:q.txt};
 }
 
+export function lanternCountDialStart(q){
+  const model=lanternMissionModel(q);if(model?.kind!=='count')return null;
+  const min=Number(q.optionMin),max=Number(q.optionMax),stored=Number(q.bounds?.dialStart);
+  if(Number.isInteger(stored)&&stored>=min&&stored<=max&&stored!==Number(q.ans))return stored;
+  const distance=3+Math.abs((Number(q.a)||0)+(Number(q.b)||0))%4,direction=((Number(q.a)||0)+(Number(q.b)||0))%2?-1:1;
+  const preferred=Number(q.ans)+direction*distance,alternate=Number(q.ans)-direction*distance;
+  return preferred>=min&&preferred<=max?preferred:Math.max(min,Math.min(max,alternate));
+}
+
 export function evaluateLanternAction(q,action){
   const model=lanternMissionModel(q);if(!model)return {correct:false};
   if(model.kind==='compare')return {correct:action?.side===q.ans,expected:q.ans};
@@ -76,7 +86,9 @@ export function lanternHint(q,{level=1}={}){
   return level>1?'先只放百光束，再放十光束，最後用一光點補齊。':'把百、十、一分開建造，總亮度不會改變。';
 }
 
-function dueLanternReview(state){return (state?.learning?.pendingReviews||[]).find(entry=>isDue(entry,state)&&isLanternSkill(entry?.q?.skillKey))||null}
+function reviewSourceFingerprint(q){return questionFingerprint(q?.reviewSourceQuestion||q)}
+function lanternReviewEntries(state,excluded=[]){const fingerprints=new Set(excluded);return (state?.learning?.pendingReviews||[]).filter(entry=>isLanternSkill(entry?.q?.skillKey)&&!fingerprints.has(entry.fingerprint||questionFingerprint(entry.q)))}
+function dueLanternReview(state,excluded=[]){return lanternReviewEntries(state,excluded).find(entry=>isDue(entry,state))||null}
 function dueLanternMemory(state,day){return Object.values(state?.learning?.memorySchedule||{}).find(entry=>isLanternSkill(entry?.skillKey)&&typeof entry.dueDay==='string'&&entry.dueDay<=day)||null}
 function freshReview(source,{rng,numberRange,kind}){
   const mission=makeLanternMission(source.skillKey,{rng,numberRange,excludeFingerprint:questionFingerprint(source)});
@@ -93,6 +105,18 @@ export function planLanternRun(state,{count=8,day=localDayKey(),rng=Math.random,
   return plan;
 }
 
+export function reconcileLanternRunQueue(state,queue,{afterIndex=-1,rng=Math.random,numberRange=200}={}){
+  if(!Array.isArray(queue))return {insertedReview:null,appendedIntervening:[],pendingWait:null};
+  const insertAt=Math.max(0,Math.min(queue.length,Math.trunc(Number(afterIndex)||0)+1));
+  const queuedFingerprints=queue.slice(insertAt).filter(item=>item?.isReview).map(reviewSourceFingerprint);
+  const due=dueLanternReview(state,queuedFingerprints);
+  if(due?.q){const review=freshReview(due.q,{rng,numberRange,kind:'session'});queue.splice(insertAt,0,review);return {insertedReview:review,appendedIntervening:[],pendingWait:0}}
+  const entries=lanternReviewEntries(state,queuedFingerprints);if(!entries.length)return {insertedReview:null,appendedIntervening:[],pendingWait:null};
+  const solved=Number(state?.learning?.solvedTotal)||0,pendingWait=Math.max(0,Math.min(...entries.map(entry=>Number(entry.dueSolved)||0))-solved),remaining=queue.length-insertAt,needed=Math.max(0,pendingWait-remaining),appendedIntervening=[];
+  for(let index=0;index<needed;index++){const skillKey=LANTERN_CORE_SKILLS[(solved+remaining+index)%LANTERN_CORE_SKILLS.length],previous=queue.at(-1),mission=makeLanternMission(skillKey,{rng,numberRange,excludeFingerprint:previous?.skillKey===skillKey?questionFingerprint(previous):null});mission.journeyPurpose='growth';queue.push(mission);appendedIntervening.push(mission)}
+  return {insertedReview:null,appendedIntervening,pendingWait};
+}
+
 export function freshLanternRetry(q,{rng=Math.random,numberRange=200}={}){
   return {...makeLanternMission(q.skillKey,{rng,numberRange,excludeFingerprint:questionFingerprint(q)}),retryOf:questionFingerprint(q),isReview:Boolean(q.isReview),isMemoryReview:Boolean(q.isMemoryReview),reviewSourceQuestion:q.reviewSourceQuestion||q};
 }
@@ -103,7 +127,7 @@ export function lanternRunCompletion(events=[]){
   return {complete:missing.length===0,completedSkillIds:LANTERN_CORE_SKILLS.filter(skillKey=>completed.has(skillKey)),missingSkillIds:missing,requiredSkillIds:[...LANTERN_CORE_SKILLS],ignoredExtensionSkillIds:[...LANTERN_EXTENSION_SKILLS]};
 }
 
-export function lanternMasterySnapshot(state){
+export function lanternCapabilitySnapshot(state){
   const history=state?.learning?.skillHistory||{};
   return Object.fromEntries(LANTERN_CORE_SKILLS.map(skillKey=>[skillKey,{attempts:Number(history[skillKey]?.attempts)||0,independentSuccesses:Number(history[skillKey]?.firstTryCorrect)||0,successfulRevisits:Number(history[skillKey]?.successfulRevisits)||0}]));
 }

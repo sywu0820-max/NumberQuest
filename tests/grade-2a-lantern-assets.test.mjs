@@ -19,9 +19,9 @@ test('child-facing harbor copy avoids school and worksheet framing',()=>{
 });
 
 test('offline shell caches the new playable core and keeps prior cache families protected',()=>{
-  const worker=read('sw.js');assert.match(worker,/grade-2a-lantern-core\.mjs/);assert.match(worker,/number-quest-v09-/);assert.match(worker,/number-quest-v08-/);
+  const html=read('index.html'),worker=read('sw.js');assert.match(worker,/grade-2a-lantern-core\.mjs/);assert.match(worker,/number-quest-v09-/);assert.match(worker,/number-quest-v08-/);assert.match(html,/v10-app\.js\?v=10-9/);assert.match(worker,/v10-app\.js\?v=10-9/);
 });
 
-test('shipped browser harness proves actions, review ownership, fresh retry, and extension exclusion without storage',()=>{
-  const harness=read('tests/grade-2a-lantern-browser-harness.html');for(const token of ['interactions','ownership','freshIdentity','sourcePreserved','extensionOnly','eligibility300'])assert.match(harness,new RegExp(token));assert.doesNotMatch(harness,/localStorage|sessionStorage/);
+test('shipped browser harness proves dial safety, live review ownership, fresh retry, and extension exclusion without storage',()=>{
+  const harness=read('tests/grade-2a-lantern-browser-harness.html');for(const token of ['interactions','countDial','noFixedPlusOne','sameSession','interveningMissions','reviewBeforeRunEnd','ownership','freshIdentity','sourcePreserved','extensionOnly','eligibility300'])assert.match(harness,new RegExp(token));assert.doesNotMatch(harness,/localStorage|sessionStorage/);
 });

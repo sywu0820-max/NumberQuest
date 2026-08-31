@@ -2,12 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
-  freshState,normalizeState,recordSkillSuccess,queueSpacedReview,takeDueReview,recordMemoryPractice,dueMemoryReviews,
+  freshState,normalizeState,recordSkillMiss,recordSkillSuccess,queueSpacedReview,takeDueReview,recordMemoryPractice,dueMemoryReviews,
   completeSpacedReview,questionFingerprint,planTodaysAdventure
 } from '../src/v10-core.mjs';
 import {
   LANTERN_CORE_SKILLS,LANTERN_EXTENSION_SKILLS,LANTERN_ALL_SKILLS,LANTERN_PEDAGOGY,isLanternSkill,lanternEligibility,
-  makeLanternMission,lanternMissionModel,evaluateLanternAction,lanternHint,planLanternRun,freshLanternRetry,lanternRunCompletion
+  makeLanternMission,lanternMissionModel,lanternCountDialStart,evaluateLanternAction,lanternHint,planLanternRun,freshLanternRetry,reconcileLanternRunQueue,lanternRunCompletion
 } from '../src/grade-2a-lantern-core.mjs';
 
 const seeded=seed=>()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)/4294967296);
@@ -39,11 +39,32 @@ test('every signal interaction evaluates the child math action instead of a deta
   }
 });
 
+test('count dial starts require varied deliberate movement and never leak a fixed plus-one solution',()=>{
+  const deltas=[];for(let seed=1;seed<=400;seed++){
+    const q=makeLanternMission(LANTERN_CORE_SKILLS[0],{rng:seeded(seed)}),start=lanternCountDialStart(q),delta=Number(q.ans)-start;deltas.push(delta);
+    assert.ok(start>=q.optionMin&&start<=q.optionMax,seed);assert.ok(Math.abs(delta)>=3&&Math.abs(delta)<=6,seed);assert.equal(evaluateLanternAction(q,{value:start+1}).correct,false,seed);
+  }
+  assert.ok(deltas.some(delta=>delta>0));assert.ok(deltas.some(delta=>delta<0));assert.ok(new Set(deltas).size>=4);
+});
+
 test('same-session repair is fresh, keeps shared ownership, and can retire the original identity',()=>{
   const state=freshState('2026-08-31'),source=makeLanternMission(LANTERN_CORE_SKILLS[0],{rng:seeded(31)}),fingerprint=questionFingerprint(source);
   queueSpacedReview(state,source);for(const id of ['add:20','sub:20','mul:2'])recordSkillSuccess(state,id,{day:'2026-08-31'});
   const plan=planLanternRun(state,{rng:seeded(42),day:'2026-08-31'}),review=plan.find(q=>q.isReview);
   assert.ok(review);assert.equal(review.skillKey,source.skillKey);assert.notEqual(questionFingerprint(review),fingerprint);assert.equal(questionFingerprint(review.reviewSourceQuestion),fingerprint);
+  assert.equal(completeSpacedReview(state,review.reviewSourceQuestion),true);assert.equal(state.learning.pendingReviews.length,0);
+});
+
+test('miss recovery dynamically earns and surfaces its scheduler-owned revisit before the run can end',()=>{
+  const state=freshState('2026-08-31'),source=makeLanternMission(LANTERN_CORE_SKILLS[0],{rng:seeded(91)}),sourceFingerprint=questionFingerprint(source),queue=[];
+  recordSkillMiss(state,source.skillKey,{day:'2026-08-31'});queueSpacedReview(state,source);
+  const recovery=freshLanternRetry(source,{rng:seeded(92)});queue.push(recovery);recordSkillSuccess(state,recovery.skillKey,{firstTry:false,day:'2026-08-31'});
+  const padded=reconcileLanternRunQueue(state,queue,{afterIndex:0,rng:seeded(93)});assert.equal(padded.insertedReview,null);assert.equal(padded.appendedIntervening.length,2);assert.equal(queue.length,3);
+  for(let index=1;index<=2;index++){
+    recordSkillSuccess(state,queue[index].skillKey,{day:'2026-08-31'});const result=reconcileLanternRunQueue(state,queue,{afterIndex:index,rng:seeded(93+index)});
+    if(index===1)assert.equal(result.insertedReview,null);else assert.ok(result.insertedReview);
+  }
+  const review=queue[3];assert.equal(review.isReview,true);assert.equal(review.skillKey,source.skillKey);assert.notEqual(questionFingerprint(review),sourceFingerprint);assert.equal(questionFingerprint(review.reviewSourceQuestion),sourceFingerprint);
   assert.equal(completeSpacedReview(state,review.reviewSourceQuestion),true);assert.equal(state.learning.pendingReviews.length,0);
 });
 

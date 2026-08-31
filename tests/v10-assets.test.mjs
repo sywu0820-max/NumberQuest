@@ -9,7 +9,7 @@ const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
 const css=await readFile(new URL('../v10.css',import.meta.url),'utf8');
 
 test('v1.0 shell uses the successor core and keeps local-only state',()=>{
-  assert.match(app,/from '\.\/src\/v10-core\.mjs'/);assert.match(app,/STATE_KEY='nq-state-v05'/);assert.match(html,/Number Quest v1\.0/);assert.match(html,/src="v10-app\.js"/);assert.doesNotMatch(app,/fetch\(|XMLHttpRequest|WebSocket|sendBeacon|analytics|childName|userId|apiKey/);
+  assert.match(app,/from '\.\/src\/v10-core\.mjs'/);assert.match(app,/STATE_KEY='nq-state-v05'/);assert.match(html,/Number Quest v1\.0/);assert.match(html,/src="v10-app\.js\?v=10-9"/);assert.doesNotMatch(app,/fetch\(|XMLHttpRequest|WebSocket|sendBeacon|analytics|childName|userId|apiKey/);
 });
 
 test('child-first home makes Today’s Adventure primary and specialist modes secondary',()=>{
