@@ -82,6 +82,31 @@
     ],
     "forbiddenLoop": "solve-symbolic-equation-then-watch-bridge-animation"
   },
+  "evidenceTaggingPolicy": {
+    "derivedFromBothCasePredicatesAndObservedActionTrace": true,
+    "generatorCaseClassAloneIsSufficient": false,
+    "exchangeActionsAreObservedNotInferred": true,
+    "rawGestureCoordinatesStored": false,
+    "actionTraceRetention": "ephemeral-until-outcome-classification",
+    "allAcquisitionTagsRequireSuccessfulSolution": true,
+    "noRegroupRequiresZeroObservedExchangeActions": true,
+    "regroupRequiresExactObservedDirectionAndCount": true,
+    "invalidOrMismatchedTraceCanEmitIndependentAcquisition": false,
+    "unnecessaryExchangeInNoRegroupCase": {
+      "policy": "neutral-reject-and-return-control",
+      "missionCompletes": false,
+      "progressOrRewardPenalty": false,
+      "completedCanonicalOutcomeEventEmitted": false,
+      "independentAcquisitionEvidenceEmitted": false,
+      "noRegroupTagEmitted": false,
+      "reason": "A value-preserving exchange may be mathematically valid, but it does not demonstrate the target no-regroup strategy."
+    },
+    "observedExchangeActionSchema": {
+      "required": ["direction", "inputUnit", "inputUnitCount", "outputUnit", "outputUnitCount", "valueBefore", "valueAfter"],
+      "directions": ["ones-to-tens", "tens-to-ones"],
+      "valueMustBePreserved": true
+    }
+  },
   "caseRules": {
     "add-no-regroup": {
       "skillId": "g2a.add.no-regroup-100",
@@ -92,7 +117,15 @@
       "resultMaximum": 99,
       "constraints": ["left-ones-plus-right-ones-at-most-9", "left-tens-plus-right-tens-at-most-9"],
       "requiredExchange": "none",
-      "alwaysEvidenceTags": ["no-regroup"],
+      "evidenceTagsWhenCaseAndTraceEligible": ["no-regroup", "observed-zero-exchange"],
+      "evidenceEligibility": {
+        "requiresSuccessfulSolution": true,
+        "requiresAllCasePredicates": true,
+        "observedActionTrace": {
+          "exchangeActionCount": 0,
+          "unexpectedExchangeActionCount": 0
+        }
+      },
       "conditionalEvidenceTags": {
         "boundary": ["ones-sum-equals-9", "result-at-least-90"]
       }
@@ -106,7 +139,21 @@
       "resultMaximum": 99,
       "constraints": ["left-ones-plus-right-ones-at-least-10", "sum-at-most-99"],
       "requiredExchange": "ones-to-tens",
-      "alwaysEvidenceTags": ["regrouping-sensitive", "ones-to-tens-regrouping"],
+      "evidenceTagsWhenCaseAndTraceEligible": ["regrouping-sensitive", "ones-to-tens-regrouping", "observed-one-ones-to-tens-exchange", "observed-value-preserving-exchange"],
+      "evidenceEligibility": {
+        "requiresSuccessfulSolution": true,
+        "requiresAllCasePredicates": true,
+        "observedActionTrace": {
+          "exchangeActionCount": 1,
+          "exchangeDirection": "ones-to-tens",
+          "inputUnit": "one",
+          "inputUnitCount": 10,
+          "outputUnit": "ten",
+          "outputUnitCount": 1,
+          "unexpectedExchangeActionCount": 0,
+          "valueBeforeEqualsValueAfter": true
+        }
+      },
       "conditionalEvidenceTags": {
         "boundary": ["ones-sum-equals-10", "result-at-least-90"]
       }
@@ -120,7 +167,15 @@
       "resultMaximum": 89,
       "constraints": ["minuend-at-least-subtrahend", "minuend-ones-at-least-subtrahend-ones"],
       "requiredExchange": "none",
-      "alwaysEvidenceTags": ["no-regroup"],
+      "evidenceTagsWhenCaseAndTraceEligible": ["no-regroup", "observed-zero-exchange"],
+      "evidenceEligibility": {
+        "requiresSuccessfulSolution": true,
+        "requiresAllCasePredicates": true,
+        "observedActionTrace": {
+          "exchangeActionCount": 0,
+          "unexpectedExchangeActionCount": 0
+        }
+      },
       "conditionalEvidenceTags": {
         "boundary": ["ones-difference-equals-0", "result-at-most-10"]
       }
@@ -134,7 +189,21 @@
       "resultMaximum": 89,
       "constraints": ["minuend-at-least-subtrahend", "minuend-ones-less-than-subtrahend-ones"],
       "requiredExchange": "tens-to-ones",
-      "alwaysEvidenceTags": ["regrouping-sensitive", "tens-to-ones-exchange"],
+      "evidenceTagsWhenCaseAndTraceEligible": ["regrouping-sensitive", "tens-to-ones-exchange", "observed-one-tens-to-ones-exchange", "observed-value-preserving-exchange"],
+      "evidenceEligibility": {
+        "requiresSuccessfulSolution": true,
+        "requiresAllCasePredicates": true,
+        "observedActionTrace": {
+          "exchangeActionCount": 1,
+          "exchangeDirection": "tens-to-ones",
+          "inputUnit": "ten",
+          "inputUnitCount": 1,
+          "outputUnit": "one",
+          "outputUnitCount": 10,
+          "unexpectedExchangeActionCount": 0,
+          "valueBeforeEqualsValueAfter": true
+        }
+      },
       "conditionalEvidenceTags": {
         "boundary": ["ones-deficit-equals-1", "result-at-most-10"]
       }
@@ -181,6 +250,10 @@
       "repair-stock-reconcile": {"family": "workshop-inventory", "phase": "transfer-candidate"},
       "blueprint-error-audit": {"family": "bridge-inspection", "phase": "transfer-candidate"},
       "crew-handoff-log": {"family": "engineer-handoff", "phase": "transfer-candidate"}
+    },
+    "evidenceTags": {
+      "acceptedMasteryTags": ["boundary", "no-regroup", "regrouping-sensitive", "ones-to-tens-regrouping", "tens-to-ones-exchange"],
+      "proposedObservedTraceTags": ["observed-zero-exchange", "observed-one-ones-to-tens-exchange", "observed-one-tens-to-ones-exchange", "observed-value-preserving-exchange"]
     }
   },
   "missionFamilies": [
@@ -193,6 +266,7 @@
       "allowedEvidenceKinds": ["acquisition", "retrieval"],
       "mathAction": "The child joins two visible loads in aligned tens/ones lanes and physically bundles exactly ten ones when an exchange is required.",
       "caseRuleIds": ["add-no-regroup", "add-regroup"],
+      "observedActionTraceRequirement": "case-rule-evidence-eligibility",
       "presentationRevealsExchangeClass": false,
       "misconceptionIds": ["add-align", "add-carry-value"],
       "hintSequenceIds": ["align-place-value-lanes", "make-one-ten-from-ten-ones"],
@@ -208,6 +282,7 @@
       "allowedEvidenceKinds": ["acquisition", "retrieval"],
       "mathAction": "The child removes a requested load from the visible whole and must split one ten into ten ones when the ones available are insufficient.",
       "caseRuleIds": ["sub-no-regroup", "sub-regroup"],
+      "observedActionTraceRequirement": "case-rule-evidence-eligibility",
       "presentationRevealsExchangeClass": false,
       "misconceptionIds": ["sub-direction", "sub-borrow-value"],
       "hintSequenceIds": ["preserve-whole-and-removal-direction", "split-one-ten-into-ten-ones"],
@@ -449,7 +524,13 @@
       "id": "carry-exchange-gate-fuzz",
       "layer": "deterministic",
       "minimumCasesPerExchangeDirection": 400,
-      "assertions": ["nine-or-eleven-ones-cannot-form-one-ten", "one-ten-always-produces-exactly-ten-ones", "exchange-preserves-total-value"]
+      "assertions": ["nine-or-eleven-ones-cannot-form-one-ten", "one-ten-always-produces-exactly-ten-ones", "exchange-preserves-total-value", "unnecessary-exchange-in-sub-no-regroup-cannot-emit-independent-no-regroup-evidence"]
+    },
+    {
+      "id": "carry-behavior-sensitive-evidence",
+      "layer": "deterministic",
+      "minimumCasesPerCaseRule": 400,
+      "assertions": ["case-class-alone-cannot-emit-acquisition-tags", "no-regroup-requires-zero-observed-exchanges", "regroup-requires-exactly-one-correct-direction-exchange", "wrong-direction-or-extra-exchange-cannot-emit-independent-acquisition", "successful-no-regroup-operands-with-unnecessary-exchange-do-not-emit-no-regroup-evidence"]
     },
     {
       "id": "carry-hint-retry-identity",
@@ -461,7 +542,7 @@
       "id": "carry-real-browser-shortcut-matrix",
       "layer": "browser",
       "targets": ["iPad Safari portrait", "iPad Safari landscape", "Surface Pro Edge", "keyboard-only"],
-      "assertions": ["no-fixed-position-answer-leak", "drag-and-tap-place-paths-are-equivalent", "exchange-class-not-revealed-before-quantity-inspection", "zero-console-or-page-errors"]
+      "assertions": ["no-fixed-position-answer-leak", "drag-and-tap-place-paths-are-equivalent", "exchange-class-not-revealed-before-quantity-inspection", "unnecessary-no-regroup-exchange-returns-control-without-evidence-or-penalty", "zero-console-or-page-errors"]
     },
     {
       "id": "carry-real-browser-miss-repair-review",

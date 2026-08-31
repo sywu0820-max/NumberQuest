@@ -75,15 +75,64 @@ test('calculation evidence tags exactly preserve the accepted skill-aware requir
     assert.equal(row.profileId,'calculation',skillId);
     assert.equal(rule.skillId,skillId);
     assert.deepEqual(row.requiredTagsAcrossAcquisition,accepted.acquisition.requiredTagsAcrossEvidence,skillId);
-    const offered=new Set([...rule.alwaysEvidenceTags,...Object.keys(rule.conditionalEvidenceTags)]);
+    const offered=new Set([...rule.evidenceTagsWhenCaseAndTraceEligible,...Object.keys(rule.conditionalEvidenceTags)]);
     for(const tag of row.requiredTagsAcrossAcquisition) assert.ok(offered.has(tag),`${skillId} cannot emit ${tag}`);
     if(skillId.includes('.no-regroup-')){
-      assert.deepEqual(rule.alwaysEvidenceTags,['no-regroup']);
+      assert.ok(rule.evidenceTagsWhenCaseAndTraceEligible.includes('no-regroup'));
+      assert.ok(rule.evidenceTagsWhenCaseAndTraceEligible.includes('observed-zero-exchange'));
       assert.equal(rule.requiredExchange,'none');
     }else{
-      assert.ok(rule.alwaysEvidenceTags.includes('regrouping-sensitive'));
+      assert.ok(rule.evidenceTagsWhenCaseAndTraceEligible.includes('regrouping-sensitive'));
+      assert.ok(rule.evidenceTagsWhenCaseAndTraceEligible.includes('observed-value-preserving-exchange'));
       assert.notEqual(rule.requiredExchange,'none');
     }
+  }
+});
+
+test('calculation evidence is behavior-sensitive rather than inferred from generator case class',()=>{
+  const policy=contract.evidenceTaggingPolicy;
+  assert.equal(policy.derivedFromBothCasePredicatesAndObservedActionTrace,true);
+  assert.equal(policy.generatorCaseClassAloneIsSufficient,false);
+  assert.equal(policy.exchangeActionsAreObservedNotInferred,true);
+  assert.equal(policy.rawGestureCoordinatesStored,false);
+  assert.equal(policy.actionTraceRetention,'ephemeral-until-outcome-classification');
+  assert.equal(policy.noRegroupRequiresZeroObservedExchangeActions,true);
+  assert.equal(policy.regroupRequiresExactObservedDirectionAndCount,true);
+  assert.equal(policy.invalidOrMismatchedTraceCanEmitIndependentAcquisition,false);
+
+  for(const id of ['add-no-regroup','sub-no-regroup']){
+    const eligibility=contract.caseRules[id].evidenceEligibility;
+    assert.equal(eligibility.requiresSuccessfulSolution,true,id);
+    assert.equal(eligibility.requiresAllCasePredicates,true,id);
+    assert.equal(eligibility.observedActionTrace.exchangeActionCount,0,id);
+    assert.equal(eligibility.observedActionTrace.unexpectedExchangeActionCount,0,id);
+  }
+  const addTrace=contract.caseRules['add-regroup'].evidenceEligibility.observedActionTrace;
+  assert.deepEqual(
+    {count:addTrace.exchangeActionCount,direction:addTrace.exchangeDirection,input:[addTrace.inputUnit,addTrace.inputUnitCount],output:[addTrace.outputUnit,addTrace.outputUnitCount],extra:addTrace.unexpectedExchangeActionCount,preserves:addTrace.valueBeforeEqualsValueAfter},
+    {count:1,direction:'ones-to-tens',input:['one',10],output:['ten',1],extra:0,preserves:true}
+  );
+  const subTrace=contract.caseRules['sub-regroup'].evidenceEligibility.observedActionTrace;
+  assert.deepEqual(
+    {count:subTrace.exchangeActionCount,direction:subTrace.exchangeDirection,input:[subTrace.inputUnit,subTrace.inputUnitCount],output:[subTrace.outputUnit,subTrace.outputUnitCount],extra:subTrace.unexpectedExchangeActionCount,preserves:subTrace.valueBeforeEqualsValueAfter},
+    {count:1,direction:'tens-to-ones',input:['ten',1],output:['one',10],extra:0,preserves:true}
+  );
+
+  const unnecessary=policy.unnecessaryExchangeInNoRegroupCase;
+  assert.equal(unnecessary.policy,'neutral-reject-and-return-control');
+  assert.equal(unnecessary.missionCompletes,false);
+  assert.equal(unnecessary.progressOrRewardPenalty,false);
+  assert.equal(unnecessary.completedCanonicalOutcomeEventEmitted,false);
+  assert.equal(unnecessary.independentAcquisitionEvidenceEmitted,false);
+  assert.equal(unnecessary.noRegroupTagEmitted,false);
+
+  const boundedTags=new Set([
+    ...contract.controlledVocabulary.evidenceTags.acceptedMasteryTags,
+    ...contract.controlledVocabulary.evidenceTags.proposedObservedTraceTags
+  ]);
+  for(const rule of Object.values(contract.caseRules)){
+    for(const tag of rule.evidenceTagsWhenCaseAndTraceEligible) assert.ok(boundedTags.has(tag),tag);
+    for(const tag of Object.keys(rule.conditionalEvidenceTags)) assert.ok(boundedTags.has(tag),tag);
   }
 });
 
@@ -205,12 +254,17 @@ test('accessibility protects Grade-2 touch, reading, motor, motion, and timing n
 
 test('future deterministic and browser tests explicitly attack fixed UI shortcuts',()=>{
   const validation=new Map(contract.proposedValidation.map(item=>[item.id,item]));
-  for(const id of ['carry-generator-arithmetic-stress','carry-fixed-trace-replay','carry-exchange-gate-fuzz','carry-hint-retry-identity','carry-real-browser-shortcut-matrix','carry-real-browser-miss-repair-review','carry-blueprint-semantic-roundtrip']) assert.ok(validation.has(id),id);
+  for(const id of ['carry-generator-arithmetic-stress','carry-fixed-trace-replay','carry-exchange-gate-fuzz','carry-behavior-sensitive-evidence','carry-hint-retry-identity','carry-real-browser-shortcut-matrix','carry-real-browser-miss-repair-review','carry-blueprint-semantic-roundtrip']) assert.ok(validation.has(id),id);
   assert.equal(validation.get('carry-generator-arithmetic-stress').minimumCasesPerCaseRule,1200);
   assert.equal(validation.get('carry-fixed-trace-replay').minimumCasesPerMissionFamily,400);
   assert.ok(validation.get('carry-fixed-trace-replay').assertions.includes('replaying-one-fixed-action-trace-does-not-solve-varied-cases'));
+  assert.ok(validation.get('carry-exchange-gate-fuzz').assertions.includes('unnecessary-exchange-in-sub-no-regroup-cannot-emit-independent-no-regroup-evidence'));
+  assert.ok(validation.get('carry-behavior-sensitive-evidence').assertions.includes('case-class-alone-cannot-emit-acquisition-tags'));
+  assert.ok(validation.get('carry-behavior-sensitive-evidence').assertions.includes('no-regroup-requires-zero-observed-exchanges'));
+  assert.ok(validation.get('carry-behavior-sensitive-evidence').assertions.includes('regroup-requires-exactly-one-correct-direction-exchange'));
   assert.ok(validation.get('carry-real-browser-shortcut-matrix').targets.includes('iPad Safari portrait'));
   assert.ok(validation.get('carry-real-browser-shortcut-matrix').targets.includes('Surface Pro Edge'));
+  assert.ok(validation.get('carry-real-browser-shortcut-matrix').assertions.includes('unnecessary-no-regroup-exchange-returns-control-without-evidence-or-penalty'));
   assert.ok(contract.antiShortcutInvariants.includes('a-fixed-tap-or-drag-trace-cannot-solve-varied-generated-cases'));
   assert.ok(contract.antiWorksheetInvariants.includes('no-answer-selection-followed-by-unrelated-reward-animation'));
 });

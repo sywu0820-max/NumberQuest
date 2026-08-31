@@ -43,16 +43,20 @@ Arithmetic remains bounded: addition is at most 100, subtraction is nonnegative,
 
 ## Case and evidence rules
 
-The contract distinguishes the mathematical case from its presentation. Evidence tags are derived from quantities, never assigned because a mission happens to use a particular visual skin.
+The contract distinguishes the mathematical case, the presentation and the child's observed action trace. Evidence tags are derived from **both** quantity predicates and what the child actually did. A generator-selected case class is never enough by itself.
 
-| Case | Quantity predicate | Required exchange | Always-on acquisition tags | Conditional boundary evidence |
+| Case | Quantity predicate | Required observed trace | Eligible acquisition tags | Conditional boundary evidence |
 |---|---|---|---|---|
-| add, no regroup | ones sum ≤ 9; tens sum ≤ 9 | none | `no-regroup` | ones sum = 9 or result ≥ 90 |
-| add, regroup | ones sum ≥ 10; total ≤ 99 | ten ones → one ten | `regrouping-sensitive`, `ones-to-tens-regrouping` | ones sum = 10 or result ≥ 90 |
-| subtract, no regroup | minuend ≥ subtrahend; minuend ones ≥ subtrahend ones | none | `no-regroup` | ones difference = 0 or result ≤ 10 |
-| subtract, regroup | minuend ≥ subtrahend; minuend ones < subtrahend ones | one ten → ten ones | `regrouping-sensitive`, `tens-to-ones-exchange` | ones deficit = 1 or result ≤ 10 |
+| add, no regroup | ones sum ≤ 9; tens sum ≤ 9 | successful solution with zero exchange actions | `no-regroup` | ones sum = 9 or result ≥ 90 |
+| add, regroup | ones sum ≥ 10; total ≤ 99 | exactly one value-preserving 10 ones → 1 ten action; no extra exchange | `regrouping-sensitive`, `ones-to-tens-regrouping` | ones sum = 10 or result ≥ 90 |
+| subtract, no regroup | minuend ≥ subtrahend; minuend ones ≥ subtrahend ones | successful solution with zero exchange actions | `no-regroup` | ones difference = 0 or result ≤ 10 |
+| subtract, regroup | minuend ≥ subtrahend; minuend ones < subtrahend ones | exactly one value-preserving 1 ten → 10 ones action; no extra exchange | `regrouping-sensitive`, `tens-to-ones-exchange` | ones deficit = 1 or result ≤ 10 |
 
-These tags exactly preserve the accepted calculation requirements. `boundary` is conditional: ordinary cases may not claim it. No-regroup cases never fabricate regrouping-sensitive evidence, and regroup cases require an actual exchange condition.
+These tags exactly preserve the accepted calculation requirements. `boundary` is conditional: ordinary cases may not claim it. No-regroup evidence requires zero observed exchange actions. Regroup evidence requires the correct observed exchange direction, unit counts and exactly one exchange. A wrong-direction, extra or merely generator-inferred exchange cannot emit independent acquisition evidence.
+
+An unnecessary but value-preserving exchange in a no-regroup case receives a neutral return-to-control: the mission does not complete, no progress or reward is removed, and no completed canonical outcome or independent acquisition evidence is emitted. This is treated as a strategy mismatch, not a child failure label. A later runtime review could choose a support-only completion path, but it may never classify that trace as independent no-regroup acquisition.
+
+The future classifier would hold the action trace only until the outcome is classified; raw gesture coordinates are not stored. Bounded trace tags—`observed-zero-exchange`, `observed-one-ones-to-tens-exchange`, `observed-one-tens-to-ones-exchange` and `observed-value-preserving-exchange`—make the behavior basis reviewable alongside the accepted mastery tags. These tags remain proposed vocabulary and are not added to the shipped ledger by this PR.
 
 ## Misconception → hint → fresh retry
 
@@ -92,10 +96,10 @@ Retrieval must use a fresh source question. Scheduler lineage stays separate. Sa
 
 | Skill | Acquisition | Retrieval | Eventual transfer candidate—unapproved |
 |---|---|---|---|
-| add, no regroup | 4 independent cases; evidence collectively includes `boundary` + `no-regroup` | fresh later-session case after ≥1 day and a different fresh case after ≥3 days | infer combine/remove in counterweight routing; reconcile repair inventory |
-| add, regroup | 4 independent cases with a real ones→tens exchange; includes `boundary`, `regrouping-sensitive`, `ones-to-tens-regrouping` | same accepted calculation schedule with fresh identities | same two candidate contexts, each requiring actual regrouping-sensitive quantities |
-| subtract, no regroup | 4 independent nonnegative cases; includes `boundary` + `no-regroup` | same accepted calculation schedule with fresh identities | counterweight and inventory candidates without vertical form |
-| subtract, regroup | 4 independent nonnegative cases with a real ten→ones exchange; includes all accepted exchange tags | same accepted calculation schedule with fresh identities | same two distinct contexts with real exchange-sensitive quantities |
+| add, no regroup | 4 independent successful zero-exchange traces; evidence collectively includes `boundary` + `no-regroup` | fresh later-session case after ≥1 day and a different fresh case after ≥3 days | infer combine/remove in counterweight routing; reconcile repair inventory |
+| add, regroup | 4 independent successful traces with exactly one observed ones→tens exchange; includes `boundary`, `regrouping-sensitive`, `ones-to-tens-regrouping` | same accepted calculation schedule with fresh identities | same two candidate contexts, each requiring actual regrouping-sensitive quantities and traces |
+| subtract, no regroup | 4 independent nonnegative successful zero-exchange traces; includes `boundary` + `no-regroup` | same accepted calculation schedule with fresh identities | counterweight and inventory candidates without vertical form |
+| subtract, regroup | 4 independent nonnegative traces with exactly one observed ten→ones exchange; includes all accepted exchange tags | same accepted calculation schedule with fresh identities | same two distinct contexts with real exchange-sensitive quantities and traces |
 | explain vertical | 3 independent successes across base-ten manipulatives and vertical notation | fresh later-session evidence after ≥1 day and another fresh case after ≥3 days | diagnose a value-preservation error; reconstruct a missing handoff state |
 
 Formal acquisition/retrieval thresholds are descriptions of what future valid ledger records could demonstrate. They do not authorize runtime emission. No transfer candidate counts merely because it is described.
@@ -133,6 +137,8 @@ Dexterity, reading speed and animation timing must never masquerade as mathemati
 - hints return control before completing the answer;
 - regrouping is derived from quantities, not disclosed by a special layout;
 - an exchange succeeds only for exactly ten ones or one ten;
+- evidence tags require both the generated case predicates and the observed child action trace;
+- an unnecessary exchange in a no-regroup case cannot complete the target mission or emit independent acquisition evidence;
 - no-regroup and regroup use the same neutral entry presentation;
 - a fixed tap/drag trace cannot solve varied cases;
 - correct zones and operand positions do not stay fixed;
@@ -146,6 +152,8 @@ No browser or generator exists in this design-only PR. The machine contract neve
 - **1,200 cases per case rule:** arithmetic bounds, exchange count and conditional evidence tags;
 - **400 cases per mission family:** replay one fixed action trace against varied cases and prove it cannot solve them;
 - **400 cases per exchange direction:** reject 9/11-one exchanges and prove exact value preservation;
+- **400 cases per case rule for evidence behavior:** case class alone is insufficient; zero-exchange no-regroup and exact-direction/count regroup traces are required;
+- **unnecessary-exchange regressions:** value-preserving ten→ones attempts in no-regroup subtraction return control without penalty and cannot emit `no-regroup` evidence;
 - **100 cases per misconception:** answer-safe hints, preserved case class, fresh operands/source identity and non-independent recovery;
 - **400 round trips per operation:** bundles ↔ blueprint preserves value and exchange marks require real exchanges;
 - **real-browser shortcut matrix:** iPad portrait/landscape, Surface Edge and keyboard-only paths; no fixed-position leak;
