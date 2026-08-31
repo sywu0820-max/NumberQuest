@@ -46,6 +46,8 @@ The validator rejects missing or contradictory identity and classification field
 
 A retrieval must use a fresh `sourceQuestionId` that was not used for acquisition. Its `schedulerId` may preserve the review lineage, but a scheduler lineage is not prompt identity and cannot make a repeated acquisition prompt count as retention.
 
+Source identity is also enforced across transfer. A transfer event is excluded when its `sourceQuestionId` appeared in any acquisition or retrieval exposure for that skill. The machine policy declares `retrievalMustBeFreshFrom: ['acquisition']`, `transferMustBeFreshFrom: ['acquisition', 'retrieval']`, and `schedulerLineageAffectsFreshness: false`. Thus scheduler lineage may continue across phases, while every counted retrieval and transfer prompt remains genuinely fresh.
+
 `elapsedMs`, `responseMs`, `timerScore` and `speedBand` are explicitly ignored. Speed is never mastery evidence.
 
 ## Profile rules
@@ -104,6 +106,7 @@ Every result exposes:
     distinct: {/* representation, relationship, fact, session, context and surface counts */},
     invalidEvents: [],
     retrievalInvalid: [],
+    transferInvalid: [],
     legacyAggregateIgnored: false
   }
 }
@@ -120,6 +123,7 @@ Every result exposes:
 - Same-day later-session retrieval is reported separately and does not satisfy a minimum one-day gap.
 - Retrieval day gaps begin only when the full acquisition rule first becomes satisfied; early exposure cannot age later evidence prematurely.
 - A retrieval that reuses any acquisition `sourceQuestionId` is excluded. A fresh prompt may retain the same `schedulerId` lineage.
+- A transfer that reuses any acquisition or retrieval `sourceQuestionId` is excluded with `transfer-reuses-prior-source`; two fresh transfer prompts may share scheduler lineage and still count when their required surfaces are distinct.
 - A claimed elapsed-day separation that disagrees with event dates is excluded.
 - Misses are counted for support planning and never remove valid evidence already earned.
 - Transfer evidence requires both `evidenceKind: 'transfer'` and `transferEvidence: true`.
@@ -152,7 +156,7 @@ Before any future World can claim formal mastery, its bounded contract must defi
 5. context identity and a controlled context/surface family;
 6. acquisition, retrieval and explicit transfer classification;
 7. same-session versus later-session revisit plus verified day separation;
-8. a fresh review question identity distinct from every acquisition prompt while preserving scheduler lineage separately;
+8. fresh retrieval and transfer question identities distinct from prior evidence phases while preserving scheduler lineage separately;
 9. profile qualifiers: relationship family, fact identity, transfer surface, or the controlled evidence tags required by its skill;
 10. miss events without destructive evidence updates;
 11. dedupe/replay behavior and offline/local persistence semantics.

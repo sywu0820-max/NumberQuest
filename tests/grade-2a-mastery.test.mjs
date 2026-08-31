@@ -32,6 +32,7 @@ test('machine rules exactly match the shipped JSON contract and cover every grap
   assert.equal(contract.policy.speedOrTimerIsEvidence,false);
   assert.equal(contract.policy.worldCompletionIsFormalMastery,false);
   assert.equal(contract.policy.capabilityGlowIsFormalMastery,false);
+  assert.deepEqual(contract.policy.crossDimensionSourceIdentity,{retrievalMustBeFreshFrom:['acquisition'],transferMustBeFreshFrom:['acquisition','retrieval'],schedulerLineageAffectsFreshness:false});
 });
 
 test('the event validator requires stable identity, session/day, representation, context, scheduler, and source fields',()=>{
@@ -93,6 +94,16 @@ test('retrieval requires a fresh source prompt while scheduler lineage may be pr
 test('repeating one transfer context and representation cannot satisfy a distinct surface requirement',()=>{
   const transfer=[event({evidenceKind:'transfer',contextFamily:'harbor',representationFamily:'bundles'}),event({evidenceKind:'transfer',contextFamily:'harbor',representationFamily:'bundles'})];
   const result=evaluate('concept',[...conceptAcquisition(),...conceptRetrieval(),...transfer]);assert.equal(result.transferMet,false);assert.equal(result.supportingEvidence.counts.transferIndependentSuccesses,2);assert.equal(result.supportingEvidence.distinct.transferSurfaces,1);
+});
+
+test('transfer source identity must be fresh across acquisition and retrieval while scheduler lineage stays separate',()=>{
+  const acquisition=conceptAcquisition(),retrieval=conceptRetrieval(),lineage=retrieval[0].schedulerId;
+  const freshOne=event({evidenceKind:'transfer',contextFamily:'market',representationFamily:'story',sourceQuestionId:'fresh-transfer-one',schedulerId:lineage}),freshTwo=event({evidenceKind:'transfer',contextFamily:'island',representationFamily:'map',sourceQuestionId:'fresh-transfer-two',schedulerId:lineage});
+  const acquisitionReuse=event({evidenceKind:'transfer',contextFamily:'market',representationFamily:'story',sourceQuestionId:acquisition[0].sourceQuestionId,schedulerId:lineage});
+  let result=evaluate('concept',[...acquisition,...retrieval,acquisitionReuse,freshOne]);assert.equal(result.transferMet,false);assert.equal(result.supportingEvidence.counts.transferIndependentSuccesses,1);assert.ok(result.supportingEvidence.transferInvalid.some(item=>item.code==='transfer-reuses-prior-source'&&item.sourceQuestionId===acquisition[0].sourceQuestionId));
+  const retrievalReuse=event({evidenceKind:'transfer',contextFamily:'island',representationFamily:'map',sourceQuestionId:retrieval[0].sourceQuestionId,schedulerId:lineage});
+  result=evaluate('concept',[...acquisition,...retrieval,retrievalReuse,freshOne]);assert.equal(result.transferMet,false);assert.equal(result.supportingEvidence.counts.transferIndependentSuccesses,1);assert.ok(result.supportingEvidence.transferInvalid.some(item=>item.code==='transfer-reuses-prior-source'&&item.sourceQuestionId===retrieval[0].sourceQuestionId));
+  result=evaluate('concept',[...acquisition,...retrieval,freshOne,freshTwo]);assert.equal(result.transferMet,true);assert.equal(result.supportingEvidence.counts.transferIndependentSuccesses,2);assert.equal(result.supportingEvidence.distinct.transferSurfaces,2);assert.equal(result.supportingEvidence.transferInvalid.length,0);assert.ok([freshOne,freshTwo].every(item=>item.schedulerId===lineage));
 });
 
 test('a declared elapsed-day gap is checked against event dates',()=>{

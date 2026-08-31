@@ -4,7 +4,7 @@ export const GRADE_2A_MASTERY_RULES=deepFreeze({
   sourceGraphId:'tw-grade-2a-foundation',
   status:'headless-review-contract',
   runtimeIntegration:false,
-  policy:{formalMasteryRequiresAllDimensions:true,missesEraseEvidence:false,speedOrTimerIsEvidence:false,legacyAggregateCountersAreFormalEvidence:false,worldCompletionIsFormalMastery:false,capabilityGlowIsFormalMastery:false,retrievalAnchoredTo:'acquisition-established-day',freshReviewSourceRequired:true,laterRetrievalDayGap:3,nextSessionMinimumDayGap:1},
+  policy:{formalMasteryRequiresAllDimensions:true,missesEraseEvidence:false,speedOrTimerIsEvidence:false,legacyAggregateCountersAreFormalEvidence:false,worldCompletionIsFormalMastery:false,capabilityGlowIsFormalMastery:false,retrievalAnchoredTo:'acquisition-established-day',freshReviewSourceRequired:true,crossDimensionSourceIdentity:{retrievalMustBeFreshFrom:['acquisition'],transferMustBeFreshFrom:['acquisition','retrieval'],schedulerLineageAffectsFreshness:false},laterRetrievalDayGap:3,nextSessionMinimumDayGap:1},
   eventSchema:{
     required:['schemaVersion','eventId','skillId','sessionId','localDay','outcome','attemptKind','evidenceKind','revisitKind','elapsedDaysSinceAcquisition','representationId','representationFamily','contextId','contextFamily','sourceQuestionId','schedulerId','transferEvidence','evidenceTags'],
     enums:{outcome:['correct','miss'],attemptKind:['independent-first-try','hinted','recovered','miss'],evidenceKind:['acquisition','retrieval','transfer'],revisitKind:['initial','same-session','later-session']},
@@ -141,6 +141,11 @@ function evaluateRetrieval(classified,rule,missingEvidence){
   return !missingEvidence.some(item=>item.dimension===dimension);
 }
 
+function freshTransferEvents(events,priorEvents,invalidReasons){
+  const priorSources=asSet(priorEvents.map(event=>event.sourceQuestionId));
+  return events.filter(event=>{if(!priorSources.has(event.sourceQuestionId))return true;invalidReasons.push({eventId:event.eventId,code:'transfer-reuses-prior-source',sourceQuestionId:event.sourceQuestionId,schedulerId:event.schedulerId});return false});
+}
+
 function evaluateTransfer(events,rule,missingEvidence){
   const dimension='transfer',notExcluded=events.filter(event=>!(rule.excludedContextFamilies||[]).includes(event.contextFamily)),eligible=everyTags(notExcluded,rule.requiredEveryEventTags);
   missing(missingEvidence,dimension,'transfer-independent-successes',rule.minIndependentSuccesses||0,eligible.length);
@@ -162,12 +167,12 @@ export function evaluateGrade2AMastery({skillId,profileId,events=[],legacyEviden
     if(seenEventIds.has(checked.event.eventId)){duplicateEvents++;continue}seenEventIds.add(checked.event.eventId);deduplicatedEvents.push(checked.event);
   }
   const correctIndependent=deduplicatedEvents.filter(independent),acquisitionExposure=deduplicatedEvents.filter(event=>event.evidenceKind==='acquisition'),acquisition=uniqueSources(correctIndependent.filter(event=>event.evidenceKind==='acquisition'));
-  const retrieval=uniqueSources(correctIndependent.filter(event=>event.evidenceKind==='retrieval')),transfer=uniqueSources(correctIndependent.filter(event=>event.evidenceKind==='transfer'&&event.transferEvidence));
-  const missingEvidence=[],retrievalInvalid=[];
+  const retrievalExposure=deduplicatedEvents.filter(event=>event.evidenceKind==='retrieval'),retrieval=uniqueSources(correctIndependent.filter(event=>event.evidenceKind==='retrieval')),transfer=uniqueSources(correctIndependent.filter(event=>event.evidenceKind==='transfer'&&event.transferEvidence));
+  const missingEvidence=[],retrievalInvalid=[],transferInvalid=[];
   const acquisitionResult=evaluateAcquisition(acquisition,rule.acquisition,missingEvidence);
   const establishedDay=acquisitionEstablishedDay(acquisition,rule.acquisition);
   const retrievalClasses=classifyRetrieval(retrieval,acquisitionExposure,establishedDay,rule.retrieval,retrievalInvalid),retrievalMet=evaluateRetrieval(retrievalClasses,rule.retrieval,missingEvidence);
-  const transferResult=evaluateTransfer(transfer,rule.transfer,missingEvidence),acquisitionMet=acquisitionResult.met,transferMet=transferResult.met,masteryMet=acquisitionMet&&retrievalMet&&transferMet;
+  const freshTransfer=freshTransferEvents(transfer,[...acquisitionExposure,...retrievalExposure],transferInvalid),transferResult=evaluateTransfer(freshTransfer,rule.transfer,missingEvidence),acquisitionMet=acquisitionResult.met,transferMet=transferResult.met,masteryMet=acquisitionMet&&retrievalMet&&transferMet;
   const granularEvidencePresent=deduplicatedEvents.length>0,legacyEvidencePresent=legacyEvidence!==null&&legacyEvidence!==undefined;
   if(!granularEvidencePresent)missingEvidence.unshift({dimension:'contract',code:legacyEvidencePresent?'legacy-aggregate-insufficient':'granular-evidence-required',required:'validated event-level evidence',observed:legacyEvidencePresent?'aggregate counters only':'none'});
   let progressStage='building';if(acquisitionMet)progressStage='acquisition';if(acquisitionMet&&retrievalMet)progressStage='retrieval';if(acquisitionMet&&retrievalMet&&transferResult.eligible.length>0&&!masteryMet)progressStage='transfer';if(masteryMet)progressStage='mastery';
@@ -178,7 +183,7 @@ export function evaluateGrade2AMastery({skillId,profileId,events=[],legacyEviden
       acquisitionEstablishedDay:establishedDay,skillRequirementId:requirementId,
       counts:{inputEvents:input.length,validSkillEvents:deduplicatedEvents.length,invalidEvents:invalidEvents.length,duplicateEvents,misses:deduplicatedEvents.filter(event=>event.outcome==='miss').length,hintedOrRecoveredSuccesses:deduplicatedEvents.filter(event=>event.outcome==='correct'&&!independent(event)).length,independentSuccesses:correctIndependent.length,acquisitionIndependentSuccesses:acquisitionResult.eligible.length,retrievalIndependentSuccesses:retrievalClasses.eligible.length,sameSessionRetrievals:retrievalClasses.sameSession.length,sameDayLaterSessionRetrievals:retrievalClasses.sameDayLaterSession.length,nextSessionRetrievals:retrievalClasses.nextSession.length,laterRetrievals:retrievalClasses.later.length,transferIndependentSuccesses:transferResult.eligible.length},
       distinct:{acquisitionRepresentations:distinct(acquisitionResult.eligible,'representationFamily'),acquisitionRelationships:distinct(acquisitionResult.eligible,'relationshipFamily'),acquisitionFacts:distinct(acquisitionResult.eligible,'factIdentity'),retrievalSessions:distinct(retrievalClasses.laterSession,'sessionId'),retrievalFacts:distinct(retrievalClasses.laterSession,'factIdentity'),transferRepresentations:distinct(transferResult.eligible,'representationFamily'),transferContexts:distinct(transferResult.eligible,'contextFamily'),transferSurfaces:asSet(transferResult.eligible.map(event=>event.transferSurfaceId||`${event.contextFamily}::${event.representationFamily}`)).size},
-      invalidEvents,retrievalInvalid,legacyAggregateIgnored:legacyEvidencePresent
+      invalidEvents,retrievalInvalid,transferInvalid,legacyAggregateIgnored:legacyEvidencePresent
     }
   };
 }

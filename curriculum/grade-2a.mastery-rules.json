@@ -13,6 +13,11 @@
     "capabilityGlowIsFormalMastery": false,
     "retrievalAnchoredTo": "acquisition-established-day",
     "freshReviewSourceRequired": true,
+    "crossDimensionSourceIdentity": {
+      "retrievalMustBeFreshFrom": ["acquisition"],
+      "transferMustBeFreshFrom": ["acquisition", "retrieval"],
+      "schedulerLineageAffectsFreshness": false
+    },
     "laterRetrievalDayGap": 3,
     "nextSessionMinimumDayGap": 1
   },
