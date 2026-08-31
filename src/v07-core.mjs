@@ -112,8 +112,9 @@ export function memoryReviewWeight(s,entry,{day=localDayKey()}={}){
   return Math.max(.25,Math.min(12,weight));
 }
 
-export function dueMemoryReviews(s,{day=localDayKey(),limit=MEMORY_RUN_LIMIT,rng=Math.random}={}){
-  const entries=Object.values(ensureMemorySchedule(s)).filter(entry=>validDayKey(entry.dueDay)&&memoryDayDistance(entry.dueDay,day)>=0);
+export function dueMemoryReviews(s,{day=localDayKey(),limit=MEMORY_RUN_LIMIT,rng=Math.random,excludeSkillKeys=[]}={}){
+  const excluded=new Set(Array.isArray(excludeSkillKeys)?excludeSkillKeys:[]);
+  const entries=Object.values(ensureMemorySchedule(s)).filter(entry=>validDayKey(entry.dueDay)&&memoryDayDistance(entry.dueDay,day)>=0&&!excluded.has(entry.skillKey));
   const count=Math.min(entries.length,Math.max(0,Math.trunc(Number(limit)||0))),pool=entries.sort((a,b)=>a.dueDay.localeCompare(b.dueDay)||a.skillKey.localeCompare(b.skillKey));
   if(count===entries.length)return pool;
   const chosen=[];
@@ -126,8 +127,8 @@ export function dueMemoryReviews(s,{day=localDayKey(),limit=MEMORY_RUN_LIMIT,rng
   return chosen;
 }
 
-export function memoryChestStatus(s,{day=localDayKey()}={}){
-  const due=dueMemoryReviews(s,{day,limit:Number.MAX_SAFE_INTEGER});
+export function memoryChestStatus(s,{day=localDayKey(),excludeSkillKeys=[]}={}){
+  const due=dueMemoryReviews(s,{day,limit:Number.MAX_SAFE_INTEGER,excludeSkillKeys});
   return {ready:due.length>0,dueCount:due.length,runCount:Math.min(MEMORY_RUN_LIMIT,due.length),label:due.length?`🧠 ${Math.min(MEMORY_RUN_LIMIT,due.length)} 個記憶寶箱在發光`:'🧠 明天再來看看哪些力量回來'};
 }
 

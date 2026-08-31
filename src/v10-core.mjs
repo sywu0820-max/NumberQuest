@@ -83,8 +83,8 @@ export function capabilityMapSnapshot(s,keys=Object.keys(s?.learning?.skillHisto
   return [...new Set((keys||[]).filter(key=>typeof key==='string'))].map(key=>({skillKey:key,...capabilityState(s,key)}));
 }
 
-export function homeMissionSummary(s,{day=localDayKey()}={}){
-  const dueCount=dueMemoryReviews(s,{day,limit:Number.MAX_SAFE_INTEGER}).length,boundedMemory=Math.min(2,dueCount);
+export function homeMissionSummary(s,{day=localDayKey(),excludeSkillKeys=[]}={}){
+  const dueCount=dueMemoryReviews(s,{day,limit:Number.MAX_SAFE_INTEGER,excludeSkillKeys}).length,boundedMemory=Math.min(2,dueCount);
   return {questionCount:10,approxMinutes:'10～15 分鐘',dueCount,boundedMemory,theme:boundedMemory?`先找回 ${boundedMemory} 個以前的力量，再換個故事試試看`:'找回、轉換，再試一個剛剛好的新挑戰'};
 }
 

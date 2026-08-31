@@ -55,7 +55,7 @@ function purposePools(s,{day}){
   const growth=eligible.filter(key=>!skillMastery(s,key).mastered);
   return {eligible,retrieval,repair,transfer,confidence,growth:growth.length?growth:eligible};
 }
-function dueSessionItems(s){return (s?.learning?.pendingReviews||[]).filter(item=>Number(item?.dueSolved)<=Number(s?.learning?.solvedTotal)).map(item=>makeReviewQuestion(item.q,()=>.5));}
+function dueSessionItems(s,excludeSkillKeys=[]){const excluded=new Set(excludeSkillKeys);return (s?.learning?.pendingReviews||[]).filter(item=>Number(item?.dueSolved)<=Number(s?.learning?.solvedTotal)&&!excluded.has(item?.q?.skillKey)).map(item=>makeReviewQuestion(item.q,()=>.5));}
 function missionPurposeSequence(count){
   const base=['retrieval','confidence','growth','transfer','repair','growth','confidence','transfer','retrieval','growth'];
   return Array.from({length:count},(_,index)=>base[index%base.length]);
@@ -76,10 +76,10 @@ function makePurposeQuestion(purpose,key,s,context){
 }
 function decorateSpecial(q,purpose){return {...clone(q),journeyPurpose:purpose,journeyRepresentation:representation(q)} }
 
-export function planTodaysAdventure(raw,{count=10,day=localDayKey(),rng=Math.random,memoryLimit=2}={}){
+export function planTodaysAdventure(raw,{count=10,day=localDayKey(),rng=Math.random,memoryLimit=2,excludeSkillKeys=[]}={}){
   const s=normalizeState(clone(raw),day),pools=purposePools(s,{day}),plan=[],fingerprints=new Set(),lastSkills=[],recentTemplateIds=[],recentThemeIds=[];
-  const memory=dueMemoryReviews(s,{day,limit:Math.min(2,Math.max(0,memoryLimit)),rng}).map(entry=>decorateSpecial(makeMemoryReviewQuestion(entry,rng),'retrieval'));
-  const session=dueSessionItems(s).map(q=>decorateSpecial(q,'repair'));
+  const memory=dueMemoryReviews(s,{day,limit:Math.min(2,Math.max(0,memoryLimit)),rng,excludeSkillKeys}).map(entry=>decorateSpecial(makeMemoryReviewQuestion(entry,rng),'retrieval'));
+  const session=dueSessionItems(s,excludeSkillKeys).map(q=>decorateSpecial(q,'repair'));
   const specials={retrieval:memory,repair:session};
   const availability=purpose=>Boolean(specials[purpose]?.length||pools[purpose]?.length);
   const addQuestion=(question,purpose)=>{
@@ -117,9 +117,9 @@ export function journeyPlanSummary(plan){
   return {count:(plan||[]).length,purposes,distinctSkills:new Set((plan||[]).map(item=>item.skillKey)).size,memoryCount:(plan||[]).filter(item=>item.isMemoryReview).length,duplicateConsecutive:(plan||[]).some((item,index)=>index>0&&questionFingerprint(item)===questionFingerprint(plan[index-1])),maxSkillStreak,maxFrictionStreak};
 }
 
-export function takeNextJourneyQuestion(s,queue,{rng=Math.random}={}){
+export function takeNextJourneyQuestion(s,queue,{rng=Math.random,excludeSkillKeys=[]}={}){
   if(!Array.isArray(queue))return null;
-  const due=takeDueReview(s,rng);
+  const due=takeDueReview(s,rng,{excludeSkillKeys});
   if(due){
     const fingerprint=questionFingerprint(due),plannedIndex=queue.findIndex(item=>questionFingerprint(item)===fingerprint);
     if(plannedIndex>=0){
