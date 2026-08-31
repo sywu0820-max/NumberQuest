@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const graph=JSON.parse(await readFile(new URL('../curriculum/grade-2a.skill-graph.json',import.meta.url),'utf8'));
+const masteryRules=JSON.parse(await readFile(new URL('../curriculum/grade-2a.mastery-rules.json',import.meta.url),'utf8'));
 const skills=new Map(graph.skills.map(skill=>[skill.id,skill]));
 
 function assertKnown(ids,label){
@@ -69,6 +70,30 @@ test('every skill has misconception, hint, retry, mastery and review metadata',(
     assert.ok(catalog.retryStrategies[p.retryStrategy],`${skill.id} has unknown retry strategy`);
     assert.ok(catalog.masteryProfiles[p.masteryProfile],`${skill.id} has unknown mastery profile`);
     assert.ok(catalog.reviewProfiles[p.reviewProfile],`${skill.id} has unknown review profile`);
+  }
+});
+
+test('the graph points to the headless formal-mastery contract without enabling runtime integration',()=>{
+  const link=graph.formalMasteryContract;
+  assert.equal(link.status,'headless-review-contract');
+  assert.equal(link.runtimeIntegration,false);
+  assert.equal(link.rulesPath,'curriculum/grade-2a.mastery-rules.json');
+  assert.equal(link.evaluatorModule,'src/grade-2a-mastery.mjs');
+  assert.deepEqual(new Set(link.profileIds),new Set(Object.keys(graph.pedagogyCatalog.masteryProfiles)));
+  assert.deepEqual(new Set(link.profileIds),new Set(Object.keys(masteryRules.profiles)));
+  assert.equal(link.worldCompletionIsMastery,false);
+  assert.equal(link.capabilityGlowIsMastery,false);
+  assert.equal(masteryRules.runtimeIntegration,false);
+});
+
+test('every calculation skill has an explicit satisfiable skill-aware acquisition requirement',()=>{
+  const calculationSkills=graph.skills.filter(skill=>skill.pedagogy.masteryProfile==='calculation'),requirements=masteryRules.skillRequirements;
+  assert.deepEqual(new Set(Object.keys(requirements)),new Set(calculationSkills.map(skill=>skill.id)));
+  for(const skill of calculationSkills){
+    const requirement=requirements[skill.id],tags=requirement.acquisition.requiredTagsAcrossEvidence;
+    assert.equal(requirement.profileId,'calculation',skill.id);assert.match(requirement.requirementId,/^calculation-/);assert.ok(tags.includes('boundary'),skill.id);assert.equal(new Set(tags).size,tags.length,skill.id);
+    if(skill.id.includes('.no-regroup-')){assert.ok(tags.includes('no-regroup'),skill.id);assert.ok(!tags.includes('regrouping-sensitive'),skill.id)}
+    else {assert.ok(tags.includes('regrouping-sensitive'),skill.id);assert.ok(tags.some(tag=>tag.endsWith('-regrouping')||tag.endsWith('-exchange')),skill.id)}
   }
 });
 

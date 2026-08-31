@@ -21,6 +21,15 @@
     "commonCompletionScope": "core",
     "eligibilityBranchScopes": ["nani-extension", "version-dependent"]
   },
+  "formalMasteryContract": {
+    "status": "headless-review-contract",
+    "runtimeIntegration": false,
+    "rulesPath": "curriculum/grade-2a.mastery-rules.json",
+    "evaluatorModule": "src/grade-2a-mastery.mjs",
+    "profileIds": ["concept", "calculation", "application", "measurement", "fact-family"],
+    "worldCompletionIsMastery": false,
+    "capabilityGlowIsMastery": false
+  },
   "moneyBounds": {
     "denominations": [1, 5, 10, 50, 100],
     "amountRange": "active-surfaced-number-range",
@@ -70,7 +79,7 @@
         "missPolicy": "A miss schedules support and review but never erases earned evidence or rewards."
       },
       "calculation": {
-        "acquisition": "At least 4 independent accurate calculations including boundary and regrouping-sensitive cases.",
+        "acquisition": "At least 4 independent accurate calculations including boundary cases and the skill's explicit calculation evidence tags; regrouping skills require actual regrouping-sensitive cases while no-regroup skills require valid no-regroup cases.",
         "retrieval": "Successful independent calculations in a later session and again after 3 or more days.",
         "transfer": "At least 2 correct applications outside bare vertical-form prompts.",
         "missPolicy": "Record the error pattern for hint selection; do not label the child or reset prior mastery."
