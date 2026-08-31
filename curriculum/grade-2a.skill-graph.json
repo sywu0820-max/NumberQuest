@@ -21,6 +21,15 @@
     "commonCompletionScope": "core",
     "eligibilityBranchScopes": ["nani-extension", "version-dependent"]
   },
+  "formalMasteryContract": {
+    "status": "headless-review-contract",
+    "runtimeIntegration": false,
+    "rulesPath": "curriculum/grade-2a.mastery-rules.json",
+    "evaluatorModule": "src/grade-2a-mastery.mjs",
+    "profileIds": ["concept", "calculation", "application", "measurement", "fact-family"],
+    "worldCompletionIsMastery": false,
+    "capabilityGlowIsMastery": false
+  },
   "moneyBounds": {
     "denominations": [1, 5, 10, 50, 100],
     "amountRange": "active-surfaced-number-range",

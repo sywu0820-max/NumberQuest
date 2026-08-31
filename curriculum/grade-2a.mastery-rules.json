@@ -1,0 +1,133 @@
+{
+  "schemaVersion": "1.0.0",
+  "contractId": "tw-grade-2a-formal-mastery",
+  "sourceGraphId": "tw-grade-2a-foundation",
+  "status": "headless-review-contract",
+  "runtimeIntegration": false,
+  "policy": {
+    "formalMasteryRequiresAllDimensions": true,
+    "missesEraseEvidence": false,
+    "speedOrTimerIsEvidence": false,
+    "legacyAggregateCountersAreFormalEvidence": false,
+    "worldCompletionIsFormalMastery": false,
+    "capabilityGlowIsFormalMastery": false,
+    "laterRetrievalDayGap": 3,
+    "nextSessionMinimumDayGap": 1
+  },
+  "eventSchema": {
+    "required": [
+      "schemaVersion",
+      "eventId",
+      "skillId",
+      "sessionId",
+      "localDay",
+      "outcome",
+      "attemptKind",
+      "evidenceKind",
+      "revisitKind",
+      "elapsedDaysSinceAcquisition",
+      "representationId",
+      "representationFamily",
+      "contextId",
+      "contextFamily",
+      "sourceQuestionId",
+      "schedulerId",
+      "transferEvidence",
+      "evidenceTags"
+    ],
+    "enums": {
+      "outcome": ["correct", "miss"],
+      "attemptKind": ["independent-first-try", "hinted", "recovered", "miss"],
+      "evidenceKind": ["acquisition", "retrieval", "transfer"],
+      "revisitKind": ["initial", "same-session", "later-session"]
+    },
+    "nullable": ["elapsedDaysSinceAcquisition", "schedulerId", "relationshipFamily", "factIdentity", "transferSurfaceId"],
+    "dedupeIdentity": ["eventId", "sourceQuestionId"],
+    "ignoredForMastery": ["elapsedMs", "responseMs", "timerScore", "speedBand"]
+  },
+  "profiles": {
+    "concept": {
+      "acquisition": {
+        "minIndependentSuccesses": 3,
+        "minDistinctRepresentationFamilies": 2
+      },
+      "retrieval": {
+        "minNextSessionSuccesses": 1,
+        "minLaterSuccesses": 1,
+        "laterDayGap": 3
+      },
+      "transfer": {
+        "minIndependentSuccesses": 2,
+        "minDistinctSurfaceSignatures": 2
+      }
+    },
+    "calculation": {
+      "acquisition": {
+        "minIndependentSuccesses": 4,
+        "requiredTagsAcrossEvidence": ["boundary", "regrouping-sensitive"]
+      },
+      "retrieval": {
+        "minNextSessionSuccesses": 1,
+        "minLaterSuccesses": 1,
+        "laterDayGap": 3
+      },
+      "transfer": {
+        "minIndependentSuccesses": 2,
+        "minDistinctContextFamilies": 2,
+        "excludedContextFamilies": ["bare-vertical-form"]
+      }
+    },
+    "application": {
+      "acquisition": {
+        "minIndependentSuccesses": 3,
+        "minDistinctRelationshipFamilies": 3,
+        "requiredTagsAcrossEvidence": ["explanation-or-valid-model"]
+      },
+      "retrieval": {
+        "minLaterSessionSuccesses": 1,
+        "minimumDayGap": 1,
+        "requiredEveryEventTags": ["no-operation-cue"]
+      },
+      "transfer": {
+        "minIndependentSuccesses": 2,
+        "minDistinctRepresentationFamilies": 2,
+        "minDistinctContextFamilies": 2,
+        "requiredEveryEventTags": ["relationship-preserved"]
+      }
+    },
+    "measurement": {
+      "acquisition": {
+        "minIndependentSuccesses": 3,
+        "requiredEveryEventTags": ["correct-unit-and-procedure"]
+      },
+      "retrieval": {
+        "minLaterSessionSuccesses": 1,
+        "minimumDayGap": 1,
+        "requiredEveryEventTags": ["no-procedural-highlight"]
+      },
+      "transfer": {
+        "minIndependentSuccesses": 2,
+        "minDistinctTransferSurfaceIds": 2
+      }
+    },
+    "fact-family": {
+      "acquisition": {
+        "minIndependentSuccesses": 4,
+        "minDistinctFactIdentities": 4,
+        "minConcreteRepresentationSuccesses": 2,
+        "concreteRepresentationFamilies": ["groups", "arrays", "story"]
+      },
+      "retrieval": {
+        "minLaterSessionSuccesses": 2,
+        "minimumDayGap": 1,
+        "minDistinctSessions": 2,
+        "minDistinctFactIdentities": 2
+      },
+      "transfer": {
+        "minIndependentSuccesses": 2,
+        "minDistinctContextFamilies": 2,
+        "requiredTagsAcrossEvidence": ["related-fact-derived"]
+      }
+    }
+  }
+}

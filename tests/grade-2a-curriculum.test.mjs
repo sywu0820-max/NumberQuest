@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const graph=JSON.parse(await readFile(new URL('../curriculum/grade-2a.skill-graph.json',import.meta.url),'utf8'));
+const masteryRules=JSON.parse(await readFile(new URL('../curriculum/grade-2a.mastery-rules.json',import.meta.url),'utf8'));
 const skills=new Map(graph.skills.map(skill=>[skill.id,skill]));
 
 function assertKnown(ids,label){
@@ -70,6 +71,19 @@ test('every skill has misconception, hint, retry, mastery and review metadata',(
     assert.ok(catalog.masteryProfiles[p.masteryProfile],`${skill.id} has unknown mastery profile`);
     assert.ok(catalog.reviewProfiles[p.reviewProfile],`${skill.id} has unknown review profile`);
   }
+});
+
+test('the graph points to the headless formal-mastery contract without enabling runtime integration',()=>{
+  const link=graph.formalMasteryContract;
+  assert.equal(link.status,'headless-review-contract');
+  assert.equal(link.runtimeIntegration,false);
+  assert.equal(link.rulesPath,'curriculum/grade-2a.mastery-rules.json');
+  assert.equal(link.evaluatorModule,'src/grade-2a-mastery.mjs');
+  assert.deepEqual(new Set(link.profileIds),new Set(Object.keys(graph.pedagogyCatalog.masteryProfiles)));
+  assert.deepEqual(new Set(link.profileIds),new Set(Object.keys(masteryRules.profiles)));
+  assert.equal(link.worldCompletionIsMastery,false);
+  assert.equal(link.capabilityGlowIsMastery,false);
+  assert.equal(masteryRules.runtimeIntegration,false);
 });
 
 test('bounded Grade 2A coverage areas are populated and scope-consistent',()=>{

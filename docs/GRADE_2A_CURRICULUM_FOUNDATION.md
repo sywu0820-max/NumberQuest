@@ -160,7 +160,7 @@ Retries use a fresh isomorphic case, a concrete-to-symbolic step-back, a contras
 
 ### Mastery evidence
 
-The graph defines four evidence profiles: concept, calculation, application, measurement and fact-family. All distinguish:
+The graph defines five evidence profiles: concept, calculation, application, measurement and fact-family. Their review-gate machine rules and event contract live in `curriculum/grade-2a.mastery-rules.json`; the side-effect-free evaluator lives in `src/grade-2a-mastery.mjs`. All distinguish:
 
 - acquisition across more than one instance;
 - independent retrieval in later sessions;
