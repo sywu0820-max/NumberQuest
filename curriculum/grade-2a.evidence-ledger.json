@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "1.0.0",
+  "ledgerId": "tw-grade-2a-forward-evidence-ledger",
+  "storagePath": "learning.grade2aEvidenceLedger",
+  "stateNamespace": "nq-state-v05",
+  "policy": {
+    "forwardOnly": true,
+    "backfillLegacyAggregates": false,
+    "localOnly": true,
+    "containsPii": false,
+    "dedupeIdentity": "eventId",
+    "derivedTimingStored": false,
+    "retention": "append-valid-no-silent-truncation",
+    "semesterStressRecords": 2400,
+    "maxExpectedSerializedBytes": 1500000
+  },
+  "recordSchema": {
+    "required": [
+      "schemaVersion",
+      "eventId",
+      "worldId",
+      "skillId",
+      "sessionId",
+      "localDay",
+      "sourceQuestionId",
+      "schedulerId",
+      "outcome",
+      "attemptKind",
+      "evidenceKind",
+      "revisitKind",
+      "representationId",
+      "representationFamily",
+      "contextId",
+      "contextFamily",
+      "transferEvidence",
+      "evidenceTags"
+    ],
+    "enums": {
+      "outcome": ["correct", "miss"],
+      "attemptKind": ["independent-first-try", "hinted", "recovered", "miss"],
+      "evidenceKind": ["acquisition", "retrieval", "transfer"],
+      "revisitKind": ["initial", "same-session", "later-session"]
+    },
+    "nullable": ["schedulerId"],
+    "forbiddenFields": ["elapsedDaysSinceAcquisition", "childName", "freeText", "email", "userId"]
+  },
+  "worlds": {
+    "world.lantern-harbor": {
+      "skillIds": [
+        "g2a.num.count-200",
+        "g2a.num.compose-200",
+        "g2a.num.represent-200",
+        "g2a.num.compare-200"
+      ],
+      "transferEligible": false,
+      "variants": {
+        "lantern-count": {
+          "representationId": "signal-dial",
+          "representationFamily": "ordered-sequence",
+          "contextId": "harbor-missing-signal",
+          "contextFamily": "harbor-navigation"
+        },
+        "lantern-compose": {
+          "representationId": "place-value-builder",
+          "representationFamily": "place-value-construction",
+          "contextId": "harbor-signal-construction",
+          "contextFamily": "harbor-beacon-workshop"
+        },
+        "lantern-represent-expanded": {
+          "representationId": "expanded-chart-translation",
+          "representationFamily": "expanded-form",
+          "contextId": "harbor-old-chart-expanded",
+          "contextFamily": "harbor-chart-room"
+        },
+        "lantern-represent-words": {
+          "representationId": "number-words-chart-translation",
+          "representationFamily": "number-words",
+          "contextId": "harbor-old-chart-words",
+          "contextFamily": "harbor-chart-room"
+        },
+        "lantern-compare-stronger": {
+          "representationId": "stronger-signal-choice",
+          "representationFamily": "place-value-comparison",
+          "contextId": "harbor-stronger-signal-route",
+          "contextFamily": "harbor-route-choice"
+        },
+        "lantern-compare-earlier": {
+          "representationId": "earlier-arrival-choice",
+          "representationFamily": "place-value-comparison",
+          "contextId": "harbor-earlier-arrival-route",
+          "contextFamily": "harbor-route-choice"
+        }
+      }
+    }
+  }
+}

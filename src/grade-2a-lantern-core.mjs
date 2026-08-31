@@ -1,4 +1,4 @@
-import {questionFingerprint,localDayKey} from './v10-core.mjs';
+import {questionFingerprint,localDayKey} from './v10-core.mjs?v=10-10';
 
 export const LANTERN_WORLD_ID='world.lantern-harbor';
 export const LANTERN_CORE_SKILLS=Object.freeze([

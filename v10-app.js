@@ -9,11 +9,14 @@ import {
   planTodaysAdventure,journeyPlanSummary,takeNextJourneyQuestion,rememberJourneyEvent,buildJourneyRecap,
   ONBOARDING_STEPS,onboardingStatus,completeOnboarding,resetOnboarding,homeMissionSummary,
   capabilityState,parentLearningSummary,recordCapabilityEvidence
-} from './src/v10-core.mjs';
+} from './src/v10-core.mjs?v=10-10';
 import {
   LANTERN_CORE_SKILLS,LANTERN_ALL_SKILLS,isLanternSkill,planLanternRun,lanternMissionModel,evaluateLanternAction,
   lanternHint,lanternCountDialStart,freshLanternRetry,reconcileLanternRunQueue,lanternRunCompletion,lanternCapabilitySnapshot,lanternEligibility
-} from './src/grade-2a-lantern-core.mjs';
+} from './src/grade-2a-lantern-core.mjs?v=10-10';
+import {
+  appendGrade2ALedgerRecord,evaluateLanternLedgerSkill,grade2AEvidenceLedgerSnapshot,lanternLedgerInput,stableQuestionSourceId
+} from './src/grade-2a-evidence-ledger.mjs?v=10-10';
 
 const STATE_KEY='nq-state-v05',LEGACY_KEY='nq-state-v04';
 const $=id=>document.getElementById(id);
@@ -23,7 +26,7 @@ let wi=0,q=null,correct=0,attempted=false,missRecorded=false,missCount=0,combo=0
 let runMode='world',challengeLevel=2,comboRewards=new Set(),introContinuation=null,activeUtterance=null,memoryQueue=[];
 let storyRecentTemplates=[],storyRecentThemes=[],storyRunLog=[],journeyQueue=[],journeyPlanSnapshot=[],journeyEvents=[];
 let onboardingIndex=0;
-let lanternQueue=[],lanternPlanSnapshot=[],lanternEvents=[],lanternQuestion=null,lanternIndex=0,lanternAttempted=false,lanternSelection={value:101,hundreds:0,tens:0,ones:0};
+let lanternQueue=[],lanternPlanSnapshot=[],lanternEvents=[],lanternQuestion=null,lanternIndex=0,lanternAttempted=false,lanternHintUsed=false,lanternSessionId=null,lanternSelection={value:101,hundreds:0,tens:0,ones:0};
 const LANTERN_NUMBER_RANGE=new URLSearchParams(location.search).get('lanternRange')==='300'?300:200;
 
 function load(){try{const current=localStorage.getItem(STATE_KEY);if(current)return JSON.parse(current);const legacy=localStorage.getItem(LEGACY_KEY);return legacy?JSON.parse(legacy):null}catch{return null}}
@@ -119,7 +122,14 @@ function finish(){
 }
 
 function syncLanternPlanSnapshot(){lanternPlanSnapshot=lanternQueue.map(item=>JSON.parse(JSON.stringify(item)))}
-function lanternQaOutput(){if(!QA_MODE)return;const output=$('lanternDebug');if(output)output.textContent=JSON.stringify({currentQuestion:lanternQuestion?JSON.parse(JSON.stringify(lanternQuestion)):null,selection:{...lanternSelection},plan:lanternPlanSnapshot,events:lanternEvents,completion:lanternRunCompletion(lanternEvents),capabilityEvidence:lanternCapabilitySnapshot(S),eligibility:lanternEligibility({numberRange:LANTERN_NUMBER_RANGE}),pageErrors:[...(window.__NQ_PAGE_ERRORS__||[])]})}
+function lanternFormalReadback(){return Object.fromEntries(LANTERN_CORE_SKILLS.map(skillId=>[skillId,evaluateLanternLedgerSkill(S,skillId)]))}
+function lanternQaOutput(){if(!QA_MODE)return;const output=$('lanternDebug');if(output)output.textContent=JSON.stringify({currentQuestion:lanternQuestion?JSON.parse(JSON.stringify(lanternQuestion)):null,selection:{...lanternSelection},plan:lanternPlanSnapshot,events:lanternEvents,evidenceLedger:grade2AEvidenceLedgerSnapshot(S),formalReadback:lanternFormalReadback(),completion:lanternRunCompletion(lanternEvents),capabilityEvidence:lanternCapabilitySnapshot(S),eligibility:lanternEligibility({numberRange:LANTERN_NUMBER_RANGE}),pageErrors:[...(window.__NQ_PAGE_ERRORS__||[])]})}
+function recordLanternEvidence(outcome,attemptKind){
+  const fingerprint=questionFingerprint(lanternQuestion),sourceQuestionId=stableQuestionSourceId(fingerprint),source=lanternQuestion.reviewSourceQuestion||lanternQuestion;
+  const schedulerId=lanternQuestion.isReview||lanternQuestion.isMemoryReview?`scheduler-${stableQuestionSourceId(questionFingerprint(source))}`:null;
+  const described=lanternLedgerInput(lanternQuestion,{sessionId:lanternSessionId,localDay:localDayKey(),sourceQuestionId,schedulerId,outcome,attemptKind});
+  return described.valid?appendGrade2ALedgerRecord(S,described.input):{appended:false,record:null,errors:described.errors};
+}
 function clearLanternScene(){for(const id of ['beaconLeft','beaconCenter','beaconRight'])$(id).classList.remove('lit','fog');$('rescueShip').classList.remove('sailing');$('lanternWorld').classList.remove('complete')}
 function lanternButton(label,className,onClick){const button=el('button',className,label);button.type='button';button.onclick=onClick;return button}
 function lanternSendButton(){return lanternButton('點亮信號','send-signal',()=>submitLantern({value:lanternSelection.value,hundreds:lanternSelection.hundreds,tens:lanternSelection.tens,ones:lanternSelection.ones}))}
@@ -140,21 +150,22 @@ function renderLanternControls(model){
   const actions=el('div','signal-actions');actions.append(lanternButton('全部重放','clear-signal',()=>{lanternSelection.hundreds=0;lanternSelection.tens=0;lanternSelection.ones=0;renderLanternControls(model)}),lanternSendButton());root.append(builders,actions);
 }
 function renderLanternMission(){
-  clearLanternScene();lanternQuestion=lanternQueue[lanternIndex];if(!lanternQuestion){finishLantern();return}const model=lanternMissionModel(lanternQuestion);lanternAttempted=false;
+  clearLanternScene();lanternQuestion=lanternQueue[lanternIndex];if(!lanternQuestion){finishLantern();return}const model=lanternMissionModel(lanternQuestion);lanternAttempted=false;lanternHintUsed=false;
   $('lanternCounter').textContent=`${lanternIndex} / ${lanternQueue.length}`;$('lanternBar').style.width=`${lanternIndex/lanternQueue.length*100}%`;
   $('lanternPurpose').textContent=lanternQuestion.isMemoryReview?'🧠 昨天的航路又亮了':lanternQuestion.isReview?'🧩 回來修穩一座訊號':'🚢 幫一艘船找到航路';$('lanternPrompt').textContent=lanternQuestion.txt;
   $('lanternInstruction').textContent=model.kind==='count'?'轉動缺少的燈號，再送出訊號。':model.kind==='compare'?(model.direction==='stronger'?'選一座能照得更遠的訊號塔。':'按下應該先進港的船號。'):'親手放入百光束、十光束和一光點。';$('lanternFeedback').className='lantern-feedback';$('lanternFeedback').textContent='數字就是你要修好的訊號。';$('lanternHelp').innerHTML='';renderLanternControls(model);lanternQaOutput();save();
 }
 function startLantern(){
-  resetRun();runMode='lantern';lanternQueue=planLanternRun(S,{count:8,day:localDayKey(),numberRange:LANTERN_NUMBER_RANGE});syncLanternPlanSnapshot();lanternEvents=[];lanternIndex=0;lanternQuestion=null;$('home').style.display='none';$('game').style.display='none';$('lanternWorld').style.display='block';renderLanternMission();
+  resetRun();runMode='lantern';lanternSessionId=`lantern-session-${S.learning.session}`;lanternQueue=planLanternRun(S,{count:8,day:localDayKey(),numberRange:LANTERN_NUMBER_RANGE});syncLanternPlanSnapshot();lanternEvents=[];lanternIndex=0;lanternQuestion=null;$('home').style.display='none';$('game').style.display='none';$('lanternWorld').style.display='block';renderLanternMission();
 }
 function showLanternRecovery(){
   const root=$('lanternHelp');root.innerHTML='';const feedback=$('lanternFeedback');feedback.className='lantern-feedback recover';feedback.textContent='霧跑出來了，但訊號沒有壞掉。選一種方法整理，再換一組新訊號。';
-  const textHint=lanternButton('💬 一句線索','',()=>{feedback.textContent=lanternHint(lanternQuestion,{level:1});textHint.disabled=true}),placeHint=lanternButton('👀 排好百十個','',()=>{feedback.textContent=lanternHint(lanternQuestion,{level:2});placeHint.disabled=true}),retry=lanternButton('🛠️ 換一組訊號再試','',()=>{lanternQueue[lanternIndex]=freshLanternRetry(lanternQuestion,{numberRange:LANTERN_NUMBER_RANGE});renderLanternMission();lanternAttempted=true;lanternQaOutput()});root.append(textHint,placeHint,retry);
+  const textHint=lanternButton('💬 一句線索','',()=>{lanternHintUsed=true;feedback.textContent=lanternHint(lanternQuestion,{level:1});textHint.disabled=true}),placeHint=lanternButton('👀 排好百十個','',()=>{lanternHintUsed=true;feedback.textContent=lanternHint(lanternQuestion,{level:2});placeHint.disabled=true}),retry=lanternButton('🛠️ 換一組訊號再試','',()=>{const usedHint=lanternHintUsed;lanternQueue[lanternIndex]=freshLanternRetry(lanternQuestion,{numberRange:LANTERN_NUMBER_RANGE});renderLanternMission();lanternAttempted=true;lanternHintUsed=usedHint;lanternQaOutput()});root.append(textHint,placeHint,retry);
 }
 function submitLantern(action){
-  const outcome=evaluateLanternAction(lanternQuestion,action);if(!outcome.correct){lanternAttempted=true;recordSkillMiss(S,lanternQuestion.skillKey);queueSpacedReview(S,lanternQuestion);if(lanternQuestion.isMemoryReview)recordMemoryMiss(S,lanternQuestion.reviewSourceQuestion||lanternQuestion,{day:localDayKey()});else recordMemoryPractice(S,lanternQuestion,{day:localDayKey(),missed:true});for(const button of $('lanternControls').querySelectorAll('button'))button.disabled=true;for(const id of ['beaconLeft','beaconCenter','beaconRight'])$(id).classList.add('fog');showLanternRecovery();save();lanternQaOutput();return}
+  const outcome=evaluateLanternAction(lanternQuestion,action);if(!outcome.correct){recordLanternEvidence('miss','miss');lanternAttempted=true;recordSkillMiss(S,lanternQuestion.skillKey);queueSpacedReview(S,lanternQuestion);if(lanternQuestion.isMemoryReview)recordMemoryMiss(S,lanternQuestion.reviewSourceQuestion||lanternQuestion,{day:localDayKey()});else recordMemoryPractice(S,lanternQuestion,{day:localDayKey(),missed:true});for(const button of $('lanternControls').querySelectorAll('button'))button.disabled=true;for(const id of ['beaconLeft','beaconCenter','beaconRight'])$(id).classList.add('fog');showLanternRecovery();save();lanternQaOutput();return}
   const firstTry=!lanternAttempted,source=lanternQuestion.reviewSourceQuestion||lanternQuestion;S.daily.solved++;
+  recordLanternEvidence('correct',firstTry?'independent-first-try':lanternHintUsed?'hinted':'recovered');
   if(lanternQuestion.isMemoryReview)completeMemoryRetrieval(S,source,{day:localDayKey(),firstTry});else{if(lanternQuestion.isReview&&firstTry)completeSpacedReview(S,source);recordSkillSuccess(S,lanternQuestion.skillKey,{firstTry,isRevisit:Boolean(lanternQuestion.isReview),day:localDayKey()});recordMemoryPractice(S,lanternQuestion,{day:localDayKey(),missed:lanternAttempted})}
   const event={completed:true,purpose:lanternQuestion.isMemoryReview||lanternQuestion.isReview?'retrieval':'growth',skillKey:lanternQuestion.skillKey,representation:lanternMissionModel(lanternQuestion).kind,isMemoryReview:Boolean(lanternQuestion.isMemoryReview),isReview:Boolean(lanternQuestion.isReview),firstTry,recovered:lanternAttempted,fingerprint:questionFingerprint(lanternQuestion)};recordCapabilityEvidence(S,event,{day:localDayKey()});lanternEvents.push(event);
   const model=lanternMissionModel(lanternQuestion);if(model.kind==='compare')$(outcome.expected==='left'?'beaconLeft':'beaconRight').classList.add('lit');else for(const id of model.kind==='count'?['beaconCenter']:['beaconLeft','beaconCenter','beaconRight'])$(id).classList.add('lit');$('rescueShip').classList.add('sailing');$('lanternFeedback').className='lantern-feedback success';$('lanternFeedback').textContent=lanternAttempted?'✨ 重新整理後，船看見你修好的光了！':'✨ 訊號一次接通，船正沿著你的數字進港！';for(const button of $('lanternControls').querySelectorAll('button'))button.disabled=true;$('lanternHelp').innerHTML='';reconcileLanternRunQueue(S,lanternQueue,{afterIndex:lanternIndex,numberRange:LANTERN_NUMBER_RANGE});syncLanternPlanSnapshot();save();lanternQaOutput();setTimeout(()=>{lanternIndex++;renderLanternMission()},720);
@@ -177,5 +188,5 @@ function advanceOnboarding(){if(onboardingIndex<ONBOARDING_STEPS.length-1){onboa
 
 $('homeBtn').onclick=renderHome;$('lanternHomeBtn').onclick=renderHome;$('lanternBtn').onclick=startLantern;$('journeyBtn').onclick=startJourney;$('collectionBtn').onclick=showCollection;$('masteryBtn').onclick=showMastery;$('mapPeekBtn').onclick=showMastery;$('adultBtn').onclick=showAdult;$('memoryBtn').onclick=startMemory;$('storyBtn').onclick=startStory;$('focusBtn').onclick=startFocus;$('academyBtn').onclick=startAcademy;$('divisionBtn').onclick=startDivision;$('readBtn').onclick=readQuestion;
 $('closeCollection').onclick=()=>$('collectionOverlay').style.display='none';$('closeMastery').onclick=()=>$('masteryOverlay').style.display='none';$('closeAdult').onclick=()=>$('adultOverlay').style.display='none';$('resetOnboardingBtn').onclick=()=>{resetOnboarding(S);save();$('adultOverlay').style.display='none';onboardingIndex=0;renderOnboarding()};$('onboardingNext').onclick=advanceOnboarding;$('divisionIntroBtn').onclick=closeDivisionIntro;$('resultBtn').onclick=()=>{$('resultOverlay').style.display='none';renderHome()};
-Object.defineProperty(window,'__NQ_V10_DEBUG__',{value:{getState:()=>JSON.parse(JSON.stringify(S)),getJourneyPlan:()=>journeyPlanSnapshot.map(item=>JSON.parse(JSON.stringify(item))),getJourneySummary:()=>journeyPlanSummary(journeyPlanSnapshot),getJourneyEvents:()=>journeyEvents.map(item=>({...item})),getParentSummary:()=>parentLearningSummary(S),getStoryRun:()=>storyRunLog.map(item=>({...item})),getStoryDiversity:()=>storyDiversitySummary(storyRunLog.map(item=>({story:true,storyTemplateId:item.templateId,storyThemeId:item.themeId,txt:item.text}))),getCurrentQuestion:()=>q?JSON.parse(JSON.stringify(q)):null,getLanternPlan:()=>lanternPlanSnapshot.map(item=>JSON.parse(JSON.stringify(item))),getLanternEvents:()=>lanternEvents.map(item=>({...item})),getLanternQuestion:()=>lanternQuestion?JSON.parse(JSON.stringify(lanternQuestion)):null,getLanternCompletion:()=>lanternRunCompletion(lanternEvents),getLanternCapabilityEvidence:()=>lanternCapabilitySnapshot(S),startLantern},configurable:false,writable:false});
+Object.defineProperty(window,'__NQ_V10_DEBUG__',{value:{getState:()=>JSON.parse(JSON.stringify(S)),getJourneyPlan:()=>journeyPlanSnapshot.map(item=>JSON.parse(JSON.stringify(item))),getJourneySummary:()=>journeyPlanSummary(journeyPlanSnapshot),getJourneyEvents:()=>journeyEvents.map(item=>({...item})),getParentSummary:()=>parentLearningSummary(S),getStoryRun:()=>storyRunLog.map(item=>({...item})),getStoryDiversity:()=>storyDiversitySummary(storyRunLog.map(item=>({story:true,storyTemplateId:item.templateId,storyThemeId:item.themeId,txt:item.text}))),getCurrentQuestion:()=>q?JSON.parse(JSON.stringify(q)):null,getLanternPlan:()=>lanternPlanSnapshot.map(item=>JSON.parse(JSON.stringify(item))),getLanternEvents:()=>lanternEvents.map(item=>({...item})),getLanternQuestion:()=>lanternQuestion?JSON.parse(JSON.stringify(lanternQuestion)):null,getLanternCompletion:()=>lanternRunCompletion(lanternEvents),getLanternCapabilityEvidence:()=>lanternCapabilitySnapshot(S),getGrade2AEvidenceLedger:()=>grade2AEvidenceLedgerSnapshot(S),getGrade2AFormalReadback:()=>lanternFormalReadback(),startLantern},configurable:false,writable:false});
 window.addEventListener('pagehide',cancelSpeech);hud();renderHome();if(!onboardingStatus(S).complete)renderOnboarding();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');

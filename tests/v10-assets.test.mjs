@@ -9,7 +9,7 @@ const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
 const css=await readFile(new URL('../v10.css',import.meta.url),'utf8');
 
 test('v1.0 shell uses the successor core and keeps local-only state',()=>{
-  assert.match(app,/from '\.\/src\/v10-core\.mjs'/);assert.match(app,/STATE_KEY='nq-state-v05'/);assert.match(html,/Number Quest v1\.0/);assert.match(html,/src="v10-app\.js\?v=10-9"/);assert.doesNotMatch(app,/fetch\(|XMLHttpRequest|WebSocket|sendBeacon|analytics|childName|userId|apiKey/);
+  assert.match(app,/from '\.\/src\/v10-core\.mjs\?v=10-10'/);assert.match(app,/STATE_KEY='nq-state-v05'/);assert.match(html,/Number Quest v1\.0/);assert.match(html,/src="v10-app\.js\?v=10-10"/);assert.doesNotMatch(app,/fetch\(|XMLHttpRequest|WebSocket|sendBeacon|analytics|childName|userId|apiKey/);
 });
 
 test('child-first home makes Today’s Adventure primary and specialist modes secondary',()=>{
@@ -41,7 +41,7 @@ test('secondary adult view is local, interpretable, and non-shaming',()=>{
 
 test('v1.0 cache family is isolated and includes the complete successor dependency chain',()=>{
   assert.match(worker,/const CACHE='number-quest-v10-/);assert.match(worker,/keys\.filter\(k=>k\.startsWith\('number-quest-v10-'\)/);assert.doesNotMatch(worker,/keys\.filter\(k=>k\.startsWith\('number-quest-v09-'\).*map\(k=>caches\.delete/);
-  for(const asset of ['v10.css','v10-app.js','src/v10-core.mjs','v09.css','v09-app.js','src/v09-core.mjs','src/v08-core.mjs','src/v07-core.mjs','src/v06-core.mjs','src/v05-core.mjs'])assert.match(worker,new RegExp(asset.replace(/[./]/g,'\\$&')));
+  for(const asset of ['v10.css','v10-app.js','src/grade-2a-evidence-ledger.mjs','src/grade-2a-mastery.mjs','src/v10-core.mjs','v09.css','v09-app.js','src/v09-core.mjs','src/v08-core.mjs','src/v07-core.mjs','src/v06-core.mjs','src/v05-core.mjs'])assert.match(worker,new RegExp(asset.replace(/[./]/g,'\\$&')));
 });
 
 test('v1.0 primary and secondary controls preserve the touch baseline and responsive layout',()=>{
