@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#132d46">
+<title>交換橋工坊 · Hidden Prototype</title>
+<link rel="stylesheet" href="carry-bridge-prototype.css?v=prototype-2">
+<script>window.__NQ_PROTOTYPE_PAGE_ERRORS__=[];addEventListener('error',event=>window.__NQ_PROTOTYPE_PAGE_ERRORS__.push(String(event.error?.stack||event.message||'page error')));addEventListener('unhandledrejection',event=>window.__NQ_PROTOTYPE_PAGE_ERRORS__.push(String(event.reason?.stack||event.reason||'unhandled rejection')))</script>
+</head>
+<body>
+<main id="prototypeGate" class="prototype-gate">
+  <section class="gate-card">
+    <span aria-hidden="true">🔒</span><h1>這是隱藏測試入口</h1>
+    <p>需要指定的 prototype 旗標才會開啟。</p>
+    <a href="index.html">回到數字探險隊</a>
+  </section>
+</main>
+
+<main id="prototypeApp" class="prototype-app" hidden>
+  <header class="prototype-head">
+    <div><small>隱藏互動原型 · 不記錄進度</small><h1>⚙️ 交換橋工坊</h1></div>
+    <button id="leavePrototype" class="quiet-button">← 離開工坊</button>
+  </header>
+
+  <section class="mission-card" aria-labelledby="missionTitle">
+    <div class="mission-copy"><span id="missionBadge">貨物任務</span><h2 id="missionTitle">把貨物整理好</h2><p id="missionPrompt"></p></div>
+    <div id="sourceLoads" class="source-loads" aria-label="起始貨物"></div>
+  </section>
+
+  <section class="workbench-card" aria-labelledby="workbenchTitle">
+    <div class="bench-heading"><div><small>點一下選取，也可以拖到目的地</small><h2 id="workbenchTitle">工作台</h2></div><output id="selectionStatus" aria-live="polite">還沒有選取貨物</output></div>
+    <div class="place-lanes" aria-label="位值欄">
+      <button class="target-zone lane-zone" id="tensLane" data-target="tens-lane"><b>十位停靠格</b><span>放「十」的貨物</span></button>
+      <button class="target-zone lane-zone" id="onesLane" data-target="ones-lane"><b>個位停靠格</b><span>放「一」的貨物</span></button>
+    </div>
+    <div id="workspace" class="workspace" aria-label="貨物工作區"></div>
+    <div class="action-zones" aria-label="貨物目的地">
+      <button class="target-zone" id="joinZone" data-target="join"><b>🤝 合流台</b><span>把兩批貨放在一起</span></button>
+      <button class="target-zone" id="bundleZone" data-target="bundle"><b>🪢 換裝台</b><span>把選到的「一」綁起來</span></button>
+      <button class="target-zone" id="splitZone" data-target="split"><b>📦 拆箱台</b><span>把選到的「十」打開</span></button>
+      <button class="target-zone" id="unloadZone" data-target="unload"><b>⛵ 卸貨區</b><span>移走選到的貨物</span></button>
+    </div>
+  </section>
+
+  <section class="finish-card">
+    <label for="answerInput">整理後，工作台上有多少？</label>
+    <div class="answer-row"><input id="answerInput" inputmode="numeric" pattern="[0-9]*" aria-describedby="answerBoundary"><button id="submitAnswer" class="primary-button">送出貨單</button></div>
+    <small id="answerBoundary">這座工坊目前只處理 0～99。</small>
+    <div id="feedback" class="feedback" aria-live="polite">慢慢試，每一次操作都可以再調整。</div>
+    <button id="hintButton" class="hint-button">💡 看一個小線索</button>
+    <div id="hintPanel" class="hint-panel" aria-live="polite"></div>
+  </section>
+
+  <details id="qaPanel" class="qa-panel" hidden>
+    <summary>QA readback（不寫入）</summary>
+    <div class="qa-controls"><label>測試航線 <select id="caseRuleSelect"><option value="add-no-regroup">加入航線 A</option><option value="add-regroup">加入航線 B</option><option value="sub-no-regroup">卸貨航線 A</option><option value="sub-regroup">卸貨航線 B</option></select></label><button id="newCaseButton">換一批貨</button></div>
+    <pre id="prototypeDebug"></pre>
+  </details>
+</main>
+<script type="module" src="carry-bridge-prototype.js?v=prototype-2"></script>
+</body>
+</html>
