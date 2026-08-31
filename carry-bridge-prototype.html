@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#132d46">
 <title>交換橋工坊 · Hidden Prototype</title>
-<link rel="stylesheet" href="carry-bridge-prototype.css?v=prototype-2">
+<link rel="stylesheet" href="carry-bridge-prototype.css?v=dogfood-3">
 <script>window.__NQ_PROTOTYPE_PAGE_ERRORS__=[];addEventListener('error',event=>window.__NQ_PROTOTYPE_PAGE_ERRORS__.push(String(event.error?.stack||event.message||'page error')));addEventListener('unhandledrejection',event=>window.__NQ_PROTOTYPE_PAGE_ERRORS__.push(String(event.reason?.stack||event.reason||'unhandled rejection')))</script>
 </head>
 <body>
@@ -19,22 +19,31 @@
 
 <main id="prototypeApp" class="prototype-app" hidden>
   <header class="prototype-head">
-    <div><small>隱藏互動原型 · 不記錄進度</small><h1>⚙️ 交換橋工坊</h1></div>
+    <div><small>隱藏試玩 · 不記錄進度</small><h1>⚙️ 交換橋工坊</h1></div>
     <button id="leavePrototype" class="quiet-button">← 離開工坊</button>
   </header>
 
+  <nav class="mission-rhythm" aria-label="任務進度">
+    <span id="rhythmMove" class="active"><b>1</b> 搬貨</span><i aria-hidden="true"></i><span id="rhythmBuild"><b>2</b> 整理</span><i aria-hidden="true"></i><span id="rhythmStamp"><b>3</b> 蓋章</span>
+  </nav>
+
   <section class="mission-card" aria-labelledby="missionTitle">
     <div class="mission-copy"><span id="missionBadge">貨物任務</span><h2 id="missionTitle">把貨物整理好</h2><p id="missionPrompt"></p></div>
-    <div id="sourceLoads" class="source-loads" aria-label="起始貨物"></div>
+    <div><div id="sourceLoads" class="source-loads" aria-label="起始貨物"></div><output id="sourceArrivalStatus" class="source-arrival" aria-live="polite"></output></div>
   </section>
 
   <section class="workbench-card" aria-labelledby="workbenchTitle">
-    <div class="bench-heading"><div><small>點一下選取，也可以拖到目的地</small><h2 id="workbenchTitle">工作台</h2></div><output id="selectionStatus" aria-live="polite">還沒有選取貨物</output></div>
+    <div class="bench-heading"><div><small id="interactionHelp">點一下選取，也可以拖到目的地</small><h2 id="workbenchTitle">工作台</h2></div><output id="selectionStatus" aria-live="polite">還沒有選取貨物</output></div>
     <div class="place-lanes" aria-label="位值欄">
       <button class="target-zone lane-zone" id="tensLane" data-target="tens-lane"><b>十位停靠格</b><span>放「十」的貨物</span></button>
       <button class="target-zone lane-zone" id="onesLane" data-target="ones-lane"><b>個位停靠格</b><span>放「一」的貨物</span></button>
     </div>
     <div id="workspace" class="workspace" aria-label="貨物工作區"></div>
+    <section id="tenTray" class="ten-tray" aria-labelledby="tenTrayTitle">
+      <div><small>選中的「一」會進到這裡</small><h3 id="tenTrayTitle">十格集貨盤</h3></div>
+      <div id="tenTraySlots" class="ten-tray-slots" aria-hidden="true"></div>
+      <output id="tenTrayCount" aria-live="polite">0 / 10</output>
+    </section>
     <div class="action-zones" aria-label="貨物目的地">
       <button class="target-zone" id="joinZone" data-target="join"><b>🤝 合流台</b><span>把兩批貨放在一起</span></button>
       <button class="target-zone" id="bundleZone" data-target="bundle"><b>🪢 換裝台</b><span>把選到的「一」綁起來</span></button>
@@ -43,14 +52,31 @@
     </div>
   </section>
 
-  <section class="finish-card">
-    <label for="answerInput">整理後，工作台上有多少？</label>
-    <div class="answer-row"><input id="answerInput" inputmode="numeric" pattern="[0-9]*" aria-describedby="answerBoundary"><button id="submitAnswer" class="primary-button">送出貨單</button></div>
+  <section id="finishCard" class="finish-card is-locked">
+    <label id="finishQuestion" for="answerInput">整理後，工作台上有多少？</label>
+    <p id="finishGateMessage" class="finish-gate">先親手整理貨物，貨單才會亮起來。</p>
+    <div id="cargoSlipEntry" class="answer-row"><input id="answerInput" inputmode="numeric" pattern="[0-9]*" maxlength="2" aria-describedby="answerBoundary" aria-label="貨單數量"><button id="submitAnswer" class="primary-button">蓋上貨單章</button></div>
+    <div id="digitDialEntry" class="digit-dial-entry" hidden>
+      <div class="digit-dial"><span>十</span><button type="button" data-dial="tens" data-step="1" aria-label="十位加一">＋</button><output id="tensDial">0</output><button type="button" data-dial="tens" data-step="-1" aria-label="十位減一">－</button></div>
+      <div class="digit-dial"><span>一</span><button type="button" data-dial="ones" data-step="1" aria-label="個位加一">＋</button><output id="onesDial">0</output><button type="button" data-dial="ones" data-step="-1" aria-label="個位減一">－</button></div>
+      <button id="submitDialAnswer" class="primary-button">蓋上貨單章</button>
+    </div>
     <small id="answerBoundary">這座工坊目前只處理 0～99。</small>
     <div id="feedback" class="feedback" aria-live="polite">慢慢試，每一次操作都可以再調整。</div>
     <button id="hintButton" class="hint-button">💡 看一個小線索</button>
     <div id="hintPanel" class="hint-panel" aria-live="polite"></div>
   </section>
+
+  <aside id="founderPanel" class="founder-panel" hidden>
+    <div><small>Founder dogfood switcher · child default hides this panel</small><h2>快速比較試玩方式</h2></div>
+    <div class="founder-controls">
+      <label>操作提示<select id="interactionVariant"><option value="tap-first">點選優先</option><option value="drag-first">拖曳優先</option><option value="balanced">兩者並列</option></select></label>
+      <label>集滿十個一<select id="bundleVariant"><option value="individual">逐一集貨</option><option value="pair-scoop">雙貨鏟（一次看見兩個一）</option></select></label>
+      <label>結果輸入<select id="resultVariant"><option value="cargo-slip">貨單數字</option><option value="digit-dials">十／一轉盤</option></select></label>
+      <button id="applyVariants" class="primary-button">套用並重新開始</button>
+    </div>
+    <p id="variantReadback"></p>
+  </aside>
 
   <details id="qaPanel" class="qa-panel" hidden>
     <summary>QA readback（不寫入）</summary>
@@ -58,6 +84,6 @@
     <pre id="prototypeDebug"></pre>
   </details>
 </main>
-<script type="module" src="carry-bridge-prototype.js?v=prototype-2"></script>
+<script type="module" src="carry-bridge-prototype.js?v=dogfood-3"></script>
 </body>
 </html>
