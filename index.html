@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="v09.css">
 <link rel="stylesheet" href="v10.css">
 <title>Number Quest v1.0</title>
+<script>window.__NQ_PAGE_ERRORS__=[];addEventListener('error',event=>window.__NQ_PAGE_ERRORS__.push(String(event.error?.stack||event.message||'page error')));addEventListener('unhandledrejection',event=>window.__NQ_PAGE_ERRORS__.push(String(event.reason?.stack||event.reason||'unhandled rejection')))</script>
 <!-- Accepted predecessor shell evidence retained for inherited regression checks: Number Quest v0.9 · v09-app.js · Number Quest v0.8 · v08-app.js · id="v08Debug" hidden -->
 </head>
 <body>
@@ -43,6 +44,7 @@
       </div>
       <div class="section-title"><h2>🌱 今天的足跡</h2><span>完成一段冒險就已經很棒</span></div><div id="daily" class="daily"></div>
       <div class="section-title"><h2>🗺️ 探險世界</h2><span>每第 3 趟會遇到 Boss</span></div><div id="worlds" class="worlds"></div>
+      <button class="lantern-entry" id="lanternBtn"><span aria-hidden="true">🏮</span><strong>百光港</strong><small>當訊號守護員，修好燈塔讓迷航的船回家</small><b>前往港口 →</b></button>
     </div></details>
   </section>
 
@@ -52,11 +54,32 @@
     <div class="progress"><div class="bar" id="bar"></div></div><div class="run-meta"><span id="counter">0 / 10</span><span id="combo" class="combo"></span></div>
     <div class="purpose-banner" id="purposeBanner"></div><div class="mascot" id="mascot">🦊</div><div class="question" id="question"></div><button class="story-read" id="readBtn" aria-label="朗讀故事題目">🔊 朗讀題目</button><div class="help-choices" id="helpChoices" aria-label="選擇幫助方法"></div><div class="visual-hint" id="visualHint" aria-live="polite"></div><div class="answers" id="answers"></div><div class="msg" id="msg">選一個答案！</div><output id="v10Debug" hidden aria-hidden="true"></output>
   </section>
+
+  <section id="lanternWorld" class="lantern-world" aria-labelledby="lanternTitle">
+    <div class="lantern-head"><button class="ghost" id="lanternHomeBtn">← 離開港口</button><div><small>訊號守護員</small><h2 id="lanternTitle">🏮 百光港</h2></div><div class="pill"><span id="lanternCounter">0 / 8</span></div></div>
+    <div class="lantern-progress" aria-hidden="true"><i id="lanternBar"></i></div>
+    <div class="harbor-scene" id="harborScene">
+      <div class="night-sky"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="beacon beacon-left" id="beaconLeft"><span></span><b id="leftSignal">百</b></div>
+      <div class="beacon beacon-center" id="beaconCenter"><span></span><b id="centerSignal">光</b></div>
+      <div class="beacon beacon-right" id="beaconRight"><span></span><b id="rightSignal">港</b></div>
+      <div class="harbor-water"><div class="rescue-ship" id="rescueShip">⛵</div></div>
+    </div>
+    <div class="lantern-mission-card">
+      <div class="lantern-purpose" id="lanternPurpose">修好第一座訊號塔</div>
+      <h3 id="lanternPrompt">港口正在等你點亮。</h3>
+      <p id="lanternInstruction">轉動訊號，再親手送出去。</p>
+      <div id="lanternControls" class="lantern-controls"></div>
+      <div id="lanternHelp" class="lantern-help"></div>
+      <div id="lanternFeedback" class="lantern-feedback" aria-live="polite">每一次嘗試，都會讓港口更清楚。</div>
+      <output id="lanternDebug" hidden aria-hidden="true"></output>
+    </div>
+  </section>
 </main>
 
 <div id="resultOverlay" class="overlay"><div class="card"><div id="resultEmoji" class="big">🏆</div><h2 id="resultTitle">探險完成！</h2><p id="resultText"></p><div id="capabilityRecap" class="capability-recap"></div><p id="healthyStop" class="healthy-stop">今天的冒險可以到這裡；想再探索也可以。</p><div id="newCollectible" class="reward"></div><button class="primary" id="resultBtn">完成今天，回到首頁</button></div></div>
 <div id="collectionOverlay" class="overlay"><div class="card"><div class="big">🎒</div><h2>探險圖鑑</h2><p>普通寶物靠探險收集，稀有寶物要打倒 Boss。</p><div id="collectionGrid" class="collection-grid"></div><button class="primary" id="closeCollection">繼續探險</button></div></div>
-<div id="masteryOverlay" class="overlay"><div class="card mastery-card-wrap"><div class="big">🗺️</div><h2>我的能力地圖</h2><p class="mastery-note">每次自己想出來，能力就會再亮一點。沒有分數，也不用跟別人比。</p><div id="nextAdventure" class="next-adventure"></div><h3>九九乘法力量</h3><div id="mulMastery" class="mul-mastery"></div><section id="divisionMasterySection"><h3>除法橋力量</h3><div id="divMastery" class="mul-mastery"></div></section><h3>加減與數感魔法</h3><div id="arithMastery" class="arith-mastery"></div><button class="primary" id="closeMastery">繼續探險</button></div></div>
+<div id="masteryOverlay" class="overlay"><div class="card mastery-card-wrap"><div class="big">🗺️</div><h2>我的能力地圖</h2><p class="mastery-note">每次自己想出來，能力就會再亮一點。沒有分數，也不用跟別人比。</p><div id="nextAdventure" class="next-adventure"></div><section id="lanternMasterySection"><h3>百光港訊號力量</h3><div id="lanternMastery" class="arith-mastery"></div></section><h3>九九乘法力量</h3><div id="mulMastery" class="mul-mastery"></div><section id="divisionMasterySection"><h3>除法橋力量</h3><div id="divMastery" class="mul-mastery"></div></section><h3>加減與數感魔法</h3><div id="arithMastery" class="arith-mastery"></div><button class="primary" id="closeMastery">繼續探險</button></div></div>
 
 <div id="adultOverlay" class="overlay"><div class="card adult-card"><div class="big">🌿</div><h2>給大人看</h2><p>這些內容只來自這台裝置，幫你陪孩子說說他怎麼想。</p><div id="adultSummary" class="adult-summary"></div><button class="text-button" id="resetOnboardingBtn">重新看一次新手引導</button><button class="primary" id="closeAdult">回到孩子的探險</button></div></div>
 
@@ -64,5 +87,5 @@
 
 <div id="divisionIntro" class="overlay"><div class="card division-intro-card"><div class="big">🌉</div><h2>乘法的另一座橋</h2><p>你已經認識乘法了。除法只是從答案走回去，不是全新的大怪獸。</p><div class="intro-equation"><span>6 × 7 = 42</span><b>↔</b><span>42 ÷ 7 = 6</span></div><div class="intro-steps"><div>🔎 看到 <b>42 ÷ 7</b>，先想「7 乘幾會到 42？」</div><div>🧩 每一題都能用你學過的 1～9 乘法找到線索。</div><div>🌱 不確定也沒關係，提示會陪你想，但不會直接說答案。</div></div><button class="primary" id="divisionIntroBtn">跨上除法橋</button></div></div>
 
-<script type="module" src="v10-app.js"></script>
+<script type="module" src="v10-app.js?v=10-9"></script>
 </body></html>

@@ -245,8 +245,9 @@ export function queueSpacedReview(s,q,spacing=3){
   if(existing){existing.dueSolved=Math.max(existing.dueSolved,dueSolved);return false}
   s.learning.pendingReviews.push({q:cloneQuestion(q),dueSolved,fingerprint});learningSkill(s,q.skillKey).pendingRevisits+=1;return true;
 }
-export function takeDueReview(s,rng=Math.random){
-  const item=s.learning.pendingReviews.find(x=>x.dueSolved<=s.learning.solvedTotal);return item?makeReviewQuestion(item.q,rng):null;
+export function takeDueReview(s,rng=Math.random,{excludeSkillKeys=[]}={}){
+  const excluded=new Set(Array.isArray(excludeSkillKeys)?excludeSkillKeys:[]);
+  const item=s.learning.pendingReviews.find(x=>x.dueSolved<=s.learning.solvedTotal&&!excluded.has(x.q?.skillKey));return item?makeReviewQuestion(item.q,rng):null;
 }
 export function completeSpacedReview(s,q){
   const fingerprint=questionFingerprint(q),idx=s.learning.pendingReviews.findIndex(x=>(x.fingerprint||questionFingerprint(x.q))===fingerprint);
