@@ -58,6 +58,11 @@ test('parent summary exposes only local interpretable learning signals',()=>{
   const summary=parentLearningSummary(s),text=JSON.stringify(summary);assert.equal(summary.localOnly,true);assert.ok(summary.recentlyPracticed.includes('add:20'));assert.ok(summary.stableRetrieval.includes('sub:20'));assert.ok(summary.recentTransfer.includes('add:20'));assert.doesNotMatch(text,/rank|percentile|retention probability|scheduler|weight|behind grade|排名|百分位|落後|權重/i);
 });
 
+test('v0.9 successful revisit evidence survives v1.0 parent-summary migration without fabricated transfer',()=>{
+  const legacy=freshState(day),key='sub:50';recordSkillSuccess(legacy,key,{firstTry:true,isRevisit:true,day});assert.equal(legacy.learning.product,undefined);const before=structuredClone(legacy);
+  const migrated=normalizeState(legacy,day),summary=parentLearningSummary(migrated);assert.deepEqual(legacy,before);assert.ok(summary.stableRetrieval.includes(key));assert.ok(!summary.recentTransfer.includes(key));assert.equal(migrated.learning.product.capabilityEvidence[key],undefined);
+});
+
 test('parent summary never infers independent retrieval from transfer-only strength',()=>{
   const s=normalizeState(null,day),key='add:50';recordSkillSuccess(s,key,{firstTry:true,day});
   for(let i=0;i<2;i++)recordCapabilityEvidence(s,{completed:true,firstTry:true,purpose:'transfer',skillKey:key},{day});

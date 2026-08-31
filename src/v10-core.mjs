@@ -95,7 +95,7 @@ function rankedKeys(s){
 
 export function parentLearningSummary(s){
   const keys=rankedKeys(s),recentlyPracticed=keys.filter(key=>cleanCount(historyFor(s,key).attempts)>0).slice(0,4);
-  const stableRetrieval=keys.filter(key=>cleanCount(evidenceFor(s,key).independentRetrievals)>0).slice(0,4);
+  const stableRetrieval=keys.filter(key=>cleanCount(historyFor(s,key).successfulRevisits)>0||cleanCount(evidenceFor(s,key).independentRetrievals)>0).slice(0,4);
   const stillBuilding=keys.filter(key=>['explored','growing'].includes(capabilityState(s,key).id)).slice(0,4);
   const recentTransfer=keys.filter(key=>cleanCount(evidenceFor(s,key).independentTransfers)>0).slice(0,4);
   const supportSuggestion=stillBuilding.length?'可以請孩子挑一個正在長大的能力，說說他先看見了哪些數量。':'可以請孩子選一個發光的能力，換個生活故事說說他怎麼想。';
