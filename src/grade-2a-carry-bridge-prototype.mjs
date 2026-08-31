@@ -11,6 +11,12 @@ import {
 export const CARRY_BRIDGE_PROTOTYPE_FLAG='carry-bridge';
 export const CARRY_BRIDGE_PROTOTYPE_RULES=Object.freeze(Object.keys(CARRY_BRIDGE_CASE_RULES));
 export const CARRY_BRIDGE_PROTOTYPE_PATHS=Object.freeze(['tap-select-place','pointer-drag']);
+export const CARRY_BRIDGE_DOGFOOD_VARIANTS=Object.freeze({
+  interaction:Object.freeze(['tap-first','drag-first','balanced']),
+  bundle:Object.freeze(['individual','pair-scoop']),
+  result:Object.freeze(['cargo-slip','digit-dials'])
+});
+export const CARRY_BRIDGE_DOGFOOD_DEFAULTS=Object.freeze({interaction:'tap-first',bundle:'individual',result:'cargo-slip'});
 
 const clone=value=>JSON.parse(JSON.stringify(value));
 
@@ -19,23 +25,62 @@ export function carryBridgePrototypeAccessEnabled(search=''){
   return params.get('prototype')===CARRY_BRIDGE_PROTOTYPE_FLAG;
 }
 
+export function normalizeCarryBridgeDogfoodVariants(source=''){
+  const params=source instanceof URLSearchParams?source:new URLSearchParams(typeof source==='string'?String(source).replace(/^\?/,''):'');
+  const supplied=typeof source==='object'&&source!==null&&!(source instanceof URLSearchParams)?source:{};
+  const value=(key,queryKey)=>String(supplied[key]??params.get(queryKey)??CARRY_BRIDGE_DOGFOOD_DEFAULTS[key]);
+  const normalized={
+    interaction:value('interaction','interaction'),bundle:value('bundle','bundle'),result:value('result','result')
+  };
+  for(const key of Object.keys(normalized))if(!CARRY_BRIDGE_DOGFOOD_VARIANTS[key].includes(normalized[key]))normalized[key]=CARRY_BRIDGE_DOGFOOD_DEFAULTS[key];
+  return normalized;
+}
+
+export function carryBridgeDogfoodVariantQuery(variants={},extra={}){
+  const normalized=normalizeCarryBridgeDogfoodVariants(variants),params=new URLSearchParams({prototype:CARRY_BRIDGE_PROTOTYPE_FLAG,...normalized,...extra});
+  return `?${params.toString()}`;
+}
+
+export function carryBridgeDogfoodSelection(selectedIndexes,index,{unit='one',bundleVariant='individual',workspaceCount=0}={}){
+  const selected=new Set([...selectedIndexes].filter(value=>Number.isInteger(value)&&value>=0&&value<workspaceCount));
+  if(!Number.isInteger(index)||index<0||index>=workspaceCount)return [...selected].sort((a,b)=>a-b);
+  if(selected.has(index)){selected.delete(index);return [...selected].sort((a,b)=>a-b)}
+  selected.add(index);
+  if(unit==='one'&&bundleVariant==='pair-scoop'&&selected.size<10){
+    const partner=Array.from({length:workspaceCount},(_,candidate)=>candidate).find(candidate=>candidate!==index&&!selected.has(candidate));
+    if(partner!==undefined)selected.add(partner);
+  }
+  return [...selected].sort((a,b)=>a-b);
+}
+
+export function carryBridgeExactTenTray(selectedOneCount){
+  const count=Math.max(0,Math.trunc(Number(selectedOneCount)||0));
+  return {selectedOneCount:count,filledSlots:Math.min(10,count),overflowCount:Math.max(0,count-10),exactTen:count===10};
+}
+
+export function carryBridgeDigitDialAnswer(tens,ones){
+  const cleanTens=Math.trunc(Number(tens)),cleanOnes=Math.trunc(Number(ones));
+  if(!Number.isInteger(cleanTens)||!Number.isInteger(cleanOnes)||cleanTens<0||cleanTens>9||cleanOnes<0||cleanOnes>9)throw new RangeError('Digit dials require two digits from 0 to 9');
+  return cleanTens*10+cleanOnes;
+}
+
 export function carryBridgePrototypeNeutralSurface(problem){
   const operation=problem?.operation;
   if(operation!=='add'&&operation!=='subtract')throw new Error('Prototype case operation required');
   return {
     schemaVersion:'1.0.0',layoutId:'carry-bridge-neutral-workbench-v1',operation,
-    visibleControlIds:['tens-lane','ones-lane','join-zone','bundle-zone','split-zone','unload-zone','answer-submit','hint'],
+    visibleControlIds:['tens-lane','ones-lane','join-zone','bundle-zone','split-zone','unload-zone','ten-tray','result-entry','answer-submit','hint'],
     exchangeClassVisible:false,regroupingLabelVisible:false,expectedExchangeMetadataVisible:false,
     minimumTargetCssPixels:44
   };
 }
 
-export function createCarryBridgePrototypeSession(caseRuleId,{rng=Math.random,sourceNonce=0}={}){
+export function createCarryBridgePrototypeSession(caseRuleId,{rng=Math.random,sourceNonce=0,variants=CARRY_BRIDGE_DOGFOOD_DEFAULTS}={}){
   const problem=makeCarryBridgeCase(caseRuleId,{rng,sourceNonce});
   return {
     schemaVersion:'1.0.0',surface:'hidden-non-production',problem,
-    coreState:createCarryBridgeActionState(problem),interactionLog:[],
-    evidenceBoundary:{ledgerWritePerformed:false,formalMasteryClaimed:false,persisted:false}
+    variants:normalizeCarryBridgeDogfoodVariants(variants),coreState:createCarryBridgeActionState(problem),interactionLog:[],
+    evidenceBoundary:{ledgerWritePerformed:false,formalMasteryClaimed:false,persisted:false,transferClaimed:false,completionClaimed:false,progressionWritePerformed:false,rewardWritePerformed:false}
   };
 }
 
@@ -56,7 +101,7 @@ export function applyCarryBridgePrototypeIntent(sourceSession,intent,{interactio
   const session=clone(sourceSession),semanticAction=carryBridgePrototypeSemanticAction(intent);
   session.coreState=applyCarryBridgeAction(session.coreState,semanticAction);
   session.interactionLog.push({index:session.interactionLog.length,interactionPath,intent:clone(intent),semanticAction:clone(semanticAction),resultCode:session.coreState.lastActionResult.code});
-  session.evidenceBoundary={ledgerWritePerformed:false,formalMasteryClaimed:false,persisted:false};
+  session.evidenceBoundary={ledgerWritePerformed:false,formalMasteryClaimed:false,persisted:false,transferClaimed:false,completionClaimed:false,progressionWritePerformed:false,rewardWritePerformed:false};
   return session;
 }
 
@@ -70,11 +115,12 @@ export function classifyCarryBridgePrototypeSession(session){
 export function carryBridgePrototypeDebugReadback(session){
   const classification=classifyCarryBridgePrototypeSession(session);
   return {
-    schemaVersion:'1.0.0',surface:'hidden-non-production',problem:clone(session.problem),
+    schemaVersion:'1.0.0',surface:'hidden-non-production',problem:clone(session.problem),variants:clone(session.variants),
     state:{phase:session.coreState.phase,complete:session.coreState.complete,numericCorrect:session.coreState.numericCorrect,workspace:clone(session.coreState.workspace),remainingToUnload:clone(session.coreState.remainingToUnload)},
     semanticActionTrace:clone(session.coreState.actionTrace),interactionLog:clone(session.interactionLog),classification,
     misconceptionSignals:carryBridgeMisconceptionSignals(session.problem,session.coreState.actionTrace),
-    evidenceBoundary:{ledgerWritePerformed:false,formalMasteryClaimed:false,persisted:false,transferClaimed:false,completionClaimed:false}
+    motorNoisePolicy:{semanticActionsOnly:true,rawPointerCoordinatesStored:false,motorNoiseDisqualifiesIndependence:false},
+    evidenceBoundary:{ledgerWritePerformed:false,formalMasteryClaimed:false,persisted:false,transferClaimed:false,completionClaimed:false,progressionWritePerformed:false,rewardWritePerformed:false}
   };
 }
 
@@ -85,6 +131,16 @@ export function carryBridgePrototypeHint(session){
   if(!signal&&session.problem.operation==='subtract'&&Number(session.coreState.workspace?.ones)<Number(session.coreState.remainingToUnload?.ones))signal='sub-borrow-value';
   if(!signal)signal=session.problem.operation==='add'?'add-align':'sub-direction';
   return carryBridgeHint(signal);
+}
+
+export function carryBridgePrototypeResultReady(session){
+  const state=session?.coreState,problem=session?.problem;
+  if(!state||!problem)return false;
+  if(state.complete)return true;
+  if(!state.workspace||state.workspace.ones<0||state.workspace.ones>9)return false;
+  if(problem.operation==='add')return state.joined===true;
+  if(problem.operation==='subtract')return Number(state.remainingToUnload?.tens)===0&&Number(state.remainingToUnload?.ones)===0;
+  return false;
 }
 
 export function replayCarryBridgePrototypeIntents(session,intents,{interactionPath='tap-select-place'}={}){

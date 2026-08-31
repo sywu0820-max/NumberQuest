@@ -2,6 +2,8 @@
 
 Status: **hidden, non-production interaction review gate**
 
+Successor: the stacked founder-dogfood hardening contract is documented in `docs/GRADE_2A_CARRY_BRIDGE_FOUNDER_DOGFOOD.md`. This accepted PR #15 document remains the frozen prototype baseline.
+
 Accepted headless-core base: `a891c71bc0733848d457c26c3e5e4e0e15563836`
 
 This prototype turns the accepted semantic mechanics into a touch-first browser workbench without adding a normal product entry point. It does not change 百光港, home navigation, World progression, rewards, the accepted Grade 2A evidence ledger, or formal mastery.
