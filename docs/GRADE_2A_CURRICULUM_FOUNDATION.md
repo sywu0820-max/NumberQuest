@@ -241,6 +241,8 @@ This is a useful skeleton: a later verified unit list can fill order and placeme
 
 Worlds are not required to unlock as eight textbook chapters. A future adaptive journey may pull a bounded quest from multiple unlocked families according to prerequisites, school-proximity and actual mastery.
 
+The reviewable, design-only contract for 交換橋工坊 is documented in `docs/GRADE_2A_CARRY_BRIDGE_DESIGN_CONTRACT.md` and machine-readable at `curriculum/grade-2a.carry-bridge-design.json`. It does not authorize runtime implementation or evidence emission.
+
 ### World membership versus completion
 
 Every World declares three lists:

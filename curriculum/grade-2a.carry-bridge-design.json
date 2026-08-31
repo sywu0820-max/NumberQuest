@@ -1,0 +1,592 @@
+{
+  "schemaVersion": "1.0.0",
+  "contractId": "tw-grade-2a-carry-bridge-design",
+  "worldId": "world.carry-bridge",
+  "childTitle": "交換橋工坊",
+  "status": "design-only-review-contract",
+  "runtimeApproved": false,
+  "runtimeIntegration": false,
+  "sourceContracts": {
+    "acceptedBaseHead": "1156bc9f992d6148dae17f15ce243abc1579c354",
+    "skillGraph": "curriculum/grade-2a.skill-graph.json",
+    "masteryRules": "curriculum/grade-2a.mastery-rules.json",
+    "evidenceLedger": "curriculum/grade-2a.evidence-ledger.json"
+  },
+  "productBoundary": {
+    "role": "Bridge engineer",
+    "missionPromise": "Join, split and exchange place-value bundles so bridges carry exactly the load they need.",
+    "mathActionIsGameplayAction": true,
+    "childFacingRuntimeIncluded": false,
+    "questionBankIncluded": false,
+    "changesExistingWorlds": false,
+    "changesProgressionOrRewards": false,
+    "changesPublisherFlow": false
+  },
+  "arithmeticBounds": {
+    "additionMaximum": 100,
+    "subtractionMinimum": 0,
+    "operandPlaceValues": ["tens", "ones"],
+    "regroupingExchange": "10-ones-for-1-ten-or-1-ten-for-10-ones",
+    "maximumRequiredExchangesPerCase": 1
+  },
+  "ownership": {
+    "skillIds": [
+      "g2a.add.no-regroup-100",
+      "g2a.add.regroup-100",
+      "g2a.sub.no-regroup-100",
+      "g2a.sub.regroup-100",
+      "g2a.addsub.explain-vertical"
+    ],
+    "requiredForCompletionSkillIds": [
+      "g2a.add.no-regroup-100",
+      "g2a.add.regroup-100",
+      "g2a.sub.no-regroup-100",
+      "g2a.sub.regroup-100",
+      "g2a.addsub.explain-vertical"
+    ],
+    "eligibilityBranchSkillIds": [],
+    "worldEntryPrerequisiteSkillIds": ["g2a.num.compose-200"],
+    "externalPrerequisites": [
+      "basic addition facts within 18",
+      "basic subtraction facts within 18"
+    ],
+    "skillPrerequisites": {
+      "g2a.add.no-regroup-100": ["g2a.num.compose-200"],
+      "g2a.add.regroup-100": ["g2a.add.no-regroup-100"],
+      "g2a.sub.no-regroup-100": ["g2a.num.compose-200"],
+      "g2a.sub.regroup-100": ["g2a.sub.no-regroup-100"],
+      "g2a.addsub.explain-vertical": [
+        "g2a.add.regroup-100",
+        "g2a.sub.regroup-100"
+      ]
+    }
+  },
+  "completionBoundary": {
+    "allOwnedSkillsAreCommonRequirements": true,
+    "optionalSkillIds": [],
+    "worldCompletionIsFormalMastery": false,
+    "formalMasteryControlsThisDesign": false,
+    "missionVolumeAloneCanComplete": false,
+    "transferCandidatesCanComplete": false,
+    "runtimeCompletionRuleApproved": false,
+    "runtimeApprovalRequirement": "A later implementation review must define observed per-skill completion evidence without changing the five-skill boundary."
+  },
+  "childActionModel": {
+    "verbs": ["join", "place", "bundle", "exchange", "split", "unload", "repair", "rebuild"],
+    "interactionLoop": [
+      "inspect-the-bridge-load",
+      "act-on-tens-and-ones",
+      "exchange-only-when-the-quantities-require-it",
+      "rebuild-the-blueprint-from-the-result",
+      "send-the-repaired-bridge"
+    ],
+    "forbiddenLoop": "solve-symbolic-equation-then-watch-bridge-animation"
+  },
+  "evidenceTaggingPolicy": {
+    "derivedFromBothCasePredicatesAndObservedActionTrace": true,
+    "generatorCaseClassAloneIsSufficient": false,
+    "exchangeActionsAreObservedNotInferred": true,
+    "rawGestureCoordinatesStored": false,
+    "actionTraceRetention": "ephemeral-until-outcome-classification",
+    "allAcquisitionTagsRequireSuccessfulSolution": true,
+    "noRegroupRequiresZeroObservedExchangeActions": true,
+    "regroupRequiresExactObservedDirectionAndCount": true,
+    "invalidOrMismatchedTraceCanEmitIndependentAcquisition": false,
+    "unnecessaryExchangeInNoRegroupCase": {
+      "policy": "neutral-reject-and-return-control",
+      "missionCompletes": false,
+      "progressOrRewardPenalty": false,
+      "completedCanonicalOutcomeEventEmitted": false,
+      "independentAcquisitionEvidenceEmitted": false,
+      "noRegroupTagEmitted": false,
+      "reason": "A value-preserving exchange may be mathematically valid, but it does not demonstrate the target no-regroup strategy."
+    },
+    "observedExchangeActionSchema": {
+      "required": ["direction", "inputUnit", "inputUnitCount", "outputUnit", "outputUnitCount", "valueBefore", "valueAfter"],
+      "directions": ["ones-to-tens", "tens-to-ones"],
+      "valueMustBePreserved": true
+    }
+  },
+  "caseRules": {
+    "add-no-regroup": {
+      "skillId": "g2a.add.no-regroup-100",
+      "operandCount": 2,
+      "operandMinimum": 10,
+      "operandMaximum": 99,
+      "resultMinimum": 20,
+      "resultMaximum": 99,
+      "constraints": ["left-ones-plus-right-ones-at-most-9", "left-tens-plus-right-tens-at-most-9"],
+      "requiredExchange": "none",
+      "evidenceTagsWhenCaseAndTraceEligible": ["no-regroup", "observed-zero-exchange"],
+      "evidenceEligibility": {
+        "requiresSuccessfulSolution": true,
+        "requiresAllCasePredicates": true,
+        "observedActionTrace": {
+          "exchangeActionCount": 0,
+          "unexpectedExchangeActionCount": 0
+        }
+      },
+      "conditionalEvidenceTags": {
+        "boundary": ["ones-sum-equals-9", "result-at-least-90"]
+      }
+    },
+    "add-regroup": {
+      "skillId": "g2a.add.regroup-100",
+      "operandCount": 2,
+      "operandMinimum": 10,
+      "operandMaximum": 99,
+      "resultMinimum": 20,
+      "resultMaximum": 99,
+      "constraints": ["left-ones-plus-right-ones-at-least-10", "sum-at-most-99"],
+      "requiredExchange": "ones-to-tens",
+      "evidenceTagsWhenCaseAndTraceEligible": ["regrouping-sensitive", "ones-to-tens-regrouping", "observed-one-ones-to-tens-exchange", "observed-value-preserving-exchange"],
+      "evidenceEligibility": {
+        "requiresSuccessfulSolution": true,
+        "requiresAllCasePredicates": true,
+        "observedActionTrace": {
+          "exchangeActionCount": 1,
+          "exchangeDirection": "ones-to-tens",
+          "inputUnit": "one",
+          "inputUnitCount": 10,
+          "outputUnit": "ten",
+          "outputUnitCount": 1,
+          "unexpectedExchangeActionCount": 0,
+          "valueBeforeEqualsValueAfter": true
+        }
+      },
+      "conditionalEvidenceTags": {
+        "boundary": ["ones-sum-equals-10", "result-at-least-90"]
+      }
+    },
+    "sub-no-regroup": {
+      "skillId": "g2a.sub.no-regroup-100",
+      "operandCount": 2,
+      "operandMinimum": 10,
+      "operandMaximum": 99,
+      "resultMinimum": 0,
+      "resultMaximum": 89,
+      "constraints": ["minuend-at-least-subtrahend", "minuend-ones-at-least-subtrahend-ones"],
+      "requiredExchange": "none",
+      "evidenceTagsWhenCaseAndTraceEligible": ["no-regroup", "observed-zero-exchange"],
+      "evidenceEligibility": {
+        "requiresSuccessfulSolution": true,
+        "requiresAllCasePredicates": true,
+        "observedActionTrace": {
+          "exchangeActionCount": 0,
+          "unexpectedExchangeActionCount": 0
+        }
+      },
+      "conditionalEvidenceTags": {
+        "boundary": ["ones-difference-equals-0", "result-at-most-10"]
+      }
+    },
+    "sub-regroup": {
+      "skillId": "g2a.sub.regroup-100",
+      "operandCount": 2,
+      "operandMinimum": 10,
+      "operandMaximum": 99,
+      "resultMinimum": 0,
+      "resultMaximum": 89,
+      "constraints": ["minuend-at-least-subtrahend", "minuend-ones-less-than-subtrahend-ones"],
+      "requiredExchange": "tens-to-ones",
+      "evidenceTagsWhenCaseAndTraceEligible": ["regrouping-sensitive", "tens-to-ones-exchange", "observed-one-tens-to-ones-exchange", "observed-value-preserving-exchange"],
+      "evidenceEligibility": {
+        "requiresSuccessfulSolution": true,
+        "requiresAllCasePredicates": true,
+        "observedActionTrace": {
+          "exchangeActionCount": 1,
+          "exchangeDirection": "tens-to-ones",
+          "inputUnit": "ten",
+          "inputUnitCount": 1,
+          "outputUnit": "one",
+          "outputUnitCount": 10,
+          "unexpectedExchangeActionCount": 0,
+          "valueBeforeEqualsValueAfter": true
+        }
+      },
+      "conditionalEvidenceTags": {
+        "boundary": ["ones-deficit-equals-1", "result-at-most-10"]
+      }
+    }
+  },
+  "controlledVocabulary": {
+    "ledgerExtensionStatus": "proposed-not-runtime-approved",
+    "ledgerFieldMapping": [
+      "worldId",
+      "skillId",
+      "representationId",
+      "representationFamily",
+      "contextId",
+      "contextFamily",
+      "evidenceTags"
+    ],
+    "representations": {
+      "base-ten-workbench": {
+        "family": "base-ten-manipulatives",
+        "mathematicalModel": "movable-one-cubes-and-ten-bundles-with-value-preserving-exchange",
+        "cosmeticVariant": false
+      },
+      "bridge-load-lanes": {
+        "family": "place-value-load-model",
+        "mathematicalModel": "tens-and-ones-loads-placed-in-aligned-bridge-lanes",
+        "cosmeticVariant": false
+      },
+      "vertical-place-value-blueprint": {
+        "family": "vertical-notation",
+        "mathematicalModel": "aligned-symbolic-columns-reconstructed-from-place-value-actions",
+        "cosmeticVariant": false
+      },
+      "exchange-sequence-panels": {
+        "family": "exchange-sequence-model",
+        "mathematicalModel": "ordered-before-exchange-after-equivalence-states",
+        "cosmeticVariant": false
+      }
+    },
+    "contexts": {
+      "bridge-join-deck": {"family": "bridge-loading", "phase": "acquisition-retrieval"},
+      "bridge-repair-deck": {"family": "bridge-repair", "phase": "acquisition-retrieval"},
+      "workshop-blueprint-table": {"family": "bridge-blueprint", "phase": "acquisition-retrieval"},
+      "counterweight-routing": {"family": "bridge-counterweight", "phase": "transfer-candidate"},
+      "repair-stock-reconcile": {"family": "workshop-inventory", "phase": "transfer-candidate"},
+      "blueprint-error-audit": {"family": "bridge-inspection", "phase": "transfer-candidate"},
+      "crew-handoff-log": {"family": "engineer-handoff", "phase": "transfer-candidate"}
+    },
+    "evidenceTags": {
+      "acceptedMasteryTags": ["boundary", "no-regroup", "regrouping-sensitive", "ones-to-tens-regrouping", "tens-to-ones-exchange"],
+      "proposedObservedTraceTags": ["observed-zero-exchange", "observed-one-ones-to-tens-exchange", "observed-one-tens-to-ones-exchange", "observed-value-preserving-exchange"]
+    }
+  },
+  "missionFamilies": [
+    {
+      "id": "carry-join-loads",
+      "childFacingVerbs": ["join", "place", "bundle", "exchange"],
+      "ownedSkillIds": ["g2a.add.no-regroup-100", "g2a.add.regroup-100"],
+      "representationIds": ["base-ten-workbench", "bridge-load-lanes"],
+      "contextIds": ["bridge-join-deck"],
+      "allowedEvidenceKinds": ["acquisition", "retrieval"],
+      "mathAction": "The child joins two visible loads in aligned tens/ones lanes and physically bundles exactly ten ones when an exchange is required.",
+      "caseRuleIds": ["add-no-regroup", "add-regroup"],
+      "observedActionTraceRequirement": "case-rule-evidence-eligibility",
+      "presentationRevealsExchangeClass": false,
+      "misconceptionIds": ["add-align", "add-carry-value"],
+      "hintSequenceIds": ["align-place-value-lanes", "make-one-ten-from-ten-ones"],
+      "freshRetryPolicyId": "fresh-isomorphic-case",
+      "answerLeakGuards": ["no-prefilled-total", "no-highlighted-final-lane", "exchange-control-does-not-signal-whether-exchange-is-needed"]
+    },
+    {
+      "id": "carry-repair-by-unloading",
+      "childFacingVerbs": ["split", "unload", "repair"],
+      "ownedSkillIds": ["g2a.sub.no-regroup-100", "g2a.sub.regroup-100"],
+      "representationIds": ["base-ten-workbench", "bridge-load-lanes"],
+      "contextIds": ["bridge-repair-deck"],
+      "allowedEvidenceKinds": ["acquisition", "retrieval"],
+      "mathAction": "The child removes a requested load from the visible whole and must split one ten into ten ones when the ones available are insufficient.",
+      "caseRuleIds": ["sub-no-regroup", "sub-regroup"],
+      "observedActionTraceRequirement": "case-rule-evidence-eligibility",
+      "presentationRevealsExchangeClass": false,
+      "misconceptionIds": ["sub-direction", "sub-borrow-value"],
+      "hintSequenceIds": ["preserve-whole-and-removal-direction", "split-one-ten-into-ten-ones"],
+      "freshRetryPolicyId": "fresh-isomorphic-case",
+      "answerLeakGuards": ["no-prefilled-remainder", "no-smaller-digit-first-affordance", "exchange-control-does-not-signal-whether-exchange-is-needed"]
+    },
+    {
+      "id": "carry-blueprint-from-bundles",
+      "childFacingVerbs": ["place", "rebuild"],
+      "ownedSkillIds": ["g2a.addsub.explain-vertical"],
+      "representationIds": ["base-ten-workbench", "vertical-place-value-blueprint"],
+      "primaryEvidenceRepresentationId": "base-ten-workbench",
+      "contextIds": ["workshop-blueprint-table"],
+      "allowedEvidenceKinds": ["acquisition", "retrieval"],
+      "mathAction": "The child reconstructs aligned vertical notation from a completed concrete join or split, including the value represented by an exchange.",
+      "caseRuleIds": ["add-regroup", "sub-regroup"],
+      "presentationRevealsExchangeClass": true,
+      "misconceptionIds": ["add-carry-value", "sub-borrow-value"],
+      "hintSequenceIds": ["trace-bundle-value-to-blueprint-column"],
+      "freshRetryPolicyId": "fresh-isomorphic-case",
+      "answerLeakGuards": ["no-prefilled-exchange-digit", "no-auto-aligned-answer", "notation-must-follow-child-built-bundles"]
+    },
+    {
+      "id": "carry-bundles-from-blueprint",
+      "childFacingVerbs": ["rebuild", "bundle", "split"],
+      "ownedSkillIds": ["g2a.addsub.explain-vertical"],
+      "representationIds": ["vertical-place-value-blueprint", "exchange-sequence-panels"],
+      "primaryEvidenceRepresentationId": "vertical-place-value-blueprint",
+      "contextIds": ["workshop-blueprint-table"],
+      "allowedEvidenceKinds": ["acquisition", "retrieval"],
+      "mathAction": "The child enacts an aligned blueprint with bundles and orders before/exchange/after states to show what the written exchange means.",
+      "caseRuleIds": ["add-regroup", "sub-regroup"],
+      "presentationRevealsExchangeClass": true,
+      "misconceptionIds": ["add-carry-value", "sub-borrow-value"],
+      "hintSequenceIds": ["trace-blueprint-column-to-bundle-value"],
+      "freshRetryPolicyId": "fresh-isomorphic-case",
+      "answerLeakGuards": ["no-auto-ordered-panels", "no-animation-before-child-model", "exchange-value-not-stated-as-final-placement"]
+    }
+  ],
+  "misconceptionResponse": {
+    "misconceptions": {
+      "add-align": {
+        "observableSignal": "The child places or combines ones in the tens lane, or tens in the ones lane.",
+        "hintSequenceIds": ["align-place-value-lanes"],
+        "freshRetryPolicyId": "fresh-isomorphic-case"
+      },
+      "add-carry-value": {
+        "observableSignal": "The child moves a bare 1 to the tens lane without selecting and bundling exactly ten ones.",
+        "hintSequenceIds": ["make-one-ten-from-ten-ones"],
+        "freshRetryPolicyId": "fresh-isomorphic-case"
+      },
+      "sub-direction": {
+        "observableSignal": "The child swaps removal direction or subtracts the smaller visible digit from the larger regardless of the whole.",
+        "hintSequenceIds": ["preserve-whole-and-removal-direction"],
+        "freshRetryPolicyId": "fresh-contrast-case"
+      },
+      "sub-borrow-value": {
+        "observableSignal": "The child adds one loose one after borrowing instead of splitting one ten into ten ones.",
+        "hintSequenceIds": ["split-one-ten-into-ten-ones"],
+        "freshRetryPolicyId": "fresh-isomorphic-case"
+      }
+    },
+    "hintSequences": {
+      "align-place-value-lanes": ["pulse-the-two-place-labels", "ask-where-one-unit-belongs", "return-control-without-filling-a-lane"],
+      "make-one-ten-from-ten-ones": ["let-the-child-select-ten-ones", "bind-the-selected-ones-into-one-ten", "return-control-with-the-new-ten-unplaced"],
+      "preserve-whole-and-removal-direction": ["keep-the-starting-whole-visible", "trace-remove-from-the-whole", "return-control-before-any-remainder-is-shown"],
+      "split-one-ten-into-ten-ones": ["let-the-child-open-one-ten", "count-the-ten-released-ones", "return-control-before-removal-continues"],
+      "trace-bundle-value-to-blueprint-column": ["select-one-child-built-bundle", "trace-its-place-value-column", "return-control-before-the-digit-is-placed"],
+      "trace-blueprint-column-to-bundle-value": ["select-one-written-place", "ask-for-the-matching-bundle-value", "return-control-before-a-bundle-is-created"]
+    },
+    "freshRetryPolicies": {
+      "fresh-isomorphic-case": {
+        "newOperandPair": true,
+        "preserveSkillId": true,
+        "preserveExchangeClass": true,
+        "sourceQuestionIdMustChange": true,
+        "schedulerLineageMayPersist": true,
+        "answerStateReset": true,
+        "hintedOrRecoveredCountsAsIndependent": false
+      },
+      "fresh-contrast-case": {
+        "newOperandPair": true,
+        "preserveSkillId": true,
+        "contrastDigitOrder": true,
+        "sourceQuestionIdMustChange": true,
+        "schedulerLineageMayPersist": true,
+        "answerStateReset": true,
+        "hintedOrRecoveredCountsAsIndependent": false
+      }
+    }
+  },
+  "evidenceDesign": {
+    "runtimeEmissionApproved": false,
+    "acquisitionAndRetrievalOnlyMissionFamilies": true,
+    "retrieval": {
+      "freshSourceQuestionRequired": true,
+      "schedulerLineageSeparateFromSourceIdentity": true,
+      "sameSessionDoesNotCountAsLaterSession": true,
+      "nextSessionMinimumDayGap": 1,
+      "laterDayGap": 3
+    },
+    "skillMatrix": {
+      "g2a.add.no-regroup-100": {
+        "profileId": "calculation",
+        "acquisitionCaseRuleId": "add-no-regroup",
+        "requiredTagsAcrossAcquisition": ["boundary", "no-regroup"],
+        "retrievalMissionFamilyIds": ["carry-join-loads"],
+        "transferCandidateIds": ["carry-counterweight-plan", "carry-repair-stock-reconcile"]
+      },
+      "g2a.add.regroup-100": {
+        "profileId": "calculation",
+        "acquisitionCaseRuleId": "add-regroup",
+        "requiredTagsAcrossAcquisition": ["boundary", "regrouping-sensitive", "ones-to-tens-regrouping"],
+        "retrievalMissionFamilyIds": ["carry-join-loads"],
+        "transferCandidateIds": ["carry-counterweight-plan", "carry-repair-stock-reconcile"]
+      },
+      "g2a.sub.no-regroup-100": {
+        "profileId": "calculation",
+        "acquisitionCaseRuleId": "sub-no-regroup",
+        "requiredTagsAcrossAcquisition": ["boundary", "no-regroup"],
+        "retrievalMissionFamilyIds": ["carry-repair-by-unloading"],
+        "transferCandidateIds": ["carry-counterweight-plan", "carry-repair-stock-reconcile"]
+      },
+      "g2a.sub.regroup-100": {
+        "profileId": "calculation",
+        "acquisitionCaseRuleId": "sub-regroup",
+        "requiredTagsAcrossAcquisition": ["boundary", "regrouping-sensitive", "tens-to-ones-exchange"],
+        "retrievalMissionFamilyIds": ["carry-repair-by-unloading"],
+        "transferCandidateIds": ["carry-counterweight-plan", "carry-repair-stock-reconcile"]
+      },
+      "g2a.addsub.explain-vertical": {
+        "profileId": "concept",
+        "acquisitionMissionFamilyIds": ["carry-blueprint-from-bundles", "carry-bundles-from-blueprint"],
+        "requiredRepresentationFamilies": ["base-ten-manipulatives", "vertical-notation"],
+        "retrievalMissionFamilyIds": ["carry-blueprint-from-bundles", "carry-bundles-from-blueprint"],
+        "transferCandidateIds": ["carry-blueprint-error-audit", "carry-crew-handoff-reconstruction"]
+      }
+    }
+  },
+  "transferCandidates": [
+    {
+      "id": "carry-counterweight-plan",
+      "designOnly": true,
+      "runtimeApproved": false,
+      "evidenceEmissionApproved": false,
+      "eligibleSkillIds": ["g2a.add.no-regroup-100", "g2a.add.regroup-100", "g2a.sub.no-regroup-100", "g2a.sub.regroup-100"],
+      "representationId": "bridge-load-lanes",
+      "contextId": "counterweight-routing",
+      "transferSurfaceId": "counterweight-balance-without-operation-cue",
+      "mathematicalDifference": "The child must infer whether to combine or remove loads to balance a route; no vertical form or operation cue is supplied.",
+      "reviewRisk": "May still be too close to bridge loading and must be independently judged before approval."
+    },
+    {
+      "id": "carry-repair-stock-reconcile",
+      "designOnly": true,
+      "runtimeApproved": false,
+      "evidenceEmissionApproved": false,
+      "eligibleSkillIds": ["g2a.add.no-regroup-100", "g2a.add.regroup-100", "g2a.sub.no-regroup-100", "g2a.sub.regroup-100"],
+      "representationId": "base-ten-workbench",
+      "contextId": "repair-stock-reconcile",
+      "transferSurfaceId": "inventory-reconciliation-without-vertical-form",
+      "mathematicalDifference": "The child reconciles parts delivered, used and remaining from an inventory state rather than following a displayed calculation.",
+      "reviewRisk": "The relationship and language load need child testing before this can count as transfer."
+    },
+    {
+      "id": "carry-blueprint-error-audit",
+      "designOnly": true,
+      "runtimeApproved": false,
+      "evidenceEmissionApproved": false,
+      "eligibleSkillIds": ["g2a.addsub.explain-vertical"],
+      "representationId": "exchange-sequence-panels",
+      "contextId": "blueprint-error-audit",
+      "transferSurfaceId": "diagnose-value-preservation-error",
+      "mathematicalDifference": "The child diagnoses which step breaks place-value equivalence instead of constructing a familiar worked example.",
+      "reviewRisk": "Error diagnosis may over-rely on reading or elimination and needs a nonverbal prototype."
+    },
+    {
+      "id": "carry-crew-handoff-reconstruction",
+      "designOnly": true,
+      "runtimeApproved": false,
+      "evidenceEmissionApproved": false,
+      "eligibleSkillIds": ["g2a.addsub.explain-vertical"],
+      "representationId": "vertical-place-value-blueprint",
+      "contextId": "crew-handoff-log",
+      "transferSurfaceId": "reconstruct-missing-exchange-state",
+      "mathematicalDifference": "The child reconstructs a missing exchange state from a partial handoff record rather than copying bundles into notation.",
+      "reviewRisk": "Must prove it measures exchange meaning rather than puzzle-pattern completion."
+    }
+  ],
+  "accessibilityAndInteraction": {
+    "minimumTouchTargetCssPixels": 44,
+    "dragOnlyInteractionForbidden": true,
+    "tapSelectThenPlaceAlternativeRequired": true,
+    "keyboardAndPointerOperable": true,
+    "colorAsSoleSignalForbidden": true,
+    "textOnlyInstructionForbidden": true,
+    "spokenOrIconSupportedShortPrompts": true,
+    "timedInputRequired": false,
+    "speedIsEvidence": false,
+    "reducedMotionAlternativeRequired": true,
+    "onePrimaryMathDecisionPerStep": true,
+    "mistakesRemoveProgressOrRewards": false,
+    "firstClassTargets": ["iPad Safari", "Surface Pro Edge"]
+  },
+  "antiWorksheetInvariants": [
+    "calculation-missions-begin-with-quantities-not-a-complete-vertical-equation",
+    "the-childs-bundle-or-split-action-causes-the-bridge-state-change",
+    "vertical-notation-is-reconstructed-from-or-enacted-as-place-value-action",
+    "no-answer-selection-followed-by-unrelated-reward-animation",
+    "hints-return-control-before-the-answer-is-complete",
+    "mistakes-never-remove-earned-progress-or-rewards",
+    "mission-success-cannot-be-earned-by-animation-volume-or-repetition-alone"
+  ],
+  "antiShortcutInvariants": [
+    "regrouping-requirement-is-derived-from-quantities-not-announced-by-layout",
+    "exchange-is-valid-only-for-exactly-ten-ones-or-one-ten",
+    "a-fixed-tap-or-drag-trace-cannot-solve-varied-generated-cases",
+    "correct-drop-zones-do-not-appear-in-a-fixed-position",
+    "bundle-count-and-screen-position-do-not-encode-the-final-digit",
+    "help-does-not-highlight-the-final-answer-or-reduce-the-action-to-one-choice",
+    "fresh-retry-changes-operands-and-source-question-identity",
+    "no-regroup-and-regroup-cases-share-the-same-neutral-entry-presentation",
+    "subtraction-preserves-whole-and-removal-direction-without-smaller-digit-first-affordance"
+  ],
+  "proposedValidation": [
+    {
+      "id": "carry-generator-arithmetic-stress",
+      "layer": "deterministic",
+      "minimumCasesPerCaseRule": 1200,
+      "assertions": ["addition-at-most-100", "subtraction-nonnegative", "exchange-count-matches-case-rule", "evidence-tags-follow-predicates"]
+    },
+    {
+      "id": "carry-fixed-trace-replay",
+      "layer": "deterministic",
+      "minimumCasesPerMissionFamily": 400,
+      "assertions": ["replaying-one-fixed-action-trace-does-not-solve-varied-cases", "positions-and-operands-vary-independently"]
+    },
+    {
+      "id": "carry-exchange-gate-fuzz",
+      "layer": "deterministic",
+      "minimumCasesPerExchangeDirection": 400,
+      "assertions": ["nine-or-eleven-ones-cannot-form-one-ten", "one-ten-always-produces-exactly-ten-ones", "exchange-preserves-total-value", "unnecessary-exchange-in-sub-no-regroup-cannot-emit-independent-no-regroup-evidence"]
+    },
+    {
+      "id": "carry-behavior-sensitive-evidence",
+      "layer": "deterministic",
+      "minimumCasesPerCaseRule": 400,
+      "assertions": ["case-class-alone-cannot-emit-acquisition-tags", "no-regroup-requires-zero-observed-exchanges", "regroup-requires-exactly-one-correct-direction-exchange", "wrong-direction-or-extra-exchange-cannot-emit-independent-acquisition", "successful-no-regroup-operands-with-unnecessary-exchange-do-not-emit-no-regroup-evidence"]
+    },
+    {
+      "id": "carry-hint-retry-identity",
+      "layer": "deterministic",
+      "minimumCasesPerMisconception": 100,
+      "assertions": ["hint-never-completes-answer", "retry-keeps-skill-and-case-class", "retry-uses-fresh-operands-and-source-id", "hinted-and-recovered-are-not-independent"]
+    },
+    {
+      "id": "carry-real-browser-shortcut-matrix",
+      "layer": "browser",
+      "targets": ["iPad Safari portrait", "iPad Safari landscape", "Surface Pro Edge", "keyboard-only"],
+      "assertions": ["no-fixed-position-answer-leak", "drag-and-tap-place-paths-are-equivalent", "exchange-class-not-revealed-before-quantity-inspection", "unnecessary-no-regroup-exchange-returns-control-without-evidence-or-penalty", "zero-console-or-page-errors"]
+    },
+    {
+      "id": "carry-real-browser-miss-repair-review",
+      "layer": "browser",
+      "targets": ["iPad Safari", "Surface Pro Edge"],
+      "assertions": ["miss-is-nonpunitive", "chosen-hint-returns-control", "fresh-retry-is-isomorphic", "review-source-is-fresh-with-separate-scheduler-lineage", "reload-offline-does-not-promote-session-or-day"]
+    },
+    {
+      "id": "carry-blueprint-semantic-roundtrip",
+      "layer": "deterministic-and-browser",
+      "minimumCasesPerOperation": 400,
+      "assertions": ["bundle-to-blueprint-preserves-value", "blueprint-to-bundle-preserves-value", "exchange-marker-cannot-be-placed-without-corresponding-exchange", "two-representation-evidence-is-mathematically-distinct"]
+    }
+  ],
+  "unresolvedQuestions": [
+    {
+      "id": "carry-uq-primary-gesture",
+      "question": "Should drag or tap-select-place be the default gesture after child dogfood, while both remain equivalent and accessible?",
+      "blockingFor": ["runtime-interaction-approval"]
+    },
+    {
+      "id": "carry-uq-explanation-observation",
+      "question": "Can ordering and rebuilding exchange states demonstrate explanation without introducing reading-heavy prompts?",
+      "blockingFor": ["g2a.addsub.explain-vertical-runtime-evidence"]
+    },
+    {
+      "id": "carry-uq-transfer-distinctness",
+      "question": "Are the counterweight and inventory candidates mathematically distinct enough from acquisition surfaces to count as transfer?",
+      "blockingFor": ["calculation-transfer-approval"]
+    },
+    {
+      "id": "carry-uq-transfer-language",
+      "question": "Can the blueprint audit and crew handoff candidates avoid measuring reading skill or pattern elimination instead of place-value explanation?",
+      "blockingFor": ["concept-transfer-approval"]
+    },
+    {
+      "id": "carry-uq-completion-runtime",
+      "question": "What bounded per-skill runtime evidence should complete the World without conflating completion, capability glow and formal mastery?",
+      "blockingFor": ["runtime-completion-contract"]
+    },
+    {
+      "id": "carry-uq-exact-100",
+      "question": "Should exact-100 sums add a reviewed 10-tens-to-1-hundred action, or remain outside this tens-and-ones World instead of hiding a second exchange?",
+      "blockingFor": ["runtime-case-generator", "exact-100-coverage"]
+    }
+  ]
+}
