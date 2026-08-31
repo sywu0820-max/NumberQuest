@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {
-  CARRY_BRIDGE_CASE_RULES,CARRY_BRIDGE_REPRESENTATIONS,CARRY_BRIDGE_SKILLS,CARRY_BRIDGE_WORLD_ID,
+  CARRY_BRIDGE_CASE_RULES,CARRY_BRIDGE_INDEPENDENCE_DISQUALIFIER_POLICY,CARRY_BRIDGE_REPRESENTATIONS,CARRY_BRIDGE_SKILLS,CARRY_BRIDGE_WORLD_ID,
   applyCarryBridgeAction,bundleModelToVerticalBlueprint,carryBridgeBundleModel,carryBridgeCaseRuleIds,
   carryBridgeHint,carryBridgeMisconceptionSignals,classifyCarryBridgeAcquisition,createCarryBridgeActionState,
   freshCarryBridgeRetry,makeCarryBridgeCase,replayCarryBridgeActions,solveCarryBridgeCase,validateCarryBridgeCase,
@@ -138,6 +138,84 @@ test('regroup evidence requires one exact observed exchange and final correctnes
     assert.ok(extraEvidence.reasons.includes('exact-observed-exchange-required'));
     const forged={...correctExchange,valueAfter:Number(correctExchange.valueAfter)+1,valuePreserved:true};
     assert.equal(classifyCarryBridgeAcquisition(problem,{outcome:'correct',attemptKind:'independent-first-try',actionTrace:[forged]}).independentAcquisitionEligible,false,`${ruleId}/forged-value`);
+  }
+});
+
+test('clean canonical traces remain eligible under the bounded semantic-only independence policy',()=>{
+  assert.equal(CARRY_BRIDGE_INDEPENDENCE_DISQUALIFIER_POLICY.inputScope,'semantic-actions-only');
+  assert.equal(CARRY_BRIDGE_INDEPENDENCE_DISQUALIFIER_POLICY.motorNoiseIncluded,false);
+  for(const requiredCode of ['place-value-misalignment','smaller-digit-first','unexplained-carry','unexplained-borrow','numeric-answer-incorrect','unnecessary-exchange','wrong-exchange-direction','invalid-exchange-unit-count']){
+    assert.ok(CARRY_BRIDGE_INDEPENDENCE_DISQUALIFIER_POLICY.codes.includes(requiredCode),requiredCode);
+  }
+  for(const ruleId of rules){
+    const problem=generated(ruleId,36),evidence=classify(problem,solveCarryBridgeCase(problem));
+    assert.equal(evidence.independentAcquisitionEligible,true,ruleId);
+    assert.equal(evidence.traceSummary.independenceDisqualified,false,ruleId);
+    assert.deepEqual(evidence.traceSummary.disqualifyingSemanticCodes,[],ruleId);
+    assert.equal(evidence.traceSummary.semanticInputOnly,true,ruleId);
+  }
+});
+
+test('misconception actions followed by canonical completion remain ineligible for independent acquisition',()=>{
+  const cases=[
+    ['add-no-regroup',{type:'place',unit:'one',lane:'tens'},'place-value-misalignment','add-align'],
+    ['add-regroup',{type:'write-carry'},'unexplained-carry','add-carry-value'],
+    ['sub-no-regroup',{type:'unload',unit:'one',count:1,strategy:'smaller-digit-first'},'smaller-digit-first','sub-direction'],
+    ['sub-regroup',{type:'write-borrow'},'unexplained-borrow','sub-borrow-value']
+  ];
+  for(const [ruleId,misconceptionAction,expectedCode,expectedSignal] of cases){
+    const problem=generated(ruleId,37);let dirty=createCarryBridgeActionState(problem);
+    dirty=applyCarryBridgeAction(dirty,misconceptionAction);
+    const corrected=replayCarryBridgeActions(problem,[...dirty.actionTrace,...solveCarryBridgeCase(problem).actionTrace]);
+    assert.equal(corrected.complete,true,ruleId);
+    const evidence=classify(problem,corrected);
+    assert.equal(evidence.independentAcquisitionEligible,false,ruleId);
+    assert.ok(evidence.reasons.includes('semantic-trace-not-independent'),ruleId);
+    assert.equal(evidence.traceSummary.independenceDisqualified,true,ruleId);
+    assert.ok(evidence.traceSummary.disqualifyingSemanticCodes.includes(expectedCode),ruleId);
+    assert.ok(evidence.traceSummary.misconceptionSignals.includes(expectedSignal),ruleId);
+    assert.equal(evidence.ledgerWritePerformed,false,ruleId);
+    assert.equal(evidence.formalMasteryClaimed,false,ruleId);
+  }
+});
+
+test('wrong numeric submissions followed by correct canonical completion remain ineligible',()=>{
+  for(const ruleId of rules){
+    const problem=generated(ruleId,38);let dirty=createCarryBridgeActionState(problem);
+    dirty=applyCarryBridgeAction(dirty,{type:'submit',answer:problem.answer===0?1:problem.answer-1});
+    assert.equal(dirty.lastActionResult.code,'numeric-answer-incorrect',ruleId);
+    const corrected=replayCarryBridgeActions(problem,[...dirty.actionTrace,...solveCarryBridgeCase(problem).actionTrace]);
+    assert.equal(corrected.complete,true,ruleId);
+    const evidence=classify(problem,corrected);
+    assert.equal(evidence.independentAcquisitionEligible,false,ruleId);
+    assert.ok(evidence.reasons.includes('semantic-trace-not-independent'),ruleId);
+    assert.deepEqual(evidence.traceSummary.disqualifyingSemanticCodes,['numeric-answer-incorrect'],ruleId);
+    assert.equal(evidence.traceSummary.incorrectSubmitCount,1,ruleId);
+    assert.equal(evidence.traceSummary.rejectedSemanticActionCount,1,ruleId);
+    assert.equal(evidence.ledgerWritePerformed,false,ruleId);
+    assert.equal(evidence.formalMasteryClaimed,false,ruleId);
+  }
+});
+
+test('unnecessary, wrong-direction, and invalid-count exchanges remain disqualifying after correction',()=>{
+  const cases=[
+    ['add-no-regroup',[],{type:'bundle',count:10},'unnecessary-exchange'],
+    ['sub-no-regroup',[],{type:'split',count:1},'unnecessary-exchange'],
+    ['add-regroup',[{type:'join'}],{type:'split',count:1},'wrong-exchange-direction'],
+    ['sub-regroup',[],{type:'split',count:2},'invalid-exchange-unit-count']
+  ];
+  for(const [ruleId,prefixActions,exchangeAction,expectedCode] of cases){
+    const problem=generated(ruleId,39);let dirty=createCarryBridgeActionState(problem);
+    for(const action of [...prefixActions,exchangeAction])dirty=applyCarryBridgeAction(dirty,action);
+    assert.equal(dirty.lastActionResult.code,expectedCode,ruleId);
+    const corrected=replayCarryBridgeActions(problem,[...dirty.actionTrace,...solveCarryBridgeCase(problem).actionTrace]);
+    assert.equal(corrected.complete,true,ruleId);
+    const evidence=classify(problem,corrected);
+    assert.equal(evidence.independentAcquisitionEligible,false,ruleId);
+    assert.ok(evidence.reasons.includes('semantic-trace-not-independent'),ruleId);
+    assert.ok(evidence.traceSummary.disqualifyingSemanticCodes.includes(expectedCode),ruleId);
+    assert.equal(evidence.ledgerWritePerformed,false,ruleId);
+    assert.equal(evidence.formalMasteryClaimed,false,ruleId);
   }
 });
 

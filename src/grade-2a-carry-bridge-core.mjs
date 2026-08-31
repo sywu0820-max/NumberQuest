@@ -8,6 +8,18 @@ export const CARRY_BRIDGE_REPRESENTATIONS=Object.freeze({
   blueprint:Object.freeze({representationId:'vertical-place-value-blueprint',representationFamily:'vertical-notation'})
 });
 
+export const CARRY_BRIDGE_INDEPENDENCE_DISQUALIFIER_POLICY=Object.freeze({
+  schemaVersion:'1.0.0',inputScope:'semantic-actions-only',motorNoiseIncluded:false,
+  codes:Object.freeze([
+    'place-value-misalignment','smaller-digit-first','unexplained-carry','unexplained-borrow',
+    'numeric-answer-incorrect','semantic-action-incomplete',
+    'unnecessary-exchange','wrong-exchange-direction','invalid-exchange-unit-count',
+    'insufficient-ones-for-exchange','insufficient-tens-for-exchange',
+    'invalid-unload-action','unload-exceeds-target','exchange-required','insufficient-load',
+    'join-not-valid-for-subtraction','unload-not-valid-for-addition'
+  ])
+});
+
 export const CARRY_BRIDGE_CASE_RULES=Object.freeze({
   'add-no-regroup':Object.freeze({skillId:'g2a.add.no-regroup-100',operation:'add',missionFamilyId:'carry-join-loads',expectedExchange:null,caseTags:Object.freeze(['no-regroup'])}),
   'add-regroup':Object.freeze({skillId:'g2a.add.regroup-100',operation:'add',missionFamilyId:'carry-join-loads',expectedExchange:'ones-to-tens',caseTags:Object.freeze(['regrouping-sensitive','ones-to-tens-regrouping'])}),
@@ -202,6 +214,10 @@ export function applyCarryBridgeAction(sourceState,action){
 }
 
 function exchangeAttempts(trace){return (Array.isArray(trace)?trace:[]).filter(item=>item?.type==='bundle'||item?.type==='split')}
+function disqualifyingSemanticEntries(trace){
+  const codes=new Set(CARRY_BRIDGE_INDEPENDENCE_DISQUALIFIER_POLICY.codes);
+  return (Array.isArray(trace)?trace:[]).filter(item=>codes.has(item?.code));
+}
 
 export function classifyCarryBridgeAcquisition(problem,{outcome='miss',attemptKind='miss',actionTrace=[]}={}){
   const validation=validateCarryBridgeCase(problem),reasons=[];
@@ -215,7 +231,9 @@ export function classifyCarryBridgeAcquisition(problem,{outcome='miss',attemptKi
   const semanticFields=['type','accepted','neutral','code','valueBefore','valueAfter','direction','inputUnit','inputUnitCount','outputUnit','outputUnitCount','valuePreserved'];
   const traceMatchesReplay=Boolean(replayed)&&replayed.actionTrace.length===suppliedTrace.length&&suppliedTrace.every((item,index)=>semanticFields.every(field=>(item?.[field]??null)===(replayed.actionTrace[index]?.[field]??null)));
   if(!traceMatchesReplay||!replayed?.complete||replayed?.numericCorrect!==true)reasons.push('semantic-trace-not-complete');
-  const rule=CARRY_BRIDGE_CASE_RULES[problem?.caseRuleId],attempts=exchangeAttempts(actionTrace);
+  const observedTrace=replayed?.actionTrace||[],disqualifiers=disqualifyingSemanticEntries(observedTrace);
+  if(disqualifiers.length)reasons.push('semantic-trace-not-independent');
+  const rule=CARRY_BRIDGE_CASE_RULES[problem?.caseRuleId],attempts=exchangeAttempts(observedTrace);
   let traceEligible=false;
   if(rule?.expectedExchange===null){
     traceEligible=attempts.length===0;
@@ -235,7 +253,13 @@ export function classifyCarryBridgeAcquisition(problem,{outcome='miss',attemptKi
   }
   return {
     skillId:problem?.skillId||null,caseRuleId:problem?.caseRuleId||null,independentAcquisitionEligible:eligible,evidenceTags:tags,
-    reasons:[...new Set(reasons)],traceSummary:{exchangeAttemptCount:attempts.length,acceptedExchangeCount:attempts.filter(item=>item.accepted).length,observedDirections:attempts.map(item=>item.direction),rawGestureCoordinatesStored:false},
+    reasons:[...new Set(reasons)],traceSummary:{
+      exchangeAttemptCount:attempts.length,acceptedExchangeCount:attempts.filter(item=>item.accepted).length,observedDirections:attempts.map(item=>item.direction),
+      independenceDisqualified:disqualifiers.length>0,disqualifyingSemanticCodes:[...new Set(disqualifiers.map(item=>item.code))],
+      misconceptionSignals:replayed?carryBridgeMisconceptionSignals(problem,observedTrace):[],
+      incorrectSubmitCount:observedTrace.filter(item=>item.code==='numeric-answer-incorrect').length,
+      rejectedSemanticActionCount:disqualifiers.length,semanticInputOnly:true,rawGestureCoordinatesStored:false
+    },
     ledgerWritePerformed:false,formalMasteryClaimed:false
   };
 }

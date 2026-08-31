@@ -51,7 +51,7 @@ The trace contains semantic math actions only. It stores no coordinates, pointer
 
 ## Observed-action evidence classifier
 
-`classifyCarryBridgeAcquisition()` recomputes the case predicates and examines the actual trace.
+`classifyCarryBridgeAcquisition()` recomputes the case predicates and replays the actual trace. Caller-supplied `independent-first-try` is necessary but not sufficient: the replayed semantic trace must also be clean.
 
 No-regroup eligibility requires:
 
@@ -72,7 +72,16 @@ Regroup eligibility requires:
 - equal numeric value before and after;
 - no wrong, partial, invalid or extra exchange attempt.
 
-A final correct answer cannot override a wrong trace. An unnecessary split in no-regroup subtraction remains in the semantic trace, so even a later correct numeric result cannot emit `no-regroup` independent evidence.
+A final correct answer cannot override a wrong trace. The bounded clean-trace policy disqualifies:
+
+- the four modeled misconceptions (`place-value-misalignment`, `smaller-digit-first`, `unexplained-carry`, `unexplained-borrow`);
+- an incorrect numeric submission or a premature semantically incomplete submission;
+- unnecessary, wrong-direction, invalid-count or impossible exchange attempts;
+- invalid or impossible unload actions, and operation-incompatible join/unload actions.
+
+An unnecessary split in no-regroup subtraction remains in the semantic trace, so even a later correct numeric result cannot emit `no-regroup` independent evidence. Likewise, a misconception or wrong numeric submission followed by a canonical completion remains correct-but-not-independent.
+
+This policy receives semantic math actions only. Pointer paths, repeated pointer events, gesture timing, and motor noise remain outside this pure core and do not become acquisition disqualifiers. The compact trace summary reports bounded disqualifying codes, misconception signals, incorrect-submit count, and the semantic-only boundary without retaining raw gesture data.
 
 The classifier emits only bounded candidate tags from the accepted design, reports reasons and a compact trace summary, and always returns `ledgerWritePerformed: false` and `formalMasteryClaimed: false`.
 
@@ -109,6 +118,8 @@ The dedicated headless suite proves:
 - 400 exchange-fuzz sequences in each direction, including rejected 9/11-one and partial exchanges;
 - 400 unnecessary-exchange regressions for no-regroup subtraction;
 - the full behavior-sensitive eligibility matrix, including final-correct-answer override guards and forged value-preservation rejection;
+- clean canonical eligibility across all four rules plus deterministic misconception→canonical and wrong-submit→canonical rejection across all four rules;
+- unnecessary, wrong-direction, and invalid-count exchange→canonical rejection across the relevant addition/subtraction families;
 - 400 addition-regroup and 400 subtraction-regroup bundle → blueprint → bundle round trips;
 - 400 fixed semantic replay attempts for each of four mission families: 1,600 total;
 - 400 fresh retries per case rule: 1,600 total;
