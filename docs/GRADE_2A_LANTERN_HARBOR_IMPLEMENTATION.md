@@ -30,6 +30,8 @@ The `g2a.num.*-300-extension` skills remain explicit eligibility branches. Even 
 
 The existing v1.0 capability-map thresholds remain progress evidence only. Neither the World completion result nor the capability-map state claims formal Grade 2A curriculum mastery; that requires a future, separately reviewed curriculum evaluator.
 
+The separately reviewed forward ledger adds hidden event-level instrumentation without changing this learning loop. Its machine contract and projection boundary are documented in `docs/GRADE_2A_FORWARD_EVIDENCE_LEDGER.md`. Legacy aggregate history is never backfilled, and current 百光港 interactions never emit formal transfer evidence.
+
 Runtime pedagogy metadata is a tested exact subset of `curriculum/grade-2a.skill-graph.json`; no publisher layer appears in child-facing play.
 
 ## Validation contract

@@ -2,6 +2,7 @@ import {
   normalizeState as normalizeV09State,localDayKey,dueMemoryReviews,buildJourneyRecap as buildV09JourneyRecap,
   finishRun,finishSpecialRun
 } from './v09-core.mjs';
+import {normalizeGrade2AEvidenceState} from './grade-2a-evidence-ledger.mjs?v=10-10';
 
 export * from './v09-core.mjs';
 
@@ -43,7 +44,7 @@ export function normalizeState(raw,day=localDayKey()){
   const state=normalizeV09State(raw,day),source=raw?.learning?.product;
   const onboardingComplete=typeof source?.onboardingComplete==='boolean'?source.onboardingComplete:hasPriorLearning(raw);
   state.learning.product={...emptyProduct(),onboardingComplete,dailyRewardDay:typeof source?.dailyRewardDay==='string'?source.dailyRewardDay:null,capabilityEvidence:cleanEvidence(source?.capabilityEvidence)};
-  return state;
+  return normalizeGrade2AEvidenceState(state,raw?.learning?.grade2aEvidenceLedger);
 }
 
 function ensureProduct(s){
