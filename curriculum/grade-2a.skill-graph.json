@@ -4,23 +4,40 @@
   "title": "Taiwan Grade 2 first-semester mathematics foundation",
   "status": "planning-only",
   "runtimeIntegration": false,
+  "curriculumBaseline": {
+    "jurisdiction": "Taiwan",
+    "schoolYear": "115",
+    "semester": 1,
+    "authority": "founder-set",
+    "publisherEditionPolicy": "Align to school year 115 semester 1 while retaining publisher-specific source confidence and unresolved edition identifiers."
+  },
   "scopePolicy": {
     "commonGraph": true,
     "publisherLayersAreChildFacing": false,
     "schoolProgressMayAffectSurfacingOnly": true,
     "masteryControlsProgression": true,
-    "questionBankIncluded": false
+    "questionBankIncluded": false,
+    "worldMembershipImpliesCompletionRequirement": false,
+    "commonCompletionScope": "core",
+    "eligibilityBranchScopes": ["nani-extension", "version-dependent"]
+  },
+  "moneyBounds": {
+    "denominations": [1, 5, 10, 50, 100],
+    "amountRange": "active-surfaced-number-range",
+    "excludedGrade2BForwardPull": [500, 1000]
   },
   "curriculumCodes": {
     "N-2-1": "Place value and representation of whole numbers within 1000",
     "N-2-2": "Addition/subtraction notation and vertical calculation grounded in place value",
     "N-2-3": "Addition/subtraction application problems and unknown quantities",
+    "N-2-5": "Money activities and exchange; this Grade 2A graph uses only the bounded 1, 5, 10, 50 and 100-dollar subset",
     "N-2-6": "Meaning and application of multiplication, including language of times-as-many",
     "N-2-7": "Multiplication facts through 9 x 9",
     "N-2-8": "Two-step application problems",
     "N-2-11": "Length in centimetres and metres through measuring, estimating and calculating",
     "N-2-12": "Capacity, weight and area comparison through hands-on activity",
     "N-2-13": "Clock time in hours and minutes",
+    "N-1-8": "Length comparison and repeated informal units as prerequisite measurement experience",
     "R-2-1": "Greater-than/less-than relations and transitive comparison",
     "R-2-3": "Commutative relationship of multiplication",
     "R-2-4": "Relationship between addition and subtraction",
@@ -87,6 +104,10 @@
       "pv-count-digits": "Treats a numeral as separate digits rather than hundreds, tens and ones.",
       "pv-zero-placeholder": "Ignores zero as a place holder.",
       "pv-compare-length": "Chooses by a salient digit instead of the highest differing place.",
+      "money-appearance": "Confuses coin or note size/color with monetary value.",
+      "money-count-pieces": "Counts pieces instead of their denomination values.",
+      "money-exchange-value": "Treats an exchange as changing total value.",
+      "money-greedy-only": "Assumes there is only one valid way to compose or pay an exact amount.",
       "add-align": "Misaligns ones and tens in vertical form.",
       "add-carry-value": "Carries a 1 without understanding it represents one ten.",
       "sub-direction": "Always subtracts the smaller visible digit from the larger digit.",
@@ -97,6 +118,8 @@
       "two-step-stop": "Stops after the first valid calculation.",
       "two-step-order": "Calculates in sentence order without considering dependencies.",
       "cm-count-marks": "Counts ruler marks instead of intervals.",
+      "length-informal-unequal": "Uses informal units of different lengths in one measurement.",
+      "length-informal-gaps": "Leaves gaps or overlaps repeated informal units.",
       "cm-start-zero": "Assumes measurement must start at the ruler edge rather than subtracting scale positions.",
       "cm-unit-mix": "Compares or combines lengths without preserving units.",
       "mul-unequal-groups": "Calls any collection of groups multiplication even when group sizes differ.",
@@ -123,13 +146,19 @@
     {"id":"g2a.num.compose-300-extension","title":"Compose and represent numbers to 300","domain":"number","scope":"nani-extension","prerequisites":["g2a.num.count-300-extension","g2a.num.compose-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-1"],"pedagogy":{"misconceptions":["pv-count-digits","pv-zero-placeholder"],"hintStrategy":"place-value-build","retryStrategy":"isomorphic-new-surface","masteryProfile":"concept","reviewProfile":"standard"}},
     {"id":"g2a.num.compare-300-extension","title":"Compare and order numbers to 300","domain":"number","scope":"nani-extension","prerequisites":["g2a.num.compose-300-extension","g2a.num.compare-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-1","R-2-1"],"pedagogy":{"misconceptions":["pv-compare-length"],"hintStrategy":"compare-align","retryStrategy":"contrast-case","masteryProfile":"concept","reviewProfile":"standard"}},
 
+    {"id":"g2a.money.recognize-denominations","title":"Recognize 1, 5, 10, 50 and 100-dollar denominations by value","domain":"money","scope":"core","prerequisites":["g2a.num.count-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-5"],"bounds":{"denominations":[1,5,10,50,100],"amountRange":"active-surfaced-number-range"},"pedagogy":{"misconceptions":["money-appearance","money-count-pieces"],"hintStrategy":"place-value-build","retryStrategy":"contrast-case","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.money.compose-count","title":"Count and compose money amounts within the active surfaced number range","domain":"money","scope":"core","prerequisites":["g2a.money.recognize-denominations","g2a.num.compose-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-5"],"bounds":{"denominations":[1,5,10,50,100],"amountRange":"active-surfaced-number-range"},"pedagogy":{"misconceptions":["money-count-pieces","money-greedy-only"],"hintStrategy":"place-value-build","retryStrategy":"concrete-then-symbolic","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.money.exchange","title":"Exchange equivalent combinations of 1, 5, 10, 50 and 100 dollars","domain":"money","scope":"core","prerequisites":["g2a.money.compose-count","g2a.num.represent-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-5"],"bounds":{"denominations":[1,5,10,50,100],"amountRange":"active-surfaced-number-range"},"pedagogy":{"misconceptions":["money-exchange-value","money-greedy-only"],"hintStrategy":"place-value-build","retryStrategy":"strategy-choice","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.money.use-exact-amount","title":"Select and use denominations to make an exact amount within the active surfaced number range","domain":"money","scope":"core","prerequisites":["g2a.money.exchange","g2a.num.compare-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-5"],"bounds":{"denominations":[1,5,10,50,100],"amountRange":"active-surfaced-number-range"},"pedagogy":{"misconceptions":["money-count-pieces","money-greedy-only","money-exchange-value"],"hintStrategy":"place-value-build","retryStrategy":"strategy-choice","masteryProfile":"application","reviewProfile":"application-varied"}},
+
     {"id":"g2a.add.no-regroup-100","title":"Add two-digit numbers without regrouping within 100","domain":"addition-subtraction","scope":"core","prerequisites":["g2a.num.compose-200"],"externalPrerequisites":["basic addition facts within 18"],"curriculumCodes":["N-2-2"],"pedagogy":{"misconceptions":["add-align"],"hintStrategy":"regroup-model","retryStrategy":"concrete-then-symbolic","masteryProfile":"calculation","reviewProfile":"standard"}},
     {"id":"g2a.add.regroup-100","title":"Add two-digit numbers with ones-to-tens regrouping within 100","domain":"addition-subtraction","scope":"core","prerequisites":["g2a.add.no-regroup-100"],"externalPrerequisites":[],"curriculumCodes":["N-2-2"],"pedagogy":{"misconceptions":["add-align","add-carry-value"],"hintStrategy":"regroup-model","retryStrategy":"concrete-then-symbolic","masteryProfile":"calculation","reviewProfile":"standard"}},
     {"id":"g2a.sub.no-regroup-100","title":"Subtract two-digit numbers without regrouping and without negative results","domain":"addition-subtraction","scope":"core","prerequisites":["g2a.num.compose-200"],"externalPrerequisites":["basic subtraction facts within 18"],"curriculumCodes":["N-2-2"],"pedagogy":{"misconceptions":["add-align","sub-direction"],"hintStrategy":"regroup-model","retryStrategy":"contrast-case","masteryProfile":"calculation","reviewProfile":"standard"}},
     {"id":"g2a.sub.regroup-100","title":"Subtract two-digit numbers with one tens-to-ones exchange and no negative result","domain":"addition-subtraction","scope":"core","prerequisites":["g2a.sub.no-regroup-100"],"externalPrerequisites":[],"curriculumCodes":["N-2-2"],"pedagogy":{"misconceptions":["sub-direction","sub-borrow-value"],"hintStrategy":"regroup-model","retryStrategy":"concrete-then-symbolic","masteryProfile":"calculation","reviewProfile":"standard"}},
     {"id":"g2a.addsub.explain-vertical","title":"Explain vertical addition and subtraction with place value","domain":"addition-subtraction","scope":"core","prerequisites":["g2a.add.regroup-100","g2a.sub.regroup-100"],"externalPrerequisites":[],"curriculumCodes":["N-2-2"],"pedagogy":{"misconceptions":["add-carry-value","sub-borrow-value"],"hintStrategy":"regroup-model","retryStrategy":"strategy-choice","masteryProfile":"concept","reviewProfile":"standard"}},
 
-    {"id":"g2a.length.cm-unit","title":"Recognize one centimetre as a repeatable length unit","domain":"length","scope":"core","prerequisites":[],"externalPrerequisites":["direct and indirect comparison of length"],"curriculumCodes":["N-2-11"],"pedagogy":{"misconceptions":["cm-count-marks","cm-unit-mix"],"hintStrategy":"measure-anchor","retryStrategy":"concrete-then-symbolic","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.length.repeat-informal-units","title":"Measure length by repeating equal informal units without gaps or overlaps","domain":"length","scope":"core","prerequisites":[],"externalPrerequisites":["direct and indirect comparison of length"],"curriculumCodes":["N-1-8","N-2-11"],"pedagogy":{"misconceptions":["length-informal-unequal","length-informal-gaps"],"hintStrategy":"measure-anchor","retryStrategy":"concrete-then-symbolic","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.length.cm-unit","title":"Recognize one centimetre as a repeatable standardized length unit","domain":"length","scope":"core","prerequisites":["g2a.length.repeat-informal-units"],"externalPrerequisites":[],"curriculumCodes":["N-2-11"],"pedagogy":{"misconceptions":["cm-count-marks","cm-unit-mix","length-informal-unequal"],"hintStrategy":"measure-anchor","retryStrategy":"concrete-then-symbolic","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
     {"id":"g2a.length.measure-from-zero","title":"Measure and draw whole-centimetre lengths from zero","domain":"length","scope":"core","prerequisites":["g2a.length.cm-unit"],"externalPrerequisites":[],"curriculumCodes":["N-2-11"],"pedagogy":{"misconceptions":["cm-count-marks","cm-start-zero"],"hintStrategy":"measure-anchor","retryStrategy":"contrast-case","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
     {"id":"g2a.length.measure-offset","title":"Measure a length when the object starts away from zero","domain":"length","scope":"core","prerequisites":["g2a.length.measure-from-zero","g2a.sub.no-regroup-100"],"externalPrerequisites":[],"curriculumCodes":["N-2-11"],"pedagogy":{"misconceptions":["cm-start-zero","cm-count-marks"],"hintStrategy":"measure-anchor","retryStrategy":"strategy-choice","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
     {"id":"g2a.length.estimate-cm","title":"Estimate and then verify lengths in centimetres","domain":"length","scope":"core","prerequisites":["g2a.length.measure-from-zero"],"externalPrerequisites":[],"curriculumCodes":["N-2-11"],"pedagogy":{"misconceptions":["cm-unit-mix"],"hintStrategy":"measure-anchor","retryStrategy":"isomorphic-new-surface","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
@@ -181,8 +210,9 @@
   "coverageRequirements": [
     {"id":"place-value-200","requiredScope":"core","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200"]},
     {"id":"nani-300-extension","requiredScope":"nani-extension","skillIds":["g2a.num.count-300-extension","g2a.num.compose-300-extension","g2a.num.compare-300-extension"]},
+    {"id":"money-within-active-number-range","requiredScope":"core","skillIds":["g2a.money.recognize-denominations","g2a.money.compose-count","g2a.money.exchange","g2a.money.use-exact-amount"]},
     {"id":"two-digit-add-sub-regrouping","requiredScope":"core","skillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"]},
-    {"id":"centimetres-length","requiredScope":"core","skillIds":["g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"]},
+    {"id":"informal-units-centimetres-length","requiredScope":"core","skillIds":["g2a.length.repeat-informal-units","g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"]},
     {"id":"add-sub-relationships-applications","requiredScope":"core","skillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols"]},
     {"id":"two-step-add-sub","requiredScope":"core","skillIds":["g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"]},
     {"id":"multiplication-concepts-and-2-to-9-facts","requiredScope":"core","skillIds":["g2a.mul.equal-groups","g2a.mul.repeated-addition","g2a.mul.arrays","g2a.mul.times-language","g2a.mul.facts-2","g2a.mul.facts-3","g2a.mul.facts-4","g2a.mul.facts-5","g2a.mul.facts-6","g2a.mul.facts-7","g2a.mul.facts-8","g2a.mul.facts-9","g2a.mul.facts-1-to-9-relations","g2a.mul.applications"]},
@@ -190,24 +220,26 @@
     {"id":"capacity-weight-area-plane-figures","requiredScope":"version-dependent","skillIds":["g2a.capacity.recognize","g2a.capacity.compare","g2a.weight.recognize-balance","g2a.weight.compare","g2a.area.recognize-surface","g2a.area.direct-indirect","g2a.area.informal-cover","g2a.shape.plane-features","g2a.shape.classify-plane","g2a.shape.compose-boundary"]}
   ],
   "worlds": [
-    {"id":"world.lantern-harbor","childTitle":"百光港","questIdentity":"Signal keeper","missionPromise":"Build and compare number signals so lost ships can find the harbor.","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200","g2a.num.count-300-extension","g2a.num.compose-300-extension","g2a.num.compare-300-extension"]},
-    {"id":"world.carry-bridge","childTitle":"交換橋工坊","questIdentity":"Bridge engineer","missionPromise":"Trade bundles to repair bridges without turning regrouping into a worksheet ritual.","skillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"]},
-    {"id":"world.trail-measurement","childTitle":"微光測量徑","questIdentity":"Trail mapper","missionPromise":"Measure, draw and compare paths so creatures can travel safely.","skillIds":["g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"]},
-    {"id":"world.mystery-workshop","childTitle":"關係偵探社","questIdentity":"Relationship detective","missionPromise":"Discover what changed, what is missing and how quantities belong together.","skillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols"]},
-    {"id":"world.route-planner","childTitle":"雙岔航線台","questIdentity":"Expedition planner","missionPromise":"Plan the hidden middle step that gets an expedition all the way home.","skillIds":["g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"]},
-    {"id":"world.chorus-groves","childTitle":"倍數合唱林","questIdentity":"Pattern conductor","missionPromise":"Wake equal-group creatures and combine their rhythms into 2-9 fact powers.","skillIds":["g2a.mul.equal-groups","g2a.mul.repeated-addition","g2a.mul.arrays","g2a.mul.times-language","g2a.mul.facts-2","g2a.mul.facts-3","g2a.mul.facts-4","g2a.mul.facts-5","g2a.mul.facts-6","g2a.mul.facts-7","g2a.mul.facts-8","g2a.mul.facts-9","g2a.mul.facts-1-to-9-relations","g2a.mul.applications"]},
-    {"id":"world.clockwork-observatory","childTitle":"星刻觀測站","questIdentity":"Time navigator","missionPromise":"Set observatory mechanisms to the right hour and minute before each sky event.","skillIds":["g2a.time.clock-hands","g2a.time.read-hour","g2a.time.read-five-minutes","g2a.time.read-minute","g2a.time.elapsed-clock-count"]},
-    {"id":"world.shifting-bazaar","childTitle":"萬象交換市集","questIdentity":"Evidence collector","missionPromise":"Use pouring, balancing, covering and shape clues to solve changing market mysteries.","skillIds":["g2a.capacity.recognize","g2a.capacity.compare","g2a.weight.recognize-balance","g2a.weight.compare","g2a.area.recognize-surface","g2a.area.direct-indirect","g2a.area.informal-cover","g2a.shape.plane-features","g2a.shape.classify-plane","g2a.shape.compose-boundary"]}
+    {"id":"world.lantern-harbor","childTitle":"百光港","questIdentity":"Signal keeper","missionPromise":"Build and compare number signals so lost ships can find the harbor.","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200","g2a.num.count-300-extension","g2a.num.compose-300-extension","g2a.num.compare-300-extension"],"requiredForCompletionSkillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200"],"eligibilityBranchSkillIds":["g2a.num.count-300-extension","g2a.num.compose-300-extension","g2a.num.compare-300-extension"]},
+    {"id":"world.carry-bridge","childTitle":"交換橋工坊","questIdentity":"Bridge engineer","missionPromise":"Trade bundles to repair bridges without turning regrouping into a worksheet ritual.","skillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"],"requiredForCompletionSkillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"],"eligibilityBranchSkillIds":[]},
+    {"id":"world.trail-measurement","childTitle":"微光測量徑","questIdentity":"Trail mapper","missionPromise":"Bridge informal units to centimetres, then measure, draw and compare paths so creatures can travel safely.","skillIds":["g2a.length.repeat-informal-units","g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"requiredForCompletionSkillIds":["g2a.length.repeat-informal-units","g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"eligibilityBranchSkillIds":[]},
+    {"id":"world.mystery-workshop","childTitle":"關係偵探社","questIdentity":"Relationship detective","missionPromise":"Discover what changed, what is missing and how quantities belong together.","skillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols"],"requiredForCompletionSkillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols"],"eligibilityBranchSkillIds":[]},
+    {"id":"world.route-planner","childTitle":"雙岔航線台","questIdentity":"Expedition planner","missionPromise":"Plan the hidden middle step that gets an expedition all the way home.","skillIds":["g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"],"requiredForCompletionSkillIds":["g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"],"eligibilityBranchSkillIds":[]},
+    {"id":"world.chorus-groves","childTitle":"倍數合唱林","questIdentity":"Pattern conductor","missionPromise":"Wake equal-group creatures and combine their rhythms into 2-9 fact powers.","skillIds":["g2a.mul.equal-groups","g2a.mul.repeated-addition","g2a.mul.arrays","g2a.mul.times-language","g2a.mul.facts-2","g2a.mul.facts-3","g2a.mul.facts-4","g2a.mul.facts-5","g2a.mul.facts-6","g2a.mul.facts-7","g2a.mul.facts-8","g2a.mul.facts-9","g2a.mul.facts-1-to-9-relations","g2a.mul.applications"],"requiredForCompletionSkillIds":["g2a.mul.equal-groups","g2a.mul.repeated-addition","g2a.mul.arrays","g2a.mul.times-language","g2a.mul.facts-2","g2a.mul.facts-3","g2a.mul.facts-4","g2a.mul.facts-5","g2a.mul.facts-6","g2a.mul.facts-7","g2a.mul.facts-8","g2a.mul.facts-9","g2a.mul.facts-1-to-9-relations","g2a.mul.applications"],"eligibilityBranchSkillIds":[]},
+    {"id":"world.clockwork-observatory","childTitle":"星刻觀測站","questIdentity":"Time navigator","missionPromise":"Set observatory mechanisms to the right hour and minute before each sky event.","skillIds":["g2a.time.clock-hands","g2a.time.read-hour","g2a.time.read-five-minutes","g2a.time.read-minute","g2a.time.elapsed-clock-count"],"requiredForCompletionSkillIds":["g2a.time.clock-hands","g2a.time.read-hour","g2a.time.read-five-minutes","g2a.time.read-minute","g2a.time.elapsed-clock-count"],"eligibilityBranchSkillIds":[]},
+    {"id":"world.shifting-bazaar","childTitle":"萬象交換市集","questIdentity":"Evidence collector","missionPromise":"Compose and exchange money, then use eligible pouring, balancing, covering and shape clues to solve market mysteries.","skillIds":["g2a.money.recognize-denominations","g2a.money.compose-count","g2a.money.exchange","g2a.money.use-exact-amount","g2a.capacity.recognize","g2a.capacity.compare","g2a.weight.recognize-balance","g2a.weight.compare","g2a.area.recognize-surface","g2a.area.direct-indirect","g2a.area.informal-cover","g2a.shape.plane-features","g2a.shape.classify-plane","g2a.shape.compose-boundary"],"requiredForCompletionSkillIds":["g2a.money.recognize-denominations","g2a.money.compose-count","g2a.money.exchange","g2a.money.use-exact-amount"],"eligibilityBranchSkillIds":["g2a.capacity.recognize","g2a.capacity.compare","g2a.weight.recognize-balance","g2a.weight.compare","g2a.area.recognize-surface","g2a.area.direct-indirect","g2a.area.informal-cover","g2a.shape.plane-features","g2a.shape.classify-plane","g2a.shape.compose-boundary"]}
   ],
   "publisherMappings": {
     "kang-hsuan": {
       "role":"alignment-only",
       "verificationStatus":"pending-primary-unit-list",
-      "sourceIds":["src-knsh-course-plan"],
+      "targetBaseline":"tw-115-1",
+      "editionEvidence":"The 115 publisher service and low-grade materials are current, but a stable primary Grade 2A unit list remains unavailable.",
+      "sourceIds":["src-knsh-course-plan","src-knsh-115-low-grade-math"],
       "alignmentGroups":[
-        {"publisherUnit":null,"topic":"place-value","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200"],"confidence":"topic-scope-only"},
+        {"publisherUnit":null,"topic":"place-value-and-money","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200","g2a.money.recognize-denominations","g2a.money.compose-count","g2a.money.exchange","g2a.money.use-exact-amount"],"confidence":"baseline-directed-topic-scope"},
         {"publisherUnit":null,"topic":"two-digit-add-sub","skillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"],"confidence":"topic-scope-only"},
-        {"publisherUnit":null,"topic":"length-and-centimetres","skillIds":["g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"confidence":"topic-scope-only"},
+        {"publisherUnit":null,"topic":"informal-units-length-and-centimetres","skillIds":["g2a.length.repeat-informal-units","g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"confidence":"baseline-directed-topic-scope"},
         {"publisherUnit":null,"topic":"relationships-and-two-step","skillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols","g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"],"confidence":"topic-scope-only"},
         {"publisherUnit":null,"topic":"multiplication-and-time","skillIds":["g2a.mul.equal-groups","g2a.mul.repeated-addition","g2a.mul.arrays","g2a.mul.times-language","g2a.mul.facts-2","g2a.mul.facts-3","g2a.mul.facts-4","g2a.mul.facts-5","g2a.mul.facts-6","g2a.mul.facts-7","g2a.mul.facts-8","g2a.mul.facts-9","g2a.mul.facts-1-to-9-relations","g2a.mul.applications","g2a.time.clock-hands","g2a.time.read-hour","g2a.time.read-five-minutes","g2a.time.read-minute","g2a.time.elapsed-clock-count"],"confidence":"topic-scope-only"},
         {"publisherUnit":null,"topic":"capacity-weight-area-shapes","skillIds":["g2a.capacity.recognize","g2a.capacity.compare","g2a.weight.recognize-balance","g2a.weight.compare","g2a.area.recognize-surface","g2a.area.direct-indirect","g2a.area.informal-cover","g2a.shape.plane-features","g2a.shape.classify-plane","g2a.shape.compose-boundary"],"confidence":"unresolved-version-placement"}
@@ -216,11 +248,13 @@
     "nani": {
       "role":"alignment-only",
       "verificationStatus":"publisher-outline-verified",
+      "targetBaseline":"tw-115-1",
+      "editionEvidence":"The 2026 publisher outline aligns chronologically with school year 115; exact approval/edition identifier remains to be recorded.",
       "sourceIds":["src-nani-2026-outline"],
       "alignmentGroups":[
-        {"publisherUnit":"1","topic":"數到300","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200","g2a.num.count-300-extension","g2a.num.compose-300-extension","g2a.num.compare-300-extension"],"confidence":"publisher-source"},
+        {"publisherUnit":"1","topic":"數到300與錢幣應用","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200","g2a.num.count-300-extension","g2a.num.compose-300-extension","g2a.num.compare-300-extension","g2a.money.recognize-denominations","g2a.money.compose-count","g2a.money.exchange","g2a.money.use-exact-amount"],"confidence":"publisher-source-plus-founder-baseline"},
         {"publisherUnit":"2","topic":"二位數的加減","skillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"],"confidence":"publisher-source"},
-        {"publisherUnit":"3","topic":"幾公分","skillIds":["g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"confidence":"publisher-source"},
+        {"publisherUnit":"3","topic":"個別單位到幾公分","skillIds":["g2a.length.repeat-informal-units","g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"confidence":"publisher-source-plus-founder-baseline"},
         {"publisherUnit":"4","topic":"加減的關係與應用","skillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols"],"confidence":"publisher-source"},
         {"publisherUnit":"5","topic":"容量","skillIds":["g2a.capacity.recognize","g2a.capacity.compare"],"confidence":"publisher-source"},
         {"publisherUnit":"6","topic":"兩步驟的加減","skillIds":["g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"],"confidence":"publisher-source"},
@@ -233,11 +267,13 @@
     "han-lin": {
       "role":"alignment-only",
       "verificationStatus":"publisher-teacher-manual-verified",
+      "targetBaseline":"tw-115-1",
+      "editionEvidence":"The accessible unit-level teacher manual is edition 111; its structure is retained as evidence pending exact 115 edition confirmation.",
       "sourceIds":["src-hanlin-111-teacher-manual"],
       "alignmentGroups":[
-        {"publisherUnit":"1","topic":"200以內的數","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200"],"confidence":"publisher-source"},
+        {"publisherUnit":"1","topic":"200以內的數與錢幣使用","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200","g2a.money.recognize-denominations","g2a.money.compose-count","g2a.money.exchange","g2a.money.use-exact-amount"],"confidence":"publisher-source"},
         {"publisherUnit":"2","topic":"二位數的加減法","skillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"],"confidence":"publisher-source"},
-        {"publisherUnit":"3","topic":"認識公分","skillIds":["g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"confidence":"publisher-source"},
+        {"publisherUnit":"3","topic":"個別單位到認識公分","skillIds":["g2a.length.repeat-informal-units","g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"confidence":"publisher-source-plus-founder-baseline"},
         {"publisherUnit":"4","topic":"加減應用","skillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols"],"confidence":"publisher-source"},
         {"publisherUnit":"5","topic":"容量","skillIds":["g2a.capacity.recognize","g2a.capacity.compare"],"confidence":"publisher-source"},
         {"publisherUnit":"6","topic":"加減兩步驟","skillIds":["g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"],"confidence":"publisher-source"},
@@ -251,14 +287,15 @@
   "sources": [
     {"id":"src-naer-math-manual","kind":"official-curriculum","title":"NAER Mathematics Curriculum Manual, January 2025 update","url":"https://www.naer.edu.tw/upload/1/9/doc/2021/%E6%95%B8%E5%AD%B8%E9%A0%98%E5%9F%9F%E8%AA%B2%E7%A8%8B%E6%89%8B%E5%86%8A%EF%BC%88114%E5%B9%B41%E6%9C%88%E6%9B%B4%E6%96%B0%E7%89%88%EF%BC%89.pdf"},
     {"id":"src-knsh-course-plan","kind":"publisher-landing-page","title":"Kang Hsuan current curriculum-plan service","url":"https://www.knsh.com.tw/service/plan"},
+    {"id":"src-knsh-115-low-grade-math","kind":"publisher-115-overview","title":"Kang Hsuan school year 115 low-grade mathematics feature bulletin","url":"https://945cloud.knsh.com.tw/show/E/expo/pic/textbook_levels_low/115%281%29%E6%95%B8%E5%AD%B8%E7%89%B9%E5%88%8A.pdf"},
     {"id":"src-nani-2026-outline","kind":"publisher-outline","title":"Nani 2026 elementary mathematics structure overview","url":"https://naniexpo.nani.com.tw/uploads/pdf/20260312_201419_4ea29e252cdd.pdf"},
     {"id":"src-hanlin-111-teacher-manual","kind":"publisher-teacher-manual","title":"Han Lin Grade 2 semester 1 mathematics teacher manual (111 edition)","url":"https://resource.hle.com.tw/Books/BooksResource/111%E5%9C%8B%E5%B0%8F%E6%95%B8%E5%AD%B82%E4%B8%8A%E6%95%99%E5%B8%AB%E6%89%8B%E5%86%8A-%E6%88%90%E6%9B%B8%28111f265000%29.pdf"}
   ],
   "unresolvedQuestions": [
     {"id":"uq-kang-hsuan-order","blockingFor":"publisher-unit-alignment","question":"What is the current Kang Hsuan Grade 2 semester 1 mathematics unit order and exact placement of capacity, weight, area comparison and plane figures?","reason":"The public publisher course-plan page is authoritative but its downloadable unit list was not accessible in a stable machine-readable form; unit numbers are intentionally left null."},
-    {"id":"uq-version-year","blockingFor":"release-specific-school-sync","question":"Which school year/edition should publisher alignment be frozen to for founder dogfood?","reason":"Nani source is current 2026 marketing material while the accessible Han Lin teacher manual is the 111 edition; the common mastery graph is stable, but release-specific unit ordering needs a declared edition."},
-    {"id":"uq-hanlin-money","blockingFor":"scope-expansion-decision","question":"Should Han Lin's money conversion/payment objective inside its 200-range unit enter the shared Grade 2A graph?","reason":"It appears in the publisher teacher manual but is outside the bounded scope supplied for this foundation, so it is documented rather than silently added."},
+    {"id":"uq-publisher-115-edition-ids","blockingFor":"release-specific-school-sync","question":"What exact approval or edition identifier should be recorded for each publisher's Taiwan school year 115 semester 1 Grade 2 mathematics book?","reason":"The founder baseline is now fixed to 115-1, but accessible evidence quality differs: Nani has a 2026 outline, Han Lin's detailed manual is edition 111, and Kang Hsuan's 115 materials do not expose a stable Grade 2A unit list."},
     {"id":"uq-shape-vs-area","blockingFor":"version-dependent-surfacing","question":"Should a school-version selector surface plane-figure quests, area-comparison quests, or both during Grade 2A?","reason":"Publisher placement differs; mastery prerequisites remain common, but school-progress surfacing needs exact edition mappings."},
-    {"id":"uq-physical-measurement","blockingFor":"world-implementation","question":"Which capacity, weight, area and ruler tasks require an adult-supplied physical object versus an on-screen simulation?","reason":"The national curriculum emphasizes hands-on activity; a future World must not claim physical transfer from screen-only evidence."}
+    {"id":"uq-physical-measurement","blockingFor":"world-implementation","question":"Which capacity, weight, area and ruler tasks require an adult-supplied physical object versus an on-screen simulation?","reason":"The national curriculum emphasizes hands-on activity; a future World must not claim physical transfer from screen-only evidence."},
+    {"id":"uq-elapsed-time-bound","blockingFor":"world-implementation","question":"What maximum nearby elapsed-time interval should future generated Grade 2A clock quests use?","reason":"The graph includes counting between nearby clock times, but this foundation does not set content-generation bounds."}
   ]
 }
