@@ -1,0 +1,301 @@
+{
+  "schemaVersion": "1.0.0",
+  "graphId": "tw-grade-2a-foundation",
+  "title": "Taiwan Grade 2 first-semester mathematics foundation",
+  "status": "planning-only",
+  "runtimeIntegration": false,
+  "curriculumBaseline": {
+    "jurisdiction": "Taiwan",
+    "schoolYear": "115",
+    "semester": 1,
+    "authority": "founder-set",
+    "publisherEditionPolicy": "Align to school year 115 semester 1 while retaining publisher-specific source confidence and unresolved edition identifiers."
+  },
+  "scopePolicy": {
+    "commonGraph": true,
+    "publisherLayersAreChildFacing": false,
+    "schoolProgressMayAffectSurfacingOnly": true,
+    "masteryControlsProgression": true,
+    "questionBankIncluded": false,
+    "worldMembershipImpliesCompletionRequirement": false,
+    "commonCompletionScope": "core",
+    "eligibilityBranchScopes": ["nani-extension", "version-dependent"]
+  },
+  "moneyBounds": {
+    "denominations": [1, 5, 10, 50, 100],
+    "amountRange": "active-surfaced-number-range",
+    "excludedGrade2BForwardPull": [500, 1000]
+  },
+  "curriculumCodes": {
+    "N-2-1": "Place value and representation of whole numbers within 1000",
+    "N-2-2": "Addition/subtraction notation and vertical calculation grounded in place value",
+    "N-2-3": "Addition/subtraction application problems and unknown quantities",
+    "N-2-5": "Money activities and exchange; this Grade 2A graph uses only the bounded 1, 5, 10, 50 and 100-dollar subset",
+    "N-2-6": "Meaning and application of multiplication, including language of times-as-many",
+    "N-2-7": "Multiplication facts through 9 x 9",
+    "N-2-8": "Two-step application problems",
+    "N-2-11": "Length in centimetres and metres through measuring, estimating and calculating",
+    "N-2-12": "Capacity, weight and area comparison through hands-on activity",
+    "N-2-13": "Clock time in hours and minutes",
+    "N-1-8": "Length comparison and repeated informal units as prerequisite measurement experience",
+    "R-2-1": "Greater-than/less-than relations and transitive comparison",
+    "R-2-3": "Commutative relationship of multiplication",
+    "R-2-4": "Relationship between addition and subtraction",
+    "S-2-1": "Observable features of simple plane and solid shapes",
+    "S-2-2": "Recognize, describe and classify simple plane and solid shapes"
+  },
+  "pedagogyCatalog": {
+    "hintStrategies": {
+      "place-value-build": ["show hundreds, tens and ones as movable bundles", "name the place that changes", "return control before choosing an answer"],
+      "compare-align": ["align representations by hundreds, tens and ones", "compare the highest differing place", "avoid revealing the final symbol"],
+      "regroup-model": ["build both quantities with base-ten objects", "exchange one ten for ten ones or ten ones for one ten", "rebuild the vertical notation from the exchange"],
+      "relationship-model": ["identify what is known and unknown in the story", "act out or diagram the relationship", "offer a choice of operation with a reason prompt"],
+      "measure-anchor": ["anchor the start point and unit", "trace equal unit intervals", "ask the child to estimate before remeasuring"],
+      "multiplication-groups": ["construct equal groups or an array", "connect groups to repeated addition", "derive a nearby fact instead of stating the product"],
+      "clock-trace": ["identify the minute and hour hands", "trace minute marks from 12", "check how the hour hand moves between hours"],
+      "compare-physical": ["choose direct comparison, an intermediary, or equal units", "keep the comparison unit unchanged", "ask the child to explain the evidence"],
+      "shape-inspect": ["trace edges, corners, boundary or surface", "rotate or rearrange the object", "classify by properties rather than orientation"]
+    },
+    "retryStrategies": {
+      "isomorphic-new-surface": "Retry the same mathematical relationship with new quantities or a new surface representation; never repeat the identical prompt as punishment.",
+      "concrete-then-symbolic": "Step back to manipulable or visual objects, then return to a fresh symbolic instance after the child acts.",
+      "contrast-case": "Offer two carefully contrasted cases that isolate the misconception, then retry with a third case.",
+      "strategy-choice": "Let the child choose between two answer-safe strategies, then retry independently on a fresh instance."
+    },
+    "masteryProfiles": {
+      "concept": {
+        "acquisition": "At least 3 independent successes across 2 representations; hinted success is recovery evidence, not independent mastery.",
+        "retrieval": "At least 1 successful next-session revisit and 1 later successful revisit after 3 or more days.",
+        "transfer": "At least 2 first-try successes in distinct surface contexts or representations.",
+        "missPolicy": "A miss schedules support and review but never erases earned evidence or rewards."
+      },
+      "calculation": {
+        "acquisition": "At least 4 independent accurate calculations including boundary and regrouping-sensitive cases.",
+        "retrieval": "Successful independent calculations in a later session and again after 3 or more days.",
+        "transfer": "At least 2 correct applications outside bare vertical-form prompts.",
+        "missPolicy": "Record the error pattern for hint selection; do not label the child or reset prior mastery."
+      },
+      "application": {
+        "acquisition": "At least 3 independent solutions across distinct relationship families, including an explanation or valid model.",
+        "retrieval": "A later-session problem must be solved without an operation cue.",
+        "transfer": "At least 2 independent successes after changing story theme and representation while preserving the relationship.",
+        "missPolicy": "Separate language/model support from calculation support so the retry targets the actual difficulty."
+      },
+      "measurement": {
+        "acquisition": "At least 3 independent observations or measurements using correct units and procedure.",
+        "retrieval": "A later-session task must be completed without procedural highlighting.",
+        "transfer": "At least 2 successes using different objects, orientations, scales or comparison methods.",
+        "missPolicy": "Return to an observable anchor or manipulable comparison; do not reveal a numeric result."
+      },
+      "fact-family": {
+        "acquisition": "Accurate independent use across at least 4 varied facts in the family, with at least 2 represented as groups, arrays or stories.",
+        "retrieval": "Retrieve varied facts in later sessions without a timer requirement.",
+        "transfer": "Use the family in at least 2 distinct multiplication situations and derive at least 1 related fact.",
+        "missPolicy": "Use a known-fact strategy and revisit later; speed is never evidence of understanding by itself."
+      }
+    },
+    "reviewProfiles": {
+      "standard": {"sameSession": "after 2-4 intervening items", "crossSession": ["1-2 days", "4-7 days", "14-21 days"], "variation": "change representation before increasing magnitude"},
+      "application-varied": {"sameSession": "one fresh relationship-preserving story", "crossSession": ["1-2 days", "5-8 days", "14-21 days"], "variation": "rotate story theme, unknown position and representation"},
+      "fact-distributed": {"sameSession": "mix with a known and a neighboring fact family", "crossSession": ["next session", "3-5 days", "10-14 days", "21-30 days"], "variation": "mix order, groups, arrays and untimed retrieval"},
+      "hands-on-return": {"sameSession": "one changed object or orientation", "crossSession": ["2-3 days", "7-10 days", "21-30 days"], "variation": "alternate direct, indirect and unit-based evidence where applicable"}
+    },
+    "misconceptions": {
+      "pv-count-digits": "Treats a numeral as separate digits rather than hundreds, tens and ones.",
+      "pv-zero-placeholder": "Ignores zero as a place holder.",
+      "pv-compare-length": "Chooses by a salient digit instead of the highest differing place.",
+      "money-appearance": "Confuses coin or note size/color with monetary value.",
+      "money-count-pieces": "Counts pieces instead of their denomination values.",
+      "money-exchange-value": "Treats an exchange as changing total value.",
+      "money-greedy-only": "Assumes there is only one valid way to compose or pay an exact amount.",
+      "add-align": "Misaligns ones and tens in vertical form.",
+      "add-carry-value": "Carries a 1 without understanding it represents one ten.",
+      "sub-direction": "Always subtracts the smaller visible digit from the larger digit.",
+      "sub-borrow-value": "Borrows a 1 without exchanging one ten for ten ones.",
+      "op-keyword": "Chooses an operation from one keyword without modeling the relationship.",
+      "unknown-position": "Assumes the answer is always the final quantity in the sentence.",
+      "inverse-surface": "Knows separate facts but does not recognize addition and subtraction as inverse relations.",
+      "two-step-stop": "Stops after the first valid calculation.",
+      "two-step-order": "Calculates in sentence order without considering dependencies.",
+      "cm-count-marks": "Counts ruler marks instead of intervals.",
+      "length-informal-unequal": "Uses informal units of different lengths in one measurement.",
+      "length-informal-gaps": "Leaves gaps or overlaps repeated informal units.",
+      "cm-start-zero": "Assumes measurement must start at the ruler edge rather than subtracting scale positions.",
+      "cm-unit-mix": "Compares or combines lengths without preserving units.",
+      "mul-unequal-groups": "Calls any collection of groups multiplication even when group sizes differ.",
+      "mul-factor-roles": "Confuses number of groups with objects per group and cannot explain either factor.",
+      "mul-add-factors": "Adds the two factors instead of using equal groups.",
+      "mul-order-language": "Treats reversed factors as the same story role even though the product is equal.",
+      "clock-hand-swap": "Swaps the hour and minute hands.",
+      "clock-hour-drift": "Reads the hour hand as the next hour after it has moved between numerals.",
+      "clock-five-vs-one": "Counts hour numerals as single minutes rather than groups of five minute marks.",
+      "compare-container-shape": "Judges capacity from height or width alone.",
+      "weight-size": "Assumes the larger-looking object is always heavier.",
+      "area-perimeter": "Judges surface size only from boundary length or shape outline.",
+      "area-unit-gaps": "Uses overlapping, gapped or unequal covering units.",
+      "shape-orientation": "Believes rotating a shape changes its type.",
+      "shape-feature-count": "Confuses edges, corners, boundary, inside and surface."
+    }
+  },
+  "skills": [
+    {"id":"g2a.num.count-200","title":"Count, read and order to 200","domain":"number","scope":"core","prerequisites":[],"externalPrerequisites":["count/read/write to 100"],"curriculumCodes":["N-2-1"],"pedagogy":{"misconceptions":["pv-count-digits","pv-zero-placeholder"],"hintStrategy":"place-value-build","retryStrategy":"concrete-then-symbolic","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.num.compose-200","title":"Compose and decompose hundreds, tens and ones to 200","domain":"number","scope":"core","prerequisites":["g2a.num.count-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-1"],"pedagogy":{"misconceptions":["pv-count-digits","pv-zero-placeholder"],"hintStrategy":"place-value-build","retryStrategy":"contrast-case","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.num.represent-200","title":"Connect numerals, words, bundles and number lines to 200","domain":"number","scope":"core","prerequisites":["g2a.num.compose-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-1"],"pedagogy":{"misconceptions":["pv-count-digits","pv-zero-placeholder"],"hintStrategy":"place-value-build","retryStrategy":"isomorphic-new-surface","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.num.compare-200","title":"Compare and order numbers to 200","domain":"number","scope":"core","prerequisites":["g2a.num.represent-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-1","R-2-1"],"pedagogy":{"misconceptions":["pv-compare-length","pv-zero-placeholder"],"hintStrategy":"compare-align","retryStrategy":"contrast-case","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.num.count-300-extension","title":"Count, read and order to 300","domain":"number","scope":"nani-extension","prerequisites":["g2a.num.count-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-1"],"pedagogy":{"misconceptions":["pv-count-digits","pv-zero-placeholder"],"hintStrategy":"place-value-build","retryStrategy":"concrete-then-symbolic","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.num.compose-300-extension","title":"Compose and represent numbers to 300","domain":"number","scope":"nani-extension","prerequisites":["g2a.num.count-300-extension","g2a.num.compose-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-1"],"pedagogy":{"misconceptions":["pv-count-digits","pv-zero-placeholder"],"hintStrategy":"place-value-build","retryStrategy":"isomorphic-new-surface","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.num.compare-300-extension","title":"Compare and order numbers to 300","domain":"number","scope":"nani-extension","prerequisites":["g2a.num.compose-300-extension","g2a.num.compare-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-1","R-2-1"],"pedagogy":{"misconceptions":["pv-compare-length"],"hintStrategy":"compare-align","retryStrategy":"contrast-case","masteryProfile":"concept","reviewProfile":"standard"}},
+
+    {"id":"g2a.money.recognize-denominations","title":"Recognize 1, 5, 10, 50 and 100-dollar denominations by value","domain":"money","scope":"core","prerequisites":["g2a.num.count-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-5"],"bounds":{"denominations":[1,5,10,50,100],"amountRange":"active-surfaced-number-range"},"pedagogy":{"misconceptions":["money-appearance","money-count-pieces"],"hintStrategy":"place-value-build","retryStrategy":"contrast-case","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.money.compose-count","title":"Count and compose money amounts within the active surfaced number range","domain":"money","scope":"core","prerequisites":["g2a.money.recognize-denominations","g2a.num.compose-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-5"],"bounds":{"denominations":[1,5,10,50,100],"amountRange":"active-surfaced-number-range"},"pedagogy":{"misconceptions":["money-count-pieces","money-greedy-only"],"hintStrategy":"place-value-build","retryStrategy":"concrete-then-symbolic","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.money.exchange","title":"Exchange equivalent combinations of 1, 5, 10, 50 and 100 dollars","domain":"money","scope":"core","prerequisites":["g2a.money.compose-count","g2a.num.represent-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-5"],"bounds":{"denominations":[1,5,10,50,100],"amountRange":"active-surfaced-number-range"},"pedagogy":{"misconceptions":["money-exchange-value","money-greedy-only"],"hintStrategy":"place-value-build","retryStrategy":"strategy-choice","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.money.use-exact-amount","title":"Select and use denominations to make an exact amount within the active surfaced number range","domain":"money","scope":"core","prerequisites":["g2a.money.exchange","g2a.num.compare-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-5"],"bounds":{"denominations":[1,5,10,50,100],"amountRange":"active-surfaced-number-range"},"pedagogy":{"misconceptions":["money-count-pieces","money-greedy-only","money-exchange-value"],"hintStrategy":"place-value-build","retryStrategy":"strategy-choice","masteryProfile":"application","reviewProfile":"application-varied"}},
+
+    {"id":"g2a.add.no-regroup-100","title":"Add two-digit numbers without regrouping within 100","domain":"addition-subtraction","scope":"core","prerequisites":["g2a.num.compose-200"],"externalPrerequisites":["basic addition facts within 18"],"curriculumCodes":["N-2-2"],"pedagogy":{"misconceptions":["add-align"],"hintStrategy":"regroup-model","retryStrategy":"concrete-then-symbolic","masteryProfile":"calculation","reviewProfile":"standard"}},
+    {"id":"g2a.add.regroup-100","title":"Add two-digit numbers with ones-to-tens regrouping within 100","domain":"addition-subtraction","scope":"core","prerequisites":["g2a.add.no-regroup-100"],"externalPrerequisites":[],"curriculumCodes":["N-2-2"],"pedagogy":{"misconceptions":["add-align","add-carry-value"],"hintStrategy":"regroup-model","retryStrategy":"concrete-then-symbolic","masteryProfile":"calculation","reviewProfile":"standard"}},
+    {"id":"g2a.sub.no-regroup-100","title":"Subtract two-digit numbers without regrouping and without negative results","domain":"addition-subtraction","scope":"core","prerequisites":["g2a.num.compose-200"],"externalPrerequisites":["basic subtraction facts within 18"],"curriculumCodes":["N-2-2"],"pedagogy":{"misconceptions":["add-align","sub-direction"],"hintStrategy":"regroup-model","retryStrategy":"contrast-case","masteryProfile":"calculation","reviewProfile":"standard"}},
+    {"id":"g2a.sub.regroup-100","title":"Subtract two-digit numbers with one tens-to-ones exchange and no negative result","domain":"addition-subtraction","scope":"core","prerequisites":["g2a.sub.no-regroup-100"],"externalPrerequisites":[],"curriculumCodes":["N-2-2"],"pedagogy":{"misconceptions":["sub-direction","sub-borrow-value"],"hintStrategy":"regroup-model","retryStrategy":"concrete-then-symbolic","masteryProfile":"calculation","reviewProfile":"standard"}},
+    {"id":"g2a.addsub.explain-vertical","title":"Explain vertical addition and subtraction with place value","domain":"addition-subtraction","scope":"core","prerequisites":["g2a.add.regroup-100","g2a.sub.regroup-100"],"externalPrerequisites":[],"curriculumCodes":["N-2-2"],"pedagogy":{"misconceptions":["add-carry-value","sub-borrow-value"],"hintStrategy":"regroup-model","retryStrategy":"strategy-choice","masteryProfile":"concept","reviewProfile":"standard"}},
+
+    {"id":"g2a.length.repeat-informal-units","title":"Measure length by repeating equal informal units without gaps or overlaps","domain":"length","scope":"core","prerequisites":[],"externalPrerequisites":["direct and indirect comparison of length"],"curriculumCodes":["N-1-8","N-2-11"],"pedagogy":{"misconceptions":["length-informal-unequal","length-informal-gaps"],"hintStrategy":"measure-anchor","retryStrategy":"concrete-then-symbolic","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.length.cm-unit","title":"Recognize one centimetre as a repeatable standardized length unit","domain":"length","scope":"core","prerequisites":["g2a.length.repeat-informal-units"],"externalPrerequisites":[],"curriculumCodes":["N-2-11"],"pedagogy":{"misconceptions":["cm-count-marks","cm-unit-mix","length-informal-unequal"],"hintStrategy":"measure-anchor","retryStrategy":"concrete-then-symbolic","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.length.measure-from-zero","title":"Measure and draw whole-centimetre lengths from zero","domain":"length","scope":"core","prerequisites":["g2a.length.cm-unit"],"externalPrerequisites":[],"curriculumCodes":["N-2-11"],"pedagogy":{"misconceptions":["cm-count-marks","cm-start-zero"],"hintStrategy":"measure-anchor","retryStrategy":"contrast-case","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.length.measure-offset","title":"Measure a length when the object starts away from zero","domain":"length","scope":"core","prerequisites":["g2a.length.measure-from-zero","g2a.sub.no-regroup-100"],"externalPrerequisites":[],"curriculumCodes":["N-2-11"],"pedagogy":{"misconceptions":["cm-start-zero","cm-count-marks"],"hintStrategy":"measure-anchor","retryStrategy":"strategy-choice","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.length.estimate-cm","title":"Estimate and then verify lengths in centimetres","domain":"length","scope":"core","prerequisites":["g2a.length.measure-from-zero"],"externalPrerequisites":[],"curriculumCodes":["N-2-11"],"pedagogy":{"misconceptions":["cm-unit-mix"],"hintStrategy":"measure-anchor","retryStrategy":"isomorphic-new-surface","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.length.add-subtract-cm","title":"Add and subtract lengths expressed in centimetres","domain":"length","scope":"core","prerequisites":["g2a.length.measure-from-zero","g2a.add.no-regroup-100","g2a.sub.no-regroup-100"],"externalPrerequisites":[],"curriculumCodes":["N-2-11"],"pedagogy":{"misconceptions":["cm-unit-mix","op-keyword"],"hintStrategy":"measure-anchor","retryStrategy":"isomorphic-new-surface","masteryProfile":"application","reviewProfile":"application-varied"}},
+
+    {"id":"g2a.relation.part-whole","title":"Model part-part-whole addition and subtraction relationships","domain":"relationships-applications","scope":"core","prerequisites":["g2a.add.no-regroup-100","g2a.sub.no-regroup-100"],"externalPrerequisites":[],"curriculumCodes":["N-2-3","R-2-4"],"pedagogy":{"misconceptions":["op-keyword","unknown-position"],"hintStrategy":"relationship-model","retryStrategy":"strategy-choice","masteryProfile":"application","reviewProfile":"application-varied"}},
+    {"id":"g2a.relation.change-unknown","title":"Solve start, change or result unknown situations","domain":"relationships-applications","scope":"core","prerequisites":["g2a.relation.part-whole"],"externalPrerequisites":[],"curriculumCodes":["N-2-3","R-2-4"],"pedagogy":{"misconceptions":["op-keyword","unknown-position"],"hintStrategy":"relationship-model","retryStrategy":"contrast-case","masteryProfile":"application","reviewProfile":"application-varied"}},
+    {"id":"g2a.relation.compare-difference","title":"Solve compare and difference situations","domain":"relationships-applications","scope":"core","prerequisites":["g2a.relation.part-whole"],"externalPrerequisites":[],"curriculumCodes":["N-2-3"],"pedagogy":{"misconceptions":["op-keyword","unknown-position"],"hintStrategy":"relationship-model","retryStrategy":"isomorphic-new-surface","masteryProfile":"application","reviewProfile":"application-varied"}},
+    {"id":"g2a.relation.inverse-check","title":"Use addition and subtraction as inverse operations to find or check an unknown","domain":"relationships-applications","scope":"core","prerequisites":["g2a.relation.change-unknown","g2a.addsub.explain-vertical"],"externalPrerequisites":[],"curriculumCodes":["R-2-4"],"pedagogy":{"misconceptions":["inverse-surface","unknown-position"],"hintStrategy":"relationship-model","retryStrategy":"strategy-choice","masteryProfile":"concept","reviewProfile":"application-varied"}},
+    {"id":"g2a.relation.inequality-symbols","title":"Use greater-than, less-than and equal signs to record comparisons","domain":"relationships-applications","scope":"core","prerequisites":["g2a.num.compare-200"],"externalPrerequisites":[],"curriculumCodes":["R-2-1"],"pedagogy":{"misconceptions":["pv-compare-length"],"hintStrategy":"compare-align","retryStrategy":"contrast-case","masteryProfile":"concept","reviewProfile":"standard"}},
+
+    {"id":"g2a.twostep.plan","title":"Identify the intermediate quantity needed in a two-step situation","domain":"two-step","scope":"core","prerequisites":["g2a.relation.change-unknown","g2a.relation.compare-difference"],"externalPrerequisites":[],"curriculumCodes":["N-2-8"],"pedagogy":{"misconceptions":["two-step-stop","two-step-order"],"hintStrategy":"relationship-model","retryStrategy":"strategy-choice","masteryProfile":"application","reviewProfile":"application-varied"}},
+    {"id":"g2a.twostep.add-add","title":"Solve two-step situations using addition then addition","domain":"two-step","scope":"core","prerequisites":["g2a.twostep.plan","g2a.add.regroup-100"],"externalPrerequisites":[],"curriculumCodes":["N-2-8"],"pedagogy":{"misconceptions":["two-step-stop","two-step-order"],"hintStrategy":"relationship-model","retryStrategy":"isomorphic-new-surface","masteryProfile":"application","reviewProfile":"application-varied"}},
+    {"id":"g2a.twostep.sub-sub","title":"Solve two-step situations using subtraction then subtraction with nonnegative intermediates","domain":"two-step","scope":"core","prerequisites":["g2a.twostep.plan","g2a.sub.regroup-100"],"externalPrerequisites":[],"curriculumCodes":["N-2-8"],"pedagogy":{"misconceptions":["two-step-stop","sub-direction"],"hintStrategy":"relationship-model","retryStrategy":"concrete-then-symbolic","masteryProfile":"application","reviewProfile":"application-varied"}},
+    {"id":"g2a.twostep.mixed","title":"Solve mixed addition/subtraction two-step situations with nonnegative results","domain":"two-step","scope":"core","prerequisites":["g2a.twostep.add-add","g2a.twostep.sub-sub"],"externalPrerequisites":[],"curriculumCodes":["N-2-8"],"pedagogy":{"misconceptions":["two-step-order","op-keyword"],"hintStrategy":"relationship-model","retryStrategy":"strategy-choice","masteryProfile":"application","reviewProfile":"application-varied"}},
+
+    {"id":"g2a.mul.equal-groups","title":"Recognize and build equal groups","domain":"multiplication","scope":"core","prerequisites":[],"externalPrerequisites":["count equal-sized collections"],"curriculumCodes":["N-2-6"],"pedagogy":{"misconceptions":["mul-unequal-groups","mul-factor-roles"],"hintStrategy":"multiplication-groups","retryStrategy":"concrete-then-symbolic","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.mul.repeated-addition","title":"Connect equal groups, repeated addition and multiplication notation","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.equal-groups"],"externalPrerequisites":[],"curriculumCodes":["N-2-6"],"pedagogy":{"misconceptions":["mul-add-factors","mul-factor-roles"],"hintStrategy":"multiplication-groups","retryStrategy":"isomorphic-new-surface","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.mul.arrays","title":"Represent multiplication with rows and columns","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.repeated-addition"],"externalPrerequisites":[],"curriculumCodes":["N-2-6","R-2-3"],"pedagogy":{"misconceptions":["mul-unequal-groups","mul-order-language"],"hintStrategy":"multiplication-groups","retryStrategy":"concrete-then-symbolic","masteryProfile":"concept","reviewProfile":"standard"}},
+    {"id":"g2a.mul.times-language","title":"Interpret 'times as many' and name both factor roles","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.repeated-addition"],"externalPrerequisites":[],"curriculumCodes":["N-2-6"],"pedagogy":{"misconceptions":["mul-factor-roles","mul-order-language"],"hintStrategy":"multiplication-groups","retryStrategy":"contrast-case","masteryProfile":"application","reviewProfile":"application-varied"}},
+    {"id":"g2a.mul.facts-2","title":"Use and retrieve the 2-times fact family","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.repeated-addition"],"externalPrerequisites":[],"curriculumCodes":["N-2-7"],"pedagogy":{"misconceptions":["mul-add-factors"],"hintStrategy":"multiplication-groups","retryStrategy":"strategy-choice","masteryProfile":"fact-family","reviewProfile":"fact-distributed"}},
+    {"id":"g2a.mul.facts-5","title":"Use and retrieve the 5-times fact family","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.repeated-addition"],"externalPrerequisites":[],"curriculumCodes":["N-2-7"],"pedagogy":{"misconceptions":["mul-add-factors"],"hintStrategy":"multiplication-groups","retryStrategy":"strategy-choice","masteryProfile":"fact-family","reviewProfile":"fact-distributed"}},
+    {"id":"g2a.mul.facts-4","title":"Use and retrieve the 4-times fact family","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.facts-2","g2a.mul.arrays"],"externalPrerequisites":[],"curriculumCodes":["N-2-7"],"pedagogy":{"misconceptions":["mul-add-factors"],"hintStrategy":"multiplication-groups","retryStrategy":"strategy-choice","masteryProfile":"fact-family","reviewProfile":"fact-distributed"}},
+    {"id":"g2a.mul.facts-8","title":"Use and retrieve the 8-times fact family","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.facts-4"],"externalPrerequisites":[],"curriculumCodes":["N-2-7"],"pedagogy":{"misconceptions":["mul-add-factors"],"hintStrategy":"multiplication-groups","retryStrategy":"strategy-choice","masteryProfile":"fact-family","reviewProfile":"fact-distributed"}},
+    {"id":"g2a.mul.facts-3","title":"Use and retrieve the 3-times fact family","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.repeated-addition"],"externalPrerequisites":[],"curriculumCodes":["N-2-7"],"pedagogy":{"misconceptions":["mul-add-factors"],"hintStrategy":"multiplication-groups","retryStrategy":"strategy-choice","masteryProfile":"fact-family","reviewProfile":"fact-distributed"}},
+    {"id":"g2a.mul.facts-6","title":"Use and retrieve the 6-times fact family","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.facts-3","g2a.mul.facts-2"],"externalPrerequisites":[],"curriculumCodes":["N-2-7"],"pedagogy":{"misconceptions":["mul-add-factors"],"hintStrategy":"multiplication-groups","retryStrategy":"strategy-choice","masteryProfile":"fact-family","reviewProfile":"fact-distributed"}},
+    {"id":"g2a.mul.facts-7","title":"Use and retrieve the 7-times fact family","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.facts-5","g2a.mul.facts-2"],"externalPrerequisites":[],"curriculumCodes":["N-2-7"],"pedagogy":{"misconceptions":["mul-add-factors"],"hintStrategy":"multiplication-groups","retryStrategy":"strategy-choice","masteryProfile":"fact-family","reviewProfile":"fact-distributed"}},
+    {"id":"g2a.mul.facts-9","title":"Use and retrieve the 9-times fact family","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.facts-8","g2a.mul.facts-1-to-9-relations"],"externalPrerequisites":[],"curriculumCodes":["N-2-7"],"pedagogy":{"misconceptions":["mul-add-factors"],"hintStrategy":"multiplication-groups","retryStrategy":"strategy-choice","masteryProfile":"fact-family","reviewProfile":"fact-distributed"}},
+    {"id":"g2a.mul.facts-1-to-9-relations","title":"Derive multiplication facts using commutativity and known neighboring facts","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.arrays","g2a.mul.facts-2","g2a.mul.facts-5","g2a.mul.facts-3"],"externalPrerequisites":[],"curriculumCodes":["N-2-7","R-2-3"],"pedagogy":{"misconceptions":["mul-order-language","mul-factor-roles"],"hintStrategy":"multiplication-groups","retryStrategy":"strategy-choice","masteryProfile":"concept","reviewProfile":"fact-distributed"}},
+    {"id":"g2a.mul.applications","title":"Choose and use multiplication in equal-group, rate, array and repeated-measure situations","domain":"multiplication","scope":"core","prerequisites":["g2a.mul.times-language","g2a.mul.arrays","g2a.mul.facts-4","g2a.mul.facts-6"],"externalPrerequisites":[],"curriculumCodes":["N-2-6","N-2-7"],"pedagogy":{"misconceptions":["mul-unequal-groups","op-keyword","mul-factor-roles"],"hintStrategy":"multiplication-groups","retryStrategy":"isomorphic-new-surface","masteryProfile":"application","reviewProfile":"application-varied"}},
+
+    {"id":"g2a.time.clock-hands","title":"Distinguish hour and minute hands and their motion","domain":"time","scope":"core","prerequisites":[],"externalPrerequisites":["read exact hours"],"curriculumCodes":["N-2-13"],"pedagogy":{"misconceptions":["clock-hand-swap","clock-hour-drift"],"hintStrategy":"clock-trace","retryStrategy":"contrast-case","masteryProfile":"concept","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.time.read-hour","title":"Read and build exact-hour times on analog and digital clocks","domain":"time","scope":"core","prerequisites":["g2a.time.clock-hands"],"externalPrerequisites":[],"curriculumCodes":["N-2-13"],"pedagogy":{"misconceptions":["clock-hand-swap"],"hintStrategy":"clock-trace","retryStrategy":"isomorphic-new-surface","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.time.read-five-minutes","title":"Read analog time in five-minute intervals","domain":"time","scope":"core","prerequisites":["g2a.time.read-hour","g2a.num.count-200"],"externalPrerequisites":[],"curriculumCodes":["N-2-13"],"pedagogy":{"misconceptions":["clock-five-vs-one","clock-hour-drift"],"hintStrategy":"clock-trace","retryStrategy":"concrete-then-symbolic","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.time.read-minute","title":"Read and match hour-and-minute times to the minute","domain":"time","scope":"core","prerequisites":["g2a.time.read-five-minutes"],"externalPrerequisites":[],"curriculumCodes":["N-2-13"],"pedagogy":{"misconceptions":["clock-five-vs-one","clock-hour-drift"],"hintStrategy":"clock-trace","retryStrategy":"strategy-choice","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.time.elapsed-clock-count","title":"Count elapsed minutes between two nearby clock times","domain":"time","scope":"core","prerequisites":["g2a.time.read-minute"],"externalPrerequisites":[],"curriculumCodes":["N-2-13"],"pedagogy":{"misconceptions":["clock-five-vs-one","two-step-stop"],"hintStrategy":"clock-trace","retryStrategy":"concrete-then-symbolic","masteryProfile":"application","reviewProfile":"application-varied"}},
+
+    {"id":"g2a.capacity.recognize","title":"Recognize capacity as how much a container can hold","domain":"comparison-measures-shapes","scope":"version-dependent","prerequisites":[],"externalPrerequisites":["direct comparison"],"curriculumCodes":["N-2-12"],"pedagogy":{"misconceptions":["compare-container-shape"],"hintStrategy":"compare-physical","retryStrategy":"contrast-case","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.capacity.compare","title":"Compare capacity directly, indirectly or with equal informal units","domain":"comparison-measures-shapes","scope":"version-dependent","prerequisites":["g2a.capacity.recognize"],"externalPrerequisites":[],"curriculumCodes":["N-2-12"],"pedagogy":{"misconceptions":["compare-container-shape","area-unit-gaps"],"hintStrategy":"compare-physical","retryStrategy":"concrete-then-symbolic","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.weight.recognize-balance","title":"Recognize weight and interpret a simple balance","domain":"comparison-measures-shapes","scope":"version-dependent","prerequisites":[],"externalPrerequisites":["direct comparison"],"curriculumCodes":["N-2-12"],"pedagogy":{"misconceptions":["weight-size"],"hintStrategy":"compare-physical","retryStrategy":"contrast-case","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.weight.compare","title":"Compare weight directly, indirectly or with equal informal units","domain":"comparison-measures-shapes","scope":"version-dependent","prerequisites":["g2a.weight.recognize-balance"],"externalPrerequisites":[],"curriculumCodes":["N-2-12"],"pedagogy":{"misconceptions":["weight-size"],"hintStrategy":"compare-physical","retryStrategy":"concrete-then-symbolic","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.area.recognize-surface","title":"Recognize the surface whose size is being compared","domain":"comparison-measures-shapes","scope":"version-dependent","prerequisites":[],"externalPrerequisites":["direct comparison"],"curriculumCodes":["N-2-12"],"pedagogy":{"misconceptions":["area-perimeter","shape-feature-count"],"hintStrategy":"compare-physical","retryStrategy":"contrast-case","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.area.direct-indirect","title":"Compare surface area directly or through an intermediary","domain":"comparison-measures-shapes","scope":"version-dependent","prerequisites":["g2a.area.recognize-surface"],"externalPrerequisites":[],"curriculumCodes":["N-2-12"],"pedagogy":{"misconceptions":["area-perimeter"],"hintStrategy":"compare-physical","retryStrategy":"concrete-then-symbolic","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.area.informal-cover","title":"Compare area by covering with equal informal units","domain":"comparison-measures-shapes","scope":"version-dependent","prerequisites":["g2a.area.direct-indirect"],"externalPrerequisites":[],"curriculumCodes":["N-2-12"],"pedagogy":{"misconceptions":["area-unit-gaps","area-perimeter"],"hintStrategy":"compare-physical","retryStrategy":"contrast-case","masteryProfile":"measurement","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.shape.plane-features","title":"Identify sides, corners and boundaries of common plane figures","domain":"comparison-measures-shapes","scope":"version-dependent","prerequisites":[],"externalPrerequisites":["recognize familiar shapes"],"curriculumCodes":["S-2-1","S-2-2"],"pedagogy":{"misconceptions":["shape-feature-count","shape-orientation"],"hintStrategy":"shape-inspect","retryStrategy":"concrete-then-symbolic","masteryProfile":"concept","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.shape.classify-plane","title":"Classify triangles, squares, rectangles and circles by observable properties","domain":"comparison-measures-shapes","scope":"version-dependent","prerequisites":["g2a.shape.plane-features"],"externalPrerequisites":[],"curriculumCodes":["S-2-1","S-2-2"],"pedagogy":{"misconceptions":["shape-orientation","shape-feature-count"],"hintStrategy":"shape-inspect","retryStrategy":"contrast-case","masteryProfile":"concept","reviewProfile":"hands-on-return"}},
+    {"id":"g2a.shape.compose-boundary","title":"Compose plane figures and distinguish boundary, inside and outside","domain":"comparison-measures-shapes","scope":"version-dependent","prerequisites":["g2a.shape.classify-plane"],"externalPrerequisites":[],"curriculumCodes":["S-2-1","S-2-2"],"pedagogy":{"misconceptions":["shape-orientation","shape-feature-count"],"hintStrategy":"shape-inspect","retryStrategy":"isomorphic-new-surface","masteryProfile":"concept","reviewProfile":"hands-on-return"}}
+  ],
+  "coverageRequirements": [
+    {"id":"place-value-200","requiredScope":"core","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200"]},
+    {"id":"nani-300-extension","requiredScope":"nani-extension","skillIds":["g2a.num.count-300-extension","g2a.num.compose-300-extension","g2a.num.compare-300-extension"]},
+    {"id":"money-within-active-number-range","requiredScope":"core","skillIds":["g2a.money.recognize-denominations","g2a.money.compose-count","g2a.money.exchange","g2a.money.use-exact-amount"]},
+    {"id":"two-digit-add-sub-regrouping","requiredScope":"core","skillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"]},
+    {"id":"informal-units-centimetres-length","requiredScope":"core","skillIds":["g2a.length.repeat-informal-units","g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"]},
+    {"id":"add-sub-relationships-applications","requiredScope":"core","skillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols"]},
+    {"id":"two-step-add-sub","requiredScope":"core","skillIds":["g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"]},
+    {"id":"multiplication-concepts-and-2-to-9-facts","requiredScope":"core","skillIds":["g2a.mul.equal-groups","g2a.mul.repeated-addition","g2a.mul.arrays","g2a.mul.times-language","g2a.mul.facts-2","g2a.mul.facts-3","g2a.mul.facts-4","g2a.mul.facts-5","g2a.mul.facts-6","g2a.mul.facts-7","g2a.mul.facts-8","g2a.mul.facts-9","g2a.mul.facts-1-to-9-relations","g2a.mul.applications"]},
+    {"id":"time-hours-minutes","requiredScope":"core","skillIds":["g2a.time.clock-hands","g2a.time.read-hour","g2a.time.read-five-minutes","g2a.time.read-minute","g2a.time.elapsed-clock-count"]},
+    {"id":"capacity-weight-area-plane-figures","requiredScope":"version-dependent","skillIds":["g2a.capacity.recognize","g2a.capacity.compare","g2a.weight.recognize-balance","g2a.weight.compare","g2a.area.recognize-surface","g2a.area.direct-indirect","g2a.area.informal-cover","g2a.shape.plane-features","g2a.shape.classify-plane","g2a.shape.compose-boundary"]}
+  ],
+  "worlds": [
+    {"id":"world.lantern-harbor","childTitle":"百光港","questIdentity":"Signal keeper","missionPromise":"Build and compare number signals so lost ships can find the harbor.","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200","g2a.num.count-300-extension","g2a.num.compose-300-extension","g2a.num.compare-300-extension"],"requiredForCompletionSkillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200"],"eligibilityBranchSkillIds":["g2a.num.count-300-extension","g2a.num.compose-300-extension","g2a.num.compare-300-extension"]},
+    {"id":"world.carry-bridge","childTitle":"交換橋工坊","questIdentity":"Bridge engineer","missionPromise":"Trade bundles to repair bridges without turning regrouping into a worksheet ritual.","skillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"],"requiredForCompletionSkillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"],"eligibilityBranchSkillIds":[]},
+    {"id":"world.trail-measurement","childTitle":"微光測量徑","questIdentity":"Trail mapper","missionPromise":"Bridge informal units to centimetres, then measure, draw and compare paths so creatures can travel safely.","skillIds":["g2a.length.repeat-informal-units","g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"requiredForCompletionSkillIds":["g2a.length.repeat-informal-units","g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"eligibilityBranchSkillIds":[]},
+    {"id":"world.mystery-workshop","childTitle":"關係偵探社","questIdentity":"Relationship detective","missionPromise":"Discover what changed, what is missing and how quantities belong together.","skillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols"],"requiredForCompletionSkillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols"],"eligibilityBranchSkillIds":[]},
+    {"id":"world.route-planner","childTitle":"雙岔航線台","questIdentity":"Expedition planner","missionPromise":"Plan the hidden middle step that gets an expedition all the way home.","skillIds":["g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"],"requiredForCompletionSkillIds":["g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"],"eligibilityBranchSkillIds":[]},
+    {"id":"world.chorus-groves","childTitle":"倍數合唱林","questIdentity":"Pattern conductor","missionPromise":"Wake equal-group creatures and combine their rhythms into 2-9 fact powers.","skillIds":["g2a.mul.equal-groups","g2a.mul.repeated-addition","g2a.mul.arrays","g2a.mul.times-language","g2a.mul.facts-2","g2a.mul.facts-3","g2a.mul.facts-4","g2a.mul.facts-5","g2a.mul.facts-6","g2a.mul.facts-7","g2a.mul.facts-8","g2a.mul.facts-9","g2a.mul.facts-1-to-9-relations","g2a.mul.applications"],"requiredForCompletionSkillIds":["g2a.mul.equal-groups","g2a.mul.repeated-addition","g2a.mul.arrays","g2a.mul.times-language","g2a.mul.facts-2","g2a.mul.facts-3","g2a.mul.facts-4","g2a.mul.facts-5","g2a.mul.facts-6","g2a.mul.facts-7","g2a.mul.facts-8","g2a.mul.facts-9","g2a.mul.facts-1-to-9-relations","g2a.mul.applications"],"eligibilityBranchSkillIds":[]},
+    {"id":"world.clockwork-observatory","childTitle":"星刻觀測站","questIdentity":"Time navigator","missionPromise":"Set observatory mechanisms to the right hour and minute before each sky event.","skillIds":["g2a.time.clock-hands","g2a.time.read-hour","g2a.time.read-five-minutes","g2a.time.read-minute","g2a.time.elapsed-clock-count"],"requiredForCompletionSkillIds":["g2a.time.clock-hands","g2a.time.read-hour","g2a.time.read-five-minutes","g2a.time.read-minute","g2a.time.elapsed-clock-count"],"eligibilityBranchSkillIds":[]},
+    {"id":"world.shifting-bazaar","childTitle":"萬象交換市集","questIdentity":"Evidence collector","missionPromise":"Compose and exchange money, then use eligible pouring, balancing, covering and shape clues to solve market mysteries.","skillIds":["g2a.money.recognize-denominations","g2a.money.compose-count","g2a.money.exchange","g2a.money.use-exact-amount","g2a.capacity.recognize","g2a.capacity.compare","g2a.weight.recognize-balance","g2a.weight.compare","g2a.area.recognize-surface","g2a.area.direct-indirect","g2a.area.informal-cover","g2a.shape.plane-features","g2a.shape.classify-plane","g2a.shape.compose-boundary"],"requiredForCompletionSkillIds":["g2a.money.recognize-denominations","g2a.money.compose-count","g2a.money.exchange","g2a.money.use-exact-amount"],"eligibilityBranchSkillIds":["g2a.capacity.recognize","g2a.capacity.compare","g2a.weight.recognize-balance","g2a.weight.compare","g2a.area.recognize-surface","g2a.area.direct-indirect","g2a.area.informal-cover","g2a.shape.plane-features","g2a.shape.classify-plane","g2a.shape.compose-boundary"]}
+  ],
+  "publisherMappings": {
+    "kang-hsuan": {
+      "role":"alignment-only",
+      "verificationStatus":"pending-primary-unit-list",
+      "targetBaseline":"tw-115-1",
+      "editionEvidence":"The 115 publisher service and low-grade materials are current, but a stable primary Grade 2A unit list remains unavailable.",
+      "sourceIds":["src-knsh-course-plan","src-knsh-115-low-grade-math"],
+      "alignmentGroups":[
+        {"publisherUnit":null,"topic":"place-value-and-money","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200","g2a.money.recognize-denominations","g2a.money.compose-count","g2a.money.exchange","g2a.money.use-exact-amount"],"confidence":"baseline-directed-topic-scope"},
+        {"publisherUnit":null,"topic":"two-digit-add-sub","skillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"],"confidence":"topic-scope-only"},
+        {"publisherUnit":null,"topic":"informal-units-length-and-centimetres","skillIds":["g2a.length.repeat-informal-units","g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"confidence":"baseline-directed-topic-scope"},
+        {"publisherUnit":null,"topic":"relationships-and-two-step","skillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols","g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"],"confidence":"topic-scope-only"},
+        {"publisherUnit":null,"topic":"multiplication-and-time","skillIds":["g2a.mul.equal-groups","g2a.mul.repeated-addition","g2a.mul.arrays","g2a.mul.times-language","g2a.mul.facts-2","g2a.mul.facts-3","g2a.mul.facts-4","g2a.mul.facts-5","g2a.mul.facts-6","g2a.mul.facts-7","g2a.mul.facts-8","g2a.mul.facts-9","g2a.mul.facts-1-to-9-relations","g2a.mul.applications","g2a.time.clock-hands","g2a.time.read-hour","g2a.time.read-five-minutes","g2a.time.read-minute","g2a.time.elapsed-clock-count"],"confidence":"topic-scope-only"},
+        {"publisherUnit":null,"topic":"capacity-weight-area-shapes","skillIds":["g2a.capacity.recognize","g2a.capacity.compare","g2a.weight.recognize-balance","g2a.weight.compare","g2a.area.recognize-surface","g2a.area.direct-indirect","g2a.area.informal-cover","g2a.shape.plane-features","g2a.shape.classify-plane","g2a.shape.compose-boundary"],"confidence":"unresolved-version-placement"}
+      ]
+    },
+    "nani": {
+      "role":"alignment-only",
+      "verificationStatus":"publisher-outline-verified",
+      "targetBaseline":"tw-115-1",
+      "editionEvidence":"The 2026 publisher outline aligns chronologically with school year 115; exact approval/edition identifier remains to be recorded.",
+      "sourceIds":["src-nani-2026-outline"],
+      "alignmentGroups":[
+        {"publisherUnit":"1","topic":"數到300與錢幣應用","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200","g2a.num.count-300-extension","g2a.num.compose-300-extension","g2a.num.compare-300-extension","g2a.money.recognize-denominations","g2a.money.compose-count","g2a.money.exchange","g2a.money.use-exact-amount"],"confidence":"publisher-source-plus-founder-baseline"},
+        {"publisherUnit":"2","topic":"二位數的加減","skillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"],"confidence":"publisher-source"},
+        {"publisherUnit":"3","topic":"個別單位到幾公分","skillIds":["g2a.length.repeat-informal-units","g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"confidence":"publisher-source-plus-founder-baseline"},
+        {"publisherUnit":"4","topic":"加減的關係與應用","skillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols"],"confidence":"publisher-source"},
+        {"publisherUnit":"5","topic":"容量","skillIds":["g2a.capacity.recognize","g2a.capacity.compare"],"confidence":"publisher-source"},
+        {"publisherUnit":"6","topic":"兩步驟的加減","skillIds":["g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"],"confidence":"publisher-source"},
+        {"publisherUnit":"7","topic":"2、5、4、8 的乘法","skillIds":["g2a.mul.equal-groups","g2a.mul.repeated-addition","g2a.mul.arrays","g2a.mul.times-language","g2a.mul.facts-2","g2a.mul.facts-5","g2a.mul.facts-4","g2a.mul.facts-8","g2a.mul.applications"],"confidence":"publisher-source"},
+        {"publisherUnit":"8","topic":"幾時幾分","skillIds":["g2a.time.clock-hands","g2a.time.read-hour","g2a.time.read-five-minutes","g2a.time.read-minute","g2a.time.elapsed-clock-count"],"confidence":"publisher-source"},
+        {"publisherUnit":"9","topic":"3、6、7、9 的乘法","skillIds":["g2a.mul.facts-3","g2a.mul.facts-6","g2a.mul.facts-7","g2a.mul.facts-9","g2a.mul.facts-1-to-9-relations","g2a.mul.applications"],"confidence":"publisher-source"},
+        {"publisherUnit":"10","topic":"平面圖形","skillIds":["g2a.shape.plane-features","g2a.shape.classify-plane","g2a.shape.compose-boundary"],"confidence":"publisher-source"}
+      ]
+    },
+    "han-lin": {
+      "role":"alignment-only",
+      "verificationStatus":"publisher-teacher-manual-verified",
+      "targetBaseline":"tw-115-1",
+      "editionEvidence":"The accessible unit-level teacher manual is edition 111; its structure is retained as evidence pending exact 115 edition confirmation.",
+      "sourceIds":["src-hanlin-111-teacher-manual"],
+      "alignmentGroups":[
+        {"publisherUnit":"1","topic":"200以內的數與錢幣使用","skillIds":["g2a.num.count-200","g2a.num.compose-200","g2a.num.represent-200","g2a.num.compare-200","g2a.money.recognize-denominations","g2a.money.compose-count","g2a.money.exchange","g2a.money.use-exact-amount"],"confidence":"publisher-source"},
+        {"publisherUnit":"2","topic":"二位數的加減法","skillIds":["g2a.add.no-regroup-100","g2a.add.regroup-100","g2a.sub.no-regroup-100","g2a.sub.regroup-100","g2a.addsub.explain-vertical"],"confidence":"publisher-source"},
+        {"publisherUnit":"3","topic":"個別單位到認識公分","skillIds":["g2a.length.repeat-informal-units","g2a.length.cm-unit","g2a.length.measure-from-zero","g2a.length.measure-offset","g2a.length.estimate-cm","g2a.length.add-subtract-cm"],"confidence":"publisher-source-plus-founder-baseline"},
+        {"publisherUnit":"4","topic":"加減應用","skillIds":["g2a.relation.part-whole","g2a.relation.change-unknown","g2a.relation.compare-difference","g2a.relation.inverse-check","g2a.relation.inequality-symbols"],"confidence":"publisher-source"},
+        {"publisherUnit":"5","topic":"容量","skillIds":["g2a.capacity.recognize","g2a.capacity.compare"],"confidence":"publisher-source"},
+        {"publisherUnit":"6","topic":"加減兩步驟","skillIds":["g2a.twostep.plan","g2a.twostep.add-add","g2a.twostep.sub-sub","g2a.twostep.mixed"],"confidence":"publisher-source"},
+        {"publisherUnit":"7","topic":"乘法（一）","skillIds":["g2a.mul.equal-groups","g2a.mul.repeated-addition","g2a.mul.arrays","g2a.mul.times-language","g2a.mul.facts-2","g2a.mul.facts-5","g2a.mul.facts-4","g2a.mul.facts-8","g2a.mul.applications"],"confidence":"publisher-source"},
+        {"publisherUnit":"8","topic":"時間","skillIds":["g2a.time.clock-hands","g2a.time.read-hour","g2a.time.read-five-minutes","g2a.time.read-minute","g2a.time.elapsed-clock-count"],"confidence":"publisher-source"},
+        {"publisherUnit":"9","topic":"乘法（二）","skillIds":["g2a.mul.facts-3","g2a.mul.facts-6","g2a.mul.facts-7","g2a.mul.facts-9","g2a.mul.facts-1-to-9-relations","g2a.mul.applications"],"confidence":"publisher-source"},
+        {"publisherUnit":"10","topic":"面的大小比較","skillIds":["g2a.area.recognize-surface","g2a.area.direct-indirect","g2a.area.informal-cover"],"confidence":"publisher-source"}
+      ]
+    }
+  },
+  "sources": [
+    {"id":"src-naer-math-manual","kind":"official-curriculum","title":"NAER Mathematics Curriculum Manual, January 2025 update","url":"https://www.naer.edu.tw/upload/1/9/doc/2021/%E6%95%B8%E5%AD%B8%E9%A0%98%E5%9F%9F%E8%AA%B2%E7%A8%8B%E6%89%8B%E5%86%8A%EF%BC%88114%E5%B9%B41%E6%9C%88%E6%9B%B4%E6%96%B0%E7%89%88%EF%BC%89.pdf"},
+    {"id":"src-knsh-course-plan","kind":"publisher-landing-page","title":"Kang Hsuan current curriculum-plan service","url":"https://www.knsh.com.tw/service/plan"},
+    {"id":"src-knsh-115-low-grade-math","kind":"publisher-115-overview","title":"Kang Hsuan school year 115 low-grade mathematics feature bulletin","url":"https://945cloud.knsh.com.tw/show/E/expo/pic/textbook_levels_low/115%281%29%E6%95%B8%E5%AD%B8%E7%89%B9%E5%88%8A.pdf"},
+    {"id":"src-nani-2026-outline","kind":"publisher-outline","title":"Nani 2026 elementary mathematics structure overview","url":"https://naniexpo.nani.com.tw/uploads/pdf/20260312_201419_4ea29e252cdd.pdf"},
+    {"id":"src-hanlin-111-teacher-manual","kind":"publisher-teacher-manual","title":"Han Lin Grade 2 semester 1 mathematics teacher manual (111 edition)","url":"https://resource.hle.com.tw/Books/BooksResource/111%E5%9C%8B%E5%B0%8F%E6%95%B8%E5%AD%B82%E4%B8%8A%E6%95%99%E5%B8%AB%E6%89%8B%E5%86%8A-%E6%88%90%E6%9B%B8%28111f265000%29.pdf"}
+  ],
+  "unresolvedQuestions": [
+    {"id":"uq-kang-hsuan-order","blockingFor":"publisher-unit-alignment","question":"What is the current Kang Hsuan Grade 2 semester 1 mathematics unit order and exact placement of capacity, weight, area comparison and plane figures?","reason":"The public publisher course-plan page is authoritative but its downloadable unit list was not accessible in a stable machine-readable form; unit numbers are intentionally left null."},
+    {"id":"uq-publisher-115-edition-ids","blockingFor":"release-specific-school-sync","question":"What exact approval or edition identifier should be recorded for each publisher's Taiwan school year 115 semester 1 Grade 2 mathematics book?","reason":"The founder baseline is now fixed to 115-1, but accessible evidence quality differs: Nani has a 2026 outline, Han Lin's detailed manual is edition 111, and Kang Hsuan's 115 materials do not expose a stable Grade 2A unit list."},
+    {"id":"uq-shape-vs-area","blockingFor":"version-dependent-surfacing","question":"Should a school-version selector surface plane-figure quests, area-comparison quests, or both during Grade 2A?","reason":"Publisher placement differs; mastery prerequisites remain common, but school-progress surfacing needs exact edition mappings."},
+    {"id":"uq-physical-measurement","blockingFor":"world-implementation","question":"Which capacity, weight, area and ruler tasks require an adult-supplied physical object versus an on-screen simulation?","reason":"The national curriculum emphasizes hands-on activity; a future World must not claim physical transfer from screen-only evidence."},
+    {"id":"uq-elapsed-time-bound","blockingFor":"world-implementation","question":"What maximum nearby elapsed-time interval should future generated Grade 2A clock quests use?","reason":"The graph includes counting between nearby clock times, but this foundation does not set content-generation bounds."}
+  ]
+}
