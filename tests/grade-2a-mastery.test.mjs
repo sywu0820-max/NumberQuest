@@ -8,9 +8,9 @@ import {
 const graph=JSON.parse(await readFile(new URL('../curriculum/grade-2a.skill-graph.json',import.meta.url),'utf8'));
 const contract=JSON.parse(await readFile(new URL('../curriculum/grade-2a.mastery-rules.json',import.meta.url),'utf8'));
 let serial=0;
-const event=({skillId='g2a.num.count-200',evidenceKind='acquisition',day='2026-09-01',sessionId='s0',outcome='correct',attemptKind='independent-first-try',representationFamily='symbolic',representationId,contextFamily='harbor',contextId,sourceQuestionId,elapsedDaysSinceAcquisition=null,revisitKind=evidenceKind==='retrieval'?'later-session':'initial',transferEvidence=evidenceKind==='transfer',evidenceTags=[],relationshipFamily=null,factIdentity=null,transferSurfaceId=null,eventId}={})=>{
+const event=({skillId='g2a.num.count-200',evidenceKind='acquisition',day='2026-09-01',sessionId='s0',outcome='correct',attemptKind='independent-first-try',representationFamily='symbolic',representationId,contextFamily='harbor',contextId,sourceQuestionId,elapsedDaysSinceAcquisition=null,revisitKind=evidenceKind==='retrieval'?'later-session':'initial',transferEvidence=evidenceKind==='transfer',evidenceTags=[],relationshipFamily=null,factIdentity=null,transferSurfaceId=null,schedulerId,eventId}={})=>{
   const id=++serial;
-  return {schemaVersion:'1.0.0',eventId:eventId||`event-${id}`,skillId,sessionId,localDay:day,outcome,attemptKind,evidenceKind,revisitKind,elapsedDaysSinceAcquisition,representationId:representationId||`${representationFamily}-${id}`,representationFamily,contextId:contextId||`${contextFamily}-${id}`,contextFamily,sourceQuestionId:sourceQuestionId||`question-${id}`,schedulerId:evidenceKind==='retrieval'?`schedule-${id}`:null,transferEvidence,evidenceTags:[...evidenceTags],relationshipFamily,factIdentity,transferSurfaceId};
+  return {schemaVersion:'1.0.0',eventId:eventId||`event-${id}`,skillId,sessionId,localDay:day,outcome,attemptKind,evidenceKind,revisitKind,elapsedDaysSinceAcquisition,representationId:representationId||`${representationFamily}-${id}`,representationFamily,contextId:contextId||`${contextFamily}-${id}`,contextFamily,sourceQuestionId:sourceQuestionId||`question-${id}`,schedulerId:schedulerId===undefined?(evidenceKind==='retrieval'?`schedule-${id}`:null):schedulerId,transferEvidence,evidenceTags:[...evidenceTags],relationshipFamily,factIdentity,transferSurfaceId};
 };
 const evaluate=(profileId,events,options={})=>evaluateGrade2AMastery({skillId:options.skillId||'g2a.num.count-200',profileId,events,legacyEvidence:options.legacyEvidence});
 const conceptAcquisition=()=>[
@@ -69,6 +69,27 @@ test('same-session and same-day later-session review are distinct from next-day 
   result=evaluate('concept',[...acquisition,...reviews,event({evidenceKind:'retrieval',day:'2026-09-04',sessionId:'s-later',elapsedDaysSinceAcquisition:3})]);assert.equal(result.retrievalMet,true);
 });
 
+test('retrieval timing begins when acquisition is established, not at first exposure',()=>{
+  const acquisition=[
+    event({day:'2026-09-01',sessionId:'acq-1',representationFamily:'bundles'}),
+    event({day:'2026-09-02',sessionId:'acq-2',representationFamily:'bundles'}),
+    event({day:'2026-09-04',sessionId:'acq-3',representationFamily:'number-line'})
+  ];
+  const sameDay=event({evidenceKind:'retrieval',day:'2026-09-04',sessionId:'review-same-day',elapsedDaysSinceAcquisition:0});
+  let result=evaluate('concept',[...acquisition,sameDay]);assert.equal(result.acquisitionMet,true);assert.equal(result.supportingEvidence.acquisitionEstablishedDay,'2026-09-04');assert.equal(result.supportingEvidence.counts.sameDayLaterSessionRetrievals,1);assert.equal(result.supportingEvidence.counts.laterRetrievals,0);assert.equal(result.retrievalMet,false);
+  const nextDay=event({evidenceKind:'retrieval',day:'2026-09-05',sessionId:'review-next',elapsedDaysSinceAcquisition:1}),durable=event({evidenceKind:'retrieval',day:'2026-09-07',sessionId:'review-durable',elapsedDaysSinceAcquisition:3});
+  result=evaluate('concept',[...acquisition,sameDay,nextDay,durable]);assert.equal(result.retrievalMet,true);assert.equal(result.supportingEvidence.counts.nextSessionRetrievals,1);assert.equal(result.supportingEvidence.counts.laterRetrievals,1);
+});
+
+test('retrieval requires a fresh source prompt while scheduler lineage may be preserved',()=>{
+  const acquisition=conceptAcquisition(),lineage='memory:g2a.num.count-200',reused=event({evidenceKind:'retrieval',day:'2026-09-02',sessionId:'review-reused',elapsedDaysSinceAcquisition:1,sourceQuestionId:acquisition[0].sourceQuestionId,schedulerId:lineage});
+  let result=evaluate('concept',[...acquisition,reused]);assert.equal(result.supportingEvidence.counts.nextSessionRetrievals,0);assert.ok(result.supportingEvidence.retrievalInvalid.some(item=>item.code==='retrieval-reuses-acquisition-source'));
+  const fresh=event({evidenceKind:'retrieval',day:'2026-09-02',sessionId:'review-fresh',elapsedDaysSinceAcquisition:1,sourceQuestionId:'fresh-review-question',schedulerId:lineage});
+  result=evaluate('concept',[...acquisition,fresh]);assert.equal(result.supportingEvidence.counts.nextSessionRetrievals,1);assert.equal(result.supportingEvidence.retrievalInvalid.length,0);
+  const hintedExposure=event({attemptKind:'hinted',sourceQuestionId:'hinted-acquisition-prompt'}),replayedHint=event({evidenceKind:'retrieval',day:'2026-09-02',sessionId:'review-hinted-replay',elapsedDaysSinceAcquisition:1,sourceQuestionId:'hinted-acquisition-prompt',schedulerId:lineage});
+  result=evaluate('concept',[...acquisition,hintedExposure,replayedHint]);assert.equal(result.supportingEvidence.counts.nextSessionRetrievals,0);assert.ok(result.supportingEvidence.retrievalInvalid.some(item=>item.code==='retrieval-reuses-acquisition-source'));
+});
+
 test('repeating one transfer context and representation cannot satisfy a distinct surface requirement',()=>{
   const transfer=[event({evidenceKind:'transfer',contextFamily:'harbor',representationFamily:'bundles'}),event({evidenceKind:'transfer',contextFamily:'harbor',representationFamily:'bundles'})];
   const result=evaluate('concept',[...conceptAcquisition(),...conceptRetrieval(),...transfer]);assert.equal(result.transferMet,false);assert.equal(result.supportingEvidence.counts.transferIndependentSuccesses,2);assert.equal(result.supportingEvidence.distinct.transferSurfaces,1);
@@ -80,10 +101,25 @@ test('a declared elapsed-day gap is checked against event dates',()=>{
 });
 
 test('calculation profile requires boundary and regrouping cases plus non-vertical transfer contexts',()=>{
-  const acquisition=[event({evidenceTags:['boundary']}),event({evidenceTags:['regrouping-sensitive']}),event(),event()],retrieval=conceptRetrieval();
-  const excluded=event({evidenceKind:'transfer',contextFamily:'bare-vertical-form'}),transfers=[event({evidenceKind:'transfer',contextFamily:'market'}),event({evidenceKind:'transfer',contextFamily:'route'})];
-  let result=evaluate('calculation',[...acquisition,...retrieval,excluded,...transfers]);assert.equal(result.masteryMet,true);assert.equal(result.supportingEvidence.counts.transferIndependentSuccesses,2);
-  result=evaluate('calculation',[...acquisition,...retrieval,excluded,event({evidenceKind:'transfer',contextFamily:'market'})]);assert.equal(result.transferMet,false);
+  const skillId='g2a.add.regroup-100',calc=properties=>event({skillId,...properties});
+  const acquisition=[calc({evidenceTags:['boundary']}),calc({evidenceTags:['regrouping-sensitive']}),calc({evidenceTags:['ones-to-tens-regrouping']}),calc({})],retrieval=[calc({evidenceKind:'retrieval',day:'2026-09-02',sessionId:'calc-r1',elapsedDaysSinceAcquisition:1}),calc({evidenceKind:'retrieval',day:'2026-09-04',sessionId:'calc-r2',elapsedDaysSinceAcquisition:3})];
+  const excluded=calc({evidenceKind:'transfer',contextFamily:'bare-vertical-form'}),transfers=[calc({evidenceKind:'transfer',contextFamily:'market'}),calc({evidenceKind:'transfer',contextFamily:'route'})];
+  let result=evaluate('calculation',[...acquisition,...retrieval,excluded,...transfers],{skillId});assert.equal(result.masteryMet,true);assert.equal(result.supportingEvidence.skillRequirementId,'calculation-add-regroup');assert.equal(result.supportingEvidence.counts.transferIndependentSuccesses,2);
+  result=evaluate('calculation',[...acquisition,...retrieval,excluded,calc({evidenceKind:'transfer',contextFamily:'market'})],{skillId});assert.equal(result.transferMet,false);
+});
+
+test('calculation acquisition requirements distinguish no-regroup from actual regrouping skills',()=>{
+  const noRegroup='g2a.add.no-regroup-100',noRegroupEvent=properties=>event({skillId:noRegroup,...properties});
+  const validNoRegroup=[noRegroupEvent({evidenceTags:['boundary']}),noRegroupEvent({evidenceTags:['no-regroup']}),noRegroupEvent({}),noRegroupEvent({})];
+  let result=evaluate('calculation',validNoRegroup,{skillId:noRegroup});assert.equal(result.acquisitionMet,true);assert.equal(result.supportingEvidence.skillRequirementId,'calculation-add-no-regroup');
+  const distorted=[noRegroupEvent({evidenceTags:['boundary']}),noRegroupEvent({evidenceTags:['regrouping-sensitive']}),noRegroupEvent({}),noRegroupEvent({})];
+  result=evaluate('calculation',distorted,{skillId:noRegroup});assert.equal(result.acquisitionMet,false);assert.ok(result.missingEvidence.some(item=>item.code==='acquisition-tag-no-regroup'));
+  const regroup='g2a.sub.regroup-100',regroupEvent=properties=>event({skillId:regroup,...properties}),validRegroup=[regroupEvent({evidenceTags:['boundary']}),regroupEvent({evidenceTags:['regrouping-sensitive']}),regroupEvent({evidenceTags:['tens-to-ones-exchange']}),regroupEvent({})];
+  result=evaluate('calculation',validRegroup,{skillId:regroup});assert.equal(result.acquisitionMet,true);assert.equal(result.supportingEvidence.skillRequirementId,'calculation-sub-regroup');
+  for(const [skillId,requirement] of Object.entries(GRADE_2A_MASTERY_RULES.skillRequirements)){
+    const required=requirement.acquisition.requiredTagsAcrossEvidence,events=Array.from({length:4},(_,index)=>event({skillId,evidenceTags:index<required.length?[required[index]]:[]}));
+    const evaluated=evaluate('calculation',events,{skillId});assert.equal(evaluated.acquisitionMet,true,skillId);assert.equal(evaluated.supportingEvidence.skillRequirementId,requirement.requirementId,skillId);
+  }
 });
 
 test('application profile requires relationship diversity, uncued retrieval, and preserved relationship transfer',()=>{

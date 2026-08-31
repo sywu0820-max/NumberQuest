@@ -4,7 +4,7 @@ export const GRADE_2A_MASTERY_RULES=deepFreeze({
   sourceGraphId:'tw-grade-2a-foundation',
   status:'headless-review-contract',
   runtimeIntegration:false,
-  policy:{formalMasteryRequiresAllDimensions:true,missesEraseEvidence:false,speedOrTimerIsEvidence:false,legacyAggregateCountersAreFormalEvidence:false,worldCompletionIsFormalMastery:false,capabilityGlowIsFormalMastery:false,laterRetrievalDayGap:3,nextSessionMinimumDayGap:1},
+  policy:{formalMasteryRequiresAllDimensions:true,missesEraseEvidence:false,speedOrTimerIsEvidence:false,legacyAggregateCountersAreFormalEvidence:false,worldCompletionIsFormalMastery:false,capabilityGlowIsFormalMastery:false,retrievalAnchoredTo:'acquisition-established-day',freshReviewSourceRequired:true,laterRetrievalDayGap:3,nextSessionMinimumDayGap:1},
   eventSchema:{
     required:['schemaVersion','eventId','skillId','sessionId','localDay','outcome','attemptKind','evidenceKind','revisitKind','elapsedDaysSinceAcquisition','representationId','representationFamily','contextId','contextFamily','sourceQuestionId','schedulerId','transferEvidence','evidenceTags'],
     enums:{outcome:['correct','miss'],attemptKind:['independent-first-try','hinted','recovered','miss'],evidenceKind:['acquisition','retrieval','transfer'],revisitKind:['initial','same-session','later-session']},
@@ -13,10 +13,16 @@ export const GRADE_2A_MASTERY_RULES=deepFreeze({
   },
   profiles:{
     concept:{acquisition:{minIndependentSuccesses:3,minDistinctRepresentationFamilies:2},retrieval:{minNextSessionSuccesses:1,minLaterSuccesses:1,laterDayGap:3},transfer:{minIndependentSuccesses:2,minDistinctSurfaceSignatures:2}},
-    calculation:{acquisition:{minIndependentSuccesses:4,requiredTagsAcrossEvidence:['boundary','regrouping-sensitive']},retrieval:{minNextSessionSuccesses:1,minLaterSuccesses:1,laterDayGap:3},transfer:{minIndependentSuccesses:2,minDistinctContextFamilies:2,excludedContextFamilies:['bare-vertical-form']}},
+    calculation:{acquisition:{minIndependentSuccesses:4},retrieval:{minNextSessionSuccesses:1,minLaterSuccesses:1,laterDayGap:3},transfer:{minIndependentSuccesses:2,minDistinctContextFamilies:2,excludedContextFamilies:['bare-vertical-form']}},
     application:{acquisition:{minIndependentSuccesses:3,minDistinctRelationshipFamilies:3,requiredTagsAcrossEvidence:['explanation-or-valid-model']},retrieval:{minLaterSessionSuccesses:1,minimumDayGap:1,requiredEveryEventTags:['no-operation-cue']},transfer:{minIndependentSuccesses:2,minDistinctRepresentationFamilies:2,minDistinctContextFamilies:2,requiredEveryEventTags:['relationship-preserved']}},
     measurement:{acquisition:{minIndependentSuccesses:3,requiredEveryEventTags:['correct-unit-and-procedure']},retrieval:{minLaterSessionSuccesses:1,minimumDayGap:1,requiredEveryEventTags:['no-procedural-highlight']},transfer:{minIndependentSuccesses:2,minDistinctTransferSurfaceIds:2}},
     'fact-family':{acquisition:{minIndependentSuccesses:4,minDistinctFactIdentities:4,minConcreteRepresentationSuccesses:2,concreteRepresentationFamilies:['groups','arrays','story']},retrieval:{minLaterSessionSuccesses:2,minimumDayGap:1,minDistinctSessions:2,minDistinctFactIdentities:2},transfer:{minIndependentSuccesses:2,minDistinctContextFamilies:2,requiredTagsAcrossEvidence:['related-fact-derived']}}
+  },
+  skillRequirements:{
+    'g2a.add.no-regroup-100':{profileId:'calculation',requirementId:'calculation-add-no-regroup',acquisition:{requiredTagsAcrossEvidence:['boundary','no-regroup']}},
+    'g2a.add.regroup-100':{profileId:'calculation',requirementId:'calculation-add-regroup',acquisition:{requiredTagsAcrossEvidence:['boundary','regrouping-sensitive','ones-to-tens-regrouping']}},
+    'g2a.sub.no-regroup-100':{profileId:'calculation',requirementId:'calculation-sub-no-regroup',acquisition:{requiredTagsAcrossEvidence:['boundary','no-regroup']}},
+    'g2a.sub.regroup-100':{profileId:'calculation',requirementId:'calculation-sub-regroup',acquisition:{requiredTagsAcrossEvidence:['boundary','regrouping-sensitive','tens-to-ones-exchange']}}
   }
 });
 
@@ -72,6 +78,14 @@ function uniqueSources(events){
   const seen=new Set();return ordered.filter(event=>{if(seen.has(event.sourceQuestionId))return false;seen.add(event.sourceQuestionId);return true});
 }
 
+function resolvedRule(skillId,profileId){
+  const profile=GRADE_2A_MASTERY_RULES.profiles[profileId];if(!profile)throw new RangeError(`Unknown Grade 2A mastery profile: ${profileId}`);
+  const requirement=GRADE_2A_MASTERY_RULES.skillRequirements[skillId];
+  if(profileId==='calculation'&&!requirement)throw new RangeError(`Calculation skill lacks an explicit evidence requirement: ${skillId}`);
+  if(requirement&&requirement.profileId!==profileId)throw new RangeError(`Skill requirement profile mismatch for ${skillId}: expected ${requirement.profileId}, received ${profileId}`);
+  return {rule:{acquisition:{...profile.acquisition,...(requirement?.acquisition||{})},retrieval:{...profile.retrieval,...(requirement?.retrieval||{})},transfer:{...profile.transfer,...(requirement?.transfer||{})}},requirementId:requirement?.requirementId||null};
+}
+
 function missing(list,dimension,code,required,observed){if(observed<required)list.push({dimension,code,required,observed})}
 function missingTags(list,dimension,required,events){
   const observed=asSet(events.flatMap(event=>event.evidenceTags));for(const tag of required||[])if(!observed.has(tag))list.push({dimension,code:`${dimension}-tag-${tag}`,required:tag,observed:false});
@@ -90,11 +104,17 @@ function evaluateAcquisition(events,rule,missingEvidence){
   return {eligible,met:!missingEvidence.some(item=>item.dimension===dimension)};
 }
 
-function classifyRetrieval(events,acquisitionEvents,rule,invalidReasons){
-  if(!acquisitionEvents.length)return {eligible:[],sameSession:[],sameDayLaterSession:[],nextSession:[],later:[],laterSession:[]};
-  const anchorDay=Math.min(...acquisitionEvents.map(event=>dayNumber(event.localDay))),acquisitionSessions=asSet(acquisitionEvents.map(event=>event.sessionId));
+function acquisitionEstablishedDay(events,rule){
+  for(let index=1;index<=events.length;index++){const missingEvidence=[],result=evaluateAcquisition(events.slice(0,index),rule,missingEvidence);if(result.met)return events[index-1].localDay}
+  return null;
+}
+
+function classifyRetrieval(events,acquisitionEvents,establishedDay,rule,invalidReasons){
+  if(!establishedDay)return {eligible:[],sameSession:[],sameDayLaterSession:[],nextSession:[],later:[],laterSession:[]};
+  const anchorDay=dayNumber(establishedDay),acquisitionSessions=asSet(acquisitionEvents.map(event=>event.sessionId)),acquisitionSources=asSet(acquisitionEvents.map(event=>event.sourceQuestionId));
   const verified=[];
   for(const event of events){
+    if(acquisitionSources.has(event.sourceQuestionId)){invalidReasons.push({eventId:event.eventId,code:'retrieval-reuses-acquisition-source',sourceQuestionId:event.sourceQuestionId,schedulerId:event.schedulerId});continue}
     const calculated=dayNumber(event.localDay)-anchorDay;
     if(calculated!==event.elapsedDaysSinceAcquisition){invalidReasons.push({eventId:event.eventId,code:'retrieval-day-gap-mismatch',declared:event.elapsedDaysSinceAcquisition,calculated});continue}
     if(event.revisitKind==='later-session'&&acquisitionSessions.has(event.sessionId)){invalidReasons.push({eventId:event.eventId,code:'later-session-reuses-acquisition-session'});continue}
@@ -133,20 +153,20 @@ function evaluateTransfer(events,rule,missingEvidence){
 }
 
 export function evaluateGrade2AMastery({skillId,profileId,events=[],legacyEvidence=null}={}){
-  const rule=GRADE_2A_MASTERY_RULES.profiles[profileId];
   if(typeof skillId!=='string'||!skillId)throw new TypeError('skillId is required.');
-  if(!rule)throw new RangeError(`Unknown Grade 2A mastery profile: ${profileId}`);
+  const {rule,requirementId}=resolvedRule(skillId,profileId);
   const input=Array.isArray(events)?events:[],invalidEvents=[],deduplicatedEvents=[];const seenEventIds=new Set();let duplicateEvents=0;
   for(const raw of input){
     const checked=validateGrade2AEvidenceEvent(raw);if(!checked.valid){invalidEvents.push({eventId:raw?.eventId||null,errors:checked.errors});continue}
     if(checked.event.skillId!==skillId)continue;
     if(seenEventIds.has(checked.event.eventId)){duplicateEvents++;continue}seenEventIds.add(checked.event.eventId);deduplicatedEvents.push(checked.event);
   }
-  const correctIndependent=deduplicatedEvents.filter(independent),acquisition=uniqueSources(correctIndependent.filter(event=>event.evidenceKind==='acquisition'));
+  const correctIndependent=deduplicatedEvents.filter(independent),acquisitionExposure=deduplicatedEvents.filter(event=>event.evidenceKind==='acquisition'),acquisition=uniqueSources(correctIndependent.filter(event=>event.evidenceKind==='acquisition'));
   const retrieval=uniqueSources(correctIndependent.filter(event=>event.evidenceKind==='retrieval')),transfer=uniqueSources(correctIndependent.filter(event=>event.evidenceKind==='transfer'&&event.transferEvidence));
   const missingEvidence=[],retrievalInvalid=[];
   const acquisitionResult=evaluateAcquisition(acquisition,rule.acquisition,missingEvidence);
-  const retrievalClasses=classifyRetrieval(retrieval,acquisition,rule.retrieval,retrievalInvalid),retrievalMet=evaluateRetrieval(retrievalClasses,rule.retrieval,missingEvidence);
+  const establishedDay=acquisitionEstablishedDay(acquisition,rule.acquisition);
+  const retrievalClasses=classifyRetrieval(retrieval,acquisitionExposure,establishedDay,rule.retrieval,retrievalInvalid),retrievalMet=evaluateRetrieval(retrievalClasses,rule.retrieval,missingEvidence);
   const transferResult=evaluateTransfer(transfer,rule.transfer,missingEvidence),acquisitionMet=acquisitionResult.met,transferMet=transferResult.met,masteryMet=acquisitionMet&&retrievalMet&&transferMet;
   const granularEvidencePresent=deduplicatedEvents.length>0,legacyEvidencePresent=legacyEvidence!==null&&legacyEvidence!==undefined;
   if(!granularEvidencePresent)missingEvidence.unshift({dimension:'contract',code:legacyEvidencePresent?'legacy-aggregate-insufficient':'granular-evidence-required',required:'validated event-level evidence',observed:legacyEvidencePresent?'aggregate counters only':'none'});
@@ -155,6 +175,7 @@ export function evaluateGrade2AMastery({skillId,profileId,events=[],legacyEviden
     skillId,profileId,progressStage,acquisitionMet,retrievalMet,transferMet,masteryMet,
     insufficientEvidence:!granularEvidencePresent,missingEvidence,
     supportingEvidence:{
+      acquisitionEstablishedDay:establishedDay,skillRequirementId:requirementId,
       counts:{inputEvents:input.length,validSkillEvents:deduplicatedEvents.length,invalidEvents:invalidEvents.length,duplicateEvents,misses:deduplicatedEvents.filter(event=>event.outcome==='miss').length,hintedOrRecoveredSuccesses:deduplicatedEvents.filter(event=>event.outcome==='correct'&&!independent(event)).length,independentSuccesses:correctIndependent.length,acquisitionIndependentSuccesses:acquisitionResult.eligible.length,retrievalIndependentSuccesses:retrievalClasses.eligible.length,sameSessionRetrievals:retrievalClasses.sameSession.length,sameDayLaterSessionRetrievals:retrievalClasses.sameDayLaterSession.length,nextSessionRetrievals:retrievalClasses.nextSession.length,laterRetrievals:retrievalClasses.later.length,transferIndependentSuccesses:transferResult.eligible.length},
       distinct:{acquisitionRepresentations:distinct(acquisitionResult.eligible,'representationFamily'),acquisitionRelationships:distinct(acquisitionResult.eligible,'relationshipFamily'),acquisitionFacts:distinct(acquisitionResult.eligible,'factIdentity'),retrievalSessions:distinct(retrievalClasses.laterSession,'sessionId'),retrievalFacts:distinct(retrievalClasses.laterSession,'factIdentity'),transferRepresentations:distinct(transferResult.eligible,'representationFamily'),transferContexts:distinct(transferResult.eligible,'contextFamily'),transferSurfaces:asSet(transferResult.eligible.map(event=>event.transferSurfaceId||`${event.contextFamily}::${event.representationFamily}`)).size},
       invalidEvents,retrievalInvalid,legacyAggregateIgnored:legacyEvidencePresent

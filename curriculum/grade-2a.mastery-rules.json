@@ -11,6 +11,8 @@
     "legacyAggregateCountersAreFormalEvidence": false,
     "worldCompletionIsFormalMastery": false,
     "capabilityGlowIsFormalMastery": false,
+    "retrievalAnchoredTo": "acquisition-established-day",
+    "freshReviewSourceRequired": true,
     "laterRetrievalDayGap": 3,
     "nextSessionMinimumDayGap": 1
   },
@@ -63,8 +65,7 @@
     },
     "calculation": {
       "acquisition": {
-        "minIndependentSuccesses": 4,
-        "requiredTagsAcrossEvidence": ["boundary", "regrouping-sensitive"]
+        "minIndependentSuccesses": 4
       },
       "retrieval": {
         "minNextSessionSuccesses": 1,
@@ -127,6 +128,36 @@
         "minIndependentSuccesses": 2,
         "minDistinctContextFamilies": 2,
         "requiredTagsAcrossEvidence": ["related-fact-derived"]
+      }
+    }
+  },
+  "skillRequirements": {
+    "g2a.add.no-regroup-100": {
+      "profileId": "calculation",
+      "requirementId": "calculation-add-no-regroup",
+      "acquisition": {
+        "requiredTagsAcrossEvidence": ["boundary", "no-regroup"]
+      }
+    },
+    "g2a.add.regroup-100": {
+      "profileId": "calculation",
+      "requirementId": "calculation-add-regroup",
+      "acquisition": {
+        "requiredTagsAcrossEvidence": ["boundary", "regrouping-sensitive", "ones-to-tens-regrouping"]
+      }
+    },
+    "g2a.sub.no-regroup-100": {
+      "profileId": "calculation",
+      "requirementId": "calculation-sub-no-regroup",
+      "acquisition": {
+        "requiredTagsAcrossEvidence": ["boundary", "no-regroup"]
+      }
+    },
+    "g2a.sub.regroup-100": {
+      "profileId": "calculation",
+      "requirementId": "calculation-sub-regroup",
+      "acquisition": {
+        "requiredTagsAcrossEvidence": ["boundary", "regrouping-sensitive", "tens-to-ones-exchange"]
       }
     }
   }

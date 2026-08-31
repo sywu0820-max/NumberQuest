@@ -27,7 +27,7 @@ Every event has stable event, skill, session, day, representation, context and s
   attemptKind: 'independent-first-try',  // independent-first-try | hinted | recovered | miss
   evidenceKind: 'retrieval',             // acquisition | retrieval | transfer
   revisitKind: 'later-session',          // initial | same-session | later-session
-  elapsedDaysSinceAcquisition: 3,
+  elapsedDaysSinceAcquisition: 3,        // from the day acquisition first became established
   representationId: 'number-line-184',
   representationFamily: 'number-line',
   contextId: 'harbor-route-east',
@@ -42,7 +42,9 @@ Every event has stable event, skill, session, day, representation, context and s
 }
 ```
 
-The validator rejects missing or contradictory identity and classification fields. The evaluator deduplicates event IDs and source-question IDs so replaying one prompt cannot inflate evidence. It cross-checks a retrieval's declared day separation against the earliest independent acquisition day.
+The validator rejects missing or contradictory identity and classification fields. The evaluator deduplicates event IDs and source-question IDs so replaying one prompt cannot inflate evidence. It deterministically sorts independent acquisition evidence, finds the earliest prefix that fully satisfies acquisition, exposes that final prefix day as `supportingEvidence.acquisitionEstablishedDay`, and cross-checks retrieval separation from that day—not from first exposure.
+
+A retrieval must use a fresh `sourceQuestionId` that was not used for acquisition. Its `schedulerId` may preserve the review lineage, but a scheduler lineage is not prompt identity and cannot make a repeated acquisition prompt count as retention.
 
 `elapsedMs`, `responseMs`, `timerScore` and `speedBand` are explicitly ignored. Speed is never mastery evidence.
 
@@ -53,7 +55,7 @@ The JSON contract is authoritative for exact thresholds. This table is a readabl
 | Profile | Acquisition | Retrieval | Transfer |
 |---|---|---|---|
 | `concept` | 3 independent successes; 2 representation families | one later session after 1–2 days, plus a different retrieval after at least 3 days | 2 independent first-try successes across 2 context/representation surface signatures |
-| `calculation` | 4 independent calculations; evidence collectively includes `boundary` and `regrouping-sensitive` | one later session after 1–2 days, plus a different retrieval after at least 3 days | 2 independent applications in 2 contexts outside `bare-vertical-form` |
+| `calculation` | 4 independent calculations plus the skill's explicit tags: no-regroup skills require `boundary` + `no-regroup`; regroup skills require `boundary` + `regrouping-sensitive` + the applicable exchange tag | one later session after 1–2 days, plus a different retrieval after at least 3 days | 2 independent applications in 2 contexts outside `bare-vertical-form` |
 | `application` | 3 independent solutions across 3 relationship families; at least one explanation or valid model | one independent later-session solution after at least 1 day with no operation cue | 2 independent preserved-relationship successes across 2 story/context and 2 representation families |
 | `measurement` | 3 independent observations/measurements, each with correct unit and procedure | one independent later-session return after at least 1 day without procedural highlighting | 2 independent successes with different object/orientation/scale/method surface IDs |
 | `fact-family` | 4 independent distinct facts; at least 2 shown as groups, arrays or stories | 2 distinct facts in 2 later sessions, each after at least 1 day | 2 distinct multiplication situations; evidence collectively derives at least 1 related fact |
@@ -96,6 +98,8 @@ Every result exposes:
     {dimension: 'retrieval', code: 'retrieval-later-day-gap', required: 1, observed: 0}
   ],
   supportingEvidence: {
+    acquisitionEstablishedDay,
+    skillRequirementId,
     counts: {/* independent, recovery, miss, retrieval-window and transfer counts */},
     distinct: {/* representation, relationship, fact, session, context and surface counts */},
     invalidEvents: [],
@@ -114,6 +118,8 @@ Every result exposes:
 - Repeating one representation, relationship, fact, context or transfer surface cannot satisfy a distinctness threshold.
 - Same-session retrieval never counts as later-session retrieval.
 - Same-day later-session retrieval is reported separately and does not satisfy a minimum one-day gap.
+- Retrieval day gaps begin only when the full acquisition rule first becomes satisfied; early exposure cannot age later evidence prematurely.
+- A retrieval that reuses any acquisition `sourceQuestionId` is excluded. A fresh prompt may retain the same `schedulerId` lineage.
 - A claimed elapsed-day separation that disagrees with event dates is excluded.
 - Misses are counted for support planning and never remove valid evidence already earned.
 - Transfer evidence requires both `evidenceKind: 'transfer'` and `transferEvidence: true`.
@@ -146,9 +152,10 @@ Before any future World can claim formal mastery, its bounded contract must defi
 5. context identity and a controlled context/surface family;
 6. acquisition, retrieval and explicit transfer classification;
 7. same-session versus later-session revisit plus verified day separation;
-8. profile qualifiers: relationship family, fact identity, transfer surface, or the controlled evidence tags required by its skill;
-9. miss events without destructive evidence updates;
-10. dedupe/replay behavior and offline/local persistence semantics.
+8. a fresh review question identity distinct from every acquisition prompt while preserving scheduler lineage separately;
+9. profile qualifiers: relationship family, fact identity, transfer surface, or the controlled evidence tags required by its skill;
+10. miss events without destructive evidence updates;
+11. dedupe/replay behavior and offline/local persistence semantics.
 
 Timer and speed fields may support accessibility or play feel, but must remain outside the evaluator.
 
@@ -156,8 +163,9 @@ Timer and speed fields may support accessibility or play feel, but must remain o
 
 1. The frozen v1/百光港 events do not persist a stable session ID, acquisition anchor day, elapsed retrieval gap, scheduler ID, context family or transfer event. They can seed an adapter only after a later, separately reviewed runtime contract supplies those fields.
 2. Current aggregate capability and skill-history counters are intentionally insufficient for retroactive formal mastery. Founder dogfood history must remain intact but unpromoted.
-3. The calculation profile's accepted prose asks for regrouping-sensitive evidence. Before a no-regrouping skill is wired, review should decide which boundary cases are legitimately “regrouping-sensitive” for that skill rather than weakening the shared profile silently.
-4. Physical-world validity for capacity, weight, area and ruler work remains unresolved. A screen simulation must not emit a physical transfer surface unless a later contract defines real-world evidence.
-5. Stable controlled vocabularies for relationship families, context families, representation families, fact identities and transfer surfaces should be bounded per World before runtime emission.
+3. Physical-world validity for capacity, weight, area and ruler work remains unresolved. A screen simulation must not emit a physical transfer surface unless a later contract defines real-world evidence.
+4. Stable controlled vocabularies for relationship families, context families, representation families, fact identities and transfer surfaces should be bounded per World before runtime emission.
+
+The earlier calculation ambiguity is resolved in the machine contract: all four calculation skills have explicit, structurally validated requirements, and no-regroup skills never need a fabricated regrouping-sensitive case.
 
 Stop at this review gate. Do not wire the evaluator to UI, progression, rewards, storage or World completion until an independent review accepts both the evidence contract and its remaining gaps.

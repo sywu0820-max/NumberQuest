@@ -86,6 +86,17 @@ test('the graph points to the headless formal-mastery contract without enabling 
   assert.equal(masteryRules.runtimeIntegration,false);
 });
 
+test('every calculation skill has an explicit satisfiable skill-aware acquisition requirement',()=>{
+  const calculationSkills=graph.skills.filter(skill=>skill.pedagogy.masteryProfile==='calculation'),requirements=masteryRules.skillRequirements;
+  assert.deepEqual(new Set(Object.keys(requirements)),new Set(calculationSkills.map(skill=>skill.id)));
+  for(const skill of calculationSkills){
+    const requirement=requirements[skill.id],tags=requirement.acquisition.requiredTagsAcrossEvidence;
+    assert.equal(requirement.profileId,'calculation',skill.id);assert.match(requirement.requirementId,/^calculation-/);assert.ok(tags.includes('boundary'),skill.id);assert.equal(new Set(tags).size,tags.length,skill.id);
+    if(skill.id.includes('.no-regroup-')){assert.ok(tags.includes('no-regroup'),skill.id);assert.ok(!tags.includes('regrouping-sensitive'),skill.id)}
+    else {assert.ok(tags.includes('regrouping-sensitive'),skill.id);assert.ok(tags.some(tag=>tag.endsWith('-regrouping')||tag.endsWith('-exchange')),skill.id)}
+  }
+});
+
 test('bounded Grade 2A coverage areas are populated and scope-consistent',()=>{
   const required=new Set([
     'place-value-200','nani-300-extension','money-within-active-number-range','two-digit-add-sub-regrouping','informal-units-centimetres-length',
