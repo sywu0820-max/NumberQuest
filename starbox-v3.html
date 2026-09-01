@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#172443">
+  <title>Number Quest · 星箱工坊</title>
+  <link rel="stylesheet" href="starbox-v3.css?v=3-6">
+  <script>window.__NQ_STARBOX_ERRORS__=[];addEventListener('error',event=>{const detail=String(event.error?.stack||event.message||'page error');window.__NQ_STARBOX_ERRORS__.push(detail);document.documentElement.dataset.bootError=`${detail} @ ${event.filename||'inline'}:${event.lineno||0}:${event.colno||0}`});addEventListener('unhandledrejection',event=>window.__NQ_STARBOX_ERRORS__.push(String(event.reason?.stack||event.reason||'unhandled rejection')))</script>
+</head>
+<body>
+  <main id="starboxApp" class="starbox-app">
+    <header class="world-head">
+      <a id="numberQuestBack" class="back-link" href="index.html">← Number Quest</a>
+      <div class="world-mark"><small>NUMBER QUEST</small><h1>⭐ 星箱工坊</h1></div>
+      <button id="soundBtn" class="icon-button" type="button" aria-label="切換音效" aria-pressed="true">🔊</button>
+    </header>
+
+    <section class="run-strip" aria-label="工坊任務進度">
+      <div><strong id="missionCounter">1 / 4</strong><span id="purposeLabel">合併兩批星星</span></div>
+      <div id="missionSteps" class="mission-steps" aria-hidden="true"></div>
+    </section>
+
+    <section class="workshop" aria-labelledby="missionTitle">
+      <div class="workshop-sky" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="mission-copy">
+        <span id="missionVerb" class="verb-chip">合併</span>
+        <h2 id="missionTitle">兩批星星送到了！</h2>
+        <p id="missionInstruction">把兩批貨送進中央工作台。</p>
+      </div>
+      <div id="workbench" class="workbench" aria-live="polite"></div>
+      <div id="actionDock" class="action-dock"></div>
+      <p id="feedback" class="feedback">點一下，或拖動發光的物件。</p>
+      <div class="support-row"><button id="hintBtn" class="hint-button" type="button">✨ 給我一個小提示</button></div>
+    </section>
+
+    <section id="successPanel" class="success-panel" hidden>
+      <div class="success-burst" aria-hidden="true">⭐</div>
+      <p id="successPurpose" class="success-purpose"></p>
+      <h2>這批任務完成了！</h2>
+      <div id="finishedInventory" class="finished-inventory"></div>
+      <div class="success-actions">
+        <button id="discoveryBtn" class="discovery-button" type="button" hidden>🔎 看看數學發現</button>
+        <button id="nextBtn" class="primary-button" type="button">下一個任務 →</button>
+      </div>
+    </section>
+
+    <dialog id="discoveryDialog" class="discovery-dialog" aria-labelledby="discoveryTitle">
+      <button id="closeDiscovery" class="dialog-close" type="button" aria-label="關閉">×</button>
+      <small>剛才的星星發生了什麼？</small>
+      <h2 id="discoveryTitle">數學發現</h2>
+      <div id="discoveryObjects" class="discovery-objects"></div>
+      <p id="discoveryStatement" class="discovery-statement"></p>
+      <div id="verticalNotation" class="vertical-notation" aria-label="算式記錄"></div>
+      <p class="discovery-note">這只是把剛才做過的事記下來。</p>
+      <button id="discoveryDone" class="primary-button" type="button">我看見了</button>
+    </dialog>
+
+    <dialog id="runCompleteDialog" class="run-complete" aria-labelledby="runCompleteTitle">
+      <div class="complete-constellation" aria-hidden="true">⭐ 📦 ⭐ 📦</div>
+      <h2 id="runCompleteTitle">星箱工坊亮起來了！</h2>
+      <p>你合併、裝箱、出貨，也親手打開了星箱。</p>
+      <div class="complete-actions"><button id="replayRunBtn" class="primary-button" type="button">再玩一次</button><a id="finishBack" class="back-link" href="index.html">回 Number Quest</a></div>
+    </dialog>
+
+    <aside id="founderPanel" class="founder-panel" hidden>
+      <h2>Founder semantic readback</h2>
+      <output id="founderDebug"></output>
+    </aside>
+  </main>
+  <script type="module" src="starbox-v3.js?v=3-6"></script>
+</body>
+</html>
