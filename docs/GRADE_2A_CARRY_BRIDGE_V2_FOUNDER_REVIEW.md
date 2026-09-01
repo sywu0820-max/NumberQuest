@@ -1,85 +1,96 @@
-# 交換橋島 V2 founder-review package
+# 交換橋工坊 V2.1 founder-review package
 
-Status: hidden replacement prototype; founder review only. This work is stacked from PR #16 exact head `7a3a681b79fae78f35313178a25edf4b4ef00f6e`. PR #16 remains frozen as failed-dogfood evidence.
+Status: hidden completeness pass; founder review only. This work is stacked from the accepted V2 exact head `d78e9a3bebfcd62f4ff7bfcafc864e78846b84bc`. PR #16 remains frozen failed-dogfood history and PR #17 remains the accepted V2 design base.
 
 ## Product boundary
 
-V2 reuses the accepted arithmetic and behavior-sensitive semantic core, but replaces the V1 control-panel interaction model. It is not linked from normal Number Quest navigation and does not write local progress, evidence ledger, mastery, progression, rewards, completion, or transfer.
+V2.1 turns the two accepted V2 exchange scenes into one short playable Number Quest world without connecting it to production progression. It reuses the accepted arithmetic core and still writes no local progress, evidence ledger, mastery, progression, reward, completion, or transfer state.
 
 - Hidden gate: `?prototype=carry-bridge-v2`
-- Included scenes: addition with regrouping and subtraction with regrouping
-- Numeric range: 0–99; exact 100 is still unsupported
-- Primary completion: derived from the final object state; no answer field
-- Symbolic notation: a separate optional post-completion blueprint scene
-- Input: direct tap is primary; pointer drag is optional and semantically equivalent
-- Mistakes: neutral and quantity-preserving
+- Direct cases: `add-no-regroup`, `add-regroup`, `sub-no-regroup`, `sub-regroup`
+- Mixed founder route: `case=world-run`, exactly six missions containing all four families
+- Numeric range: 0–99; exact 100 remains unsupported
+- Completion: derived from object state; no answer field
+- Input: tap first, native keyboard on buttons, optional source-bound pointer drag
+- Mistakes: neutral, quantity-preserving, and never progress-removing
+- Blueprint: separate post-completion micro-scene for `g2a.addsub.explain-vertical`; it is interactive but never claims mastery evidence
 
 ## Progressive scene graph
 
-Addition:
+Addition without regrouping:
 
-`two cargo groups → merge → loose ones + ten-machine → select exactly ten → visible 10 ones to 1 ten transformation → object-state celebration`
+`two visible loads → physical merge → final tens/ones cargo → short celebration`
 
-Subtraction:
+Addition with regrouping:
 
-`starting cargo + boat demand → remove required tens → one highlighted ten-box opens → visible 1 ten to 10 ones transformation → remove required ones → object-state celebration`
+`two visible loads → physical merge → select exactly ten ones → before/transform/after film → one new ten → celebration`
 
-Only the currently relevant object/action pair is exposed. Join, exchange, split, unload, place-value lanes, tray, and answer controls are never shown together.
+Subtraction without regrouping:
 
-Every V2 action carries source-bound object identities. A fixed script copied from another problem is rejected before it can become a valid semantic trace.
+`visible whole + boat demand → remove requested tens → remove requested ones → celebration`
 
-## Test URLs
+Subtraction with regrouping:
 
-- Child-default addition: `/carry-bridge-v2.html?prototype=carry-bridge-v2&case=add-regroup&seed=22`
-- Child-default subtraction: `/carry-bridge-v2.html?prototype=carry-bridge-v2&case=sub-regroup&seed=23`
-- Founder readback: append `&founder=1`
-- Browser semantic harness: `/tests/grade-2a-carry-bridge-v2-browser-harness.html`
+`visible whole + boat demand → remove requested tens → open exactly one ten → before/transform/after film → remove requested ones → celebration`
+
+Only the action set required by the current mathematical state is visible. No-regroup cases never receive a fake exchange.
+
+## Hint and input safety
+
+Inactivity and neutral actions escalate through three answer-safe stages:
+
+1. pulse only the current affordance;
+2. show a visual relationship cue;
+3. add one tiny action phrase.
+
+No stage animates the complete solution. Pointer drops outside a meaningful target preserve state; drag-generated clicks are suppressed, and pointer cancellation clears the pending gesture. Tap and drag produce identical semantic traces and no coordinates are stored.
+
+## Founder URLs
+
+- Addition, no regroup: `/carry-bridge-v2.html?prototype=carry-bridge-v2&case=add-no-regroup&seed=11`
+- Addition, regroup: `/carry-bridge-v2.html?prototype=carry-bridge-v2&case=add-regroup&seed=22`
+- Subtraction, no regroup: `/carry-bridge-v2.html?prototype=carry-bridge-v2&case=sub-no-regroup&seed=19`
+- Subtraction, regroup: `/carry-bridge-v2.html?prototype=carry-bridge-v2&case=sub-regroup&seed=23`
+- Mixed six-mission run: `/carry-bridge-v2.html?prototype=carry-bridge-v2&case=world-run&seed=31`
+- Deterministic blueprint: `/carry-bridge-v2.html?prototype=carry-bridge-v2&case=sub-regroup&seed=23&founder=1&blueprint=1`
+- Semantic harness: `/tests/grade-2a-carry-bridge-v2-browser-harness.html`
+- Founder readback: append `&founder=1` to a child route
 
 ## Five-minute founder test
 
-1. Open the child-default addition URL. Do not read the heading aloud. Check whether the two glowing cargo islands suggest the first action within roughly five seconds.
-2. Move both cargo groups. Confirm that the merge is the only available task and that the machine appears only afterwards.
-3. Tap loose ones. Try the machine before ten, then fill exactly ten and activate it. Confirm the early attempt is neutral and the final transformation visibly preserves quantity.
-4. Confirm completion happens immediately from the transformed cargo state, with no equation or answer entry. Open the blueprint only after completion and check that it feels like a short reveal rather than a worksheet step.
-5. Open the subtraction URL. Remove the requested tens, open one highlighted ten-box, and remove the requested ones. Confirm each scene presents only the next relevant action.
-6. Repeat one action by dragging. Confirm it produces the same result as tapping and never requires precision drag.
-7. With `founder=1`, confirm the trace contains exactly one value-preserving exchange, automatic object-state completion, zero page errors, and all product evidence boundaries remain false.
+1. Open addition without regrouping. Move both loads and confirm that the final tens/ones cargo is visible without an exchange or answer entry.
+2. Open addition with regrouping. Try the machine with nine selected ones, then attempt an eleventh selection. Confirm both recover neutrally and only exactly ten transforms.
+3. Watch the exchange film. Decide whether the same ten objects remain perceptually present before, during, and after the transformation.
+4. Open both subtraction routes. Confirm the no-regroup path never shows an opening action and the regroup path opens exactly one ten only when loose ones are insufficient.
+5. Complete the blueprint with one wrong piece followed by the right piece. Confirm it feels like a short game beat connected to the cargo action, not a worksheet.
+6. Play the six-mission world-run without coaching. Judge rhythm, repetition, transitions, and fatigue; use the final replay action once.
+7. Leave one scene idle long enough to observe all three hint stages. Confirm each remains answer-safe.
+8. Repeat one action by drag and one control by keyboard. Confirm tap remains the obvious default.
 
 ## No-coaching child observation
 
-Do not explain the controls or mathematical vocabulary. Do not point at the next object.
+Do not name carrying, borrowing, regrouping, columns, or the next control. Record time to first meaningful action; whether the child infers merge/removal; whether exactly ten is concrete or tedious; whether the transformation preserves identity perceptually; whether the no-regroup missions still feel purposeful; whether the blueprint is recognized as the same event; fatigue or strategy changes across six missions; neutral-attempt recovery; and spontaneous game versus schoolwork language.
 
-Record:
+## Automated and browser evidence contract
 
-- time to first meaningful action;
-- whether the child taps a cargo group, the bridge, or something unrelated first;
-- whether the child predicts that both groups should meet;
-- whether the child notices the machine after it appears;
-- whether selecting ten individual ones becomes tedious before the relationship is understood;
-- whether the child anticipates one new ten-box before the transformation finishes;
-- for subtraction, whether the boat demand is understood without verbal explanation;
-- whether the highlighted ten-box suggests opening when loose ones are insufficient;
-- whether the child can say or show that quantity stayed the same during exchange;
-- whether neutral attempts cause confusion, recovery, or frustration;
-- whether the post-completion blueprint is recognized as the same event in a different representation;
-- spontaneous language indicating play, construction, cargo, bridge, machine, or schoolwork.
+- Every family completes from source-bound object actions with a 0–99 answer.
+- Clean no-regroup traces contain zero exchange attempts; clean regroup traces contain exactly one value-preserving exchange.
+- 9 and 11 one attempts are neutral; exactly 10 is accepted.
+- Tap and pointer-drag traces are semantically identical.
+- Fixed scripts cannot broadly solve varied cases; dirty corrected traces remain ineligible.
+- World-run length is constrained to 5–7 and the shipped six-mission plan includes all four families.
+- Blueprint choices are source-bound, neutral on a miss, and store no coordinates.
+- Mobile, iPad portrait/landscape, and Surface layouts have no horizontal overflow and preserve at least 44 CSS-pixel targets.
+- The shell reloads offline after first load and reports zero page errors.
 
-Do not ask whether it is fun and do not treat task completion as mastery.
+## Remaining human judgments
 
-## Human-judgment questions
+- Does the first action read within roughly five seconds for a child who ignores text?
+- Is selecting ten individual ones productively concrete or too repetitive?
+- Is the before/transform/after film strong enough to communicate conserved total without narration?
+- Do direct-removal no-regroup missions feel like play rather than busywork?
+- Does the six-mission mix vary rhythm enough to avoid worksheet fatigue?
+- Is the interactive blueprint welcome after each mission, or should it appear only at selected moments?
+- Are the second and third hint stages strong enough without becoming instructions?
 
-- Does the first cargo movement read within five seconds for a child who ignores the short heading?
-- Is individually selecting ten loose ones productively concrete or unnecessarily tedious?
-- Is the boat demand sufficiently clear without coaching?
-- Does automatic object-state completion feel earned and legible?
-- Is the optional blueprint reveal welcome, or should it be delayed to a later mission?
-- Are sound and idle highlighting supportive without becoming distracting?
-
-## Known limitations
-
-- This is not a full World, question bank, adaptive sequence, or production progression path.
-- Only regrouping addition and subtraction are exposed in V2 founder review.
-- Audio is a short synthesized affordance cue, not production sound design.
-- The visual transformation is deliberately simple CSS motion; child observation must decide whether it communicates identity preservation strongly enough.
-- No ledger, mastery, transfer, reward, World completion, or persistence claim is made.
-- No publisher alignment UI is present.
+No founder judgment may be converted into production progression, transfer, mastery, or completion evidence in this branch.

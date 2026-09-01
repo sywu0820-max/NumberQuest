@@ -11,8 +11,9 @@ import {
 } from './grade-2a-carry-bridge-core.mjs';
 
 export const CARRY_BRIDGE_V2_FLAG='carry-bridge-v2';
-export const CARRY_BRIDGE_V2_RULES=Object.freeze(['add-regroup','sub-regroup']);
+export const CARRY_BRIDGE_V2_RULES=Object.freeze(['add-no-regroup','add-regroup','sub-no-regroup','sub-regroup']);
 export const CARRY_BRIDGE_V2_PATHS=Object.freeze(['tap-direct','pointer-drag']);
+export const CARRY_BRIDGE_V21_WORLD_RUN_LENGTH=6;
 
 const clone=value=>JSON.parse(JSON.stringify(value));
 const valueOf=workspace=>Number(workspace?.tens||0)*10+Number(workspace?.ones||0);
@@ -25,7 +26,7 @@ export function carryBridgeV2AccessEnabled(search=''){
 export function createCarryBridgeV2Session(caseRuleId,{rng=Math.random,sourceNonce=0}={}){
   if(!CARRY_BRIDGE_V2_RULES.includes(caseRuleId))throw new Error(`Unsupported Carry Bridge V2 rule: ${caseRuleId}`);
   const session=createCarryBridgePrototypeSession(caseRuleId,{rng,sourceNonce});
-  return {...session,schemaVersion:'2.0.0',surface:'hidden-v2-founder-review',v2:{completionSource:'object-state',childAnswerInputRequired:false,blueprintViewed:false,semanticErrors:[]}};
+  return {...session,schemaVersion:'2.1.0',surface:'hidden-v21-founder-review',v2:{completionSource:'object-state',childAnswerInputRequired:false,blueprintViewed:false,blueprintCompleted:false,semanticErrors:[],hintSignals:0,neutralActions:0}};
 }
 
 const objectId=(problem,unit,index)=>`${problem.sourceQuestionId}:${unit}:${index}`;
@@ -86,6 +87,7 @@ export function applyCarryBridgeV2Action(sourceSession,action,{interactionPath='
   if(!actionIdentityValid(sourceSession,action)){
     const rejected=clone(sourceSession),path=interactionPath==='tap-direct'?'tap-select-place':'pointer-drag';
     rejected.v2.semanticErrors=[...(rejected.v2.semanticErrors||[]),'v2-object-identity-mismatch'];
+    rejected.v2.neutralActions=Number(rejected.v2.neutralActions||0)+1;
     rejected.coreState.lastActionResult={accepted:false,neutral:true,code:'v2-object-identity-mismatch'};
     rejected.interactionLog.push({index:rejected.interactionLog.length,interactionPath:path,intent:null,semanticAction:null,v2Action:clone(action),resultCode:'v2-object-identity-mismatch'});
     return rejected;
@@ -99,6 +101,7 @@ export function applyCarryBridgeV2Action(sourceSession,action,{interactionPath='
   else throw new Error(`Unknown Carry Bridge V2 action: ${action?.type}`);
   const current=applyCarryBridgePrototypeIntent(sourceSession,intent,{interactionPath:interactionPath==='tap-direct'?'tap-select-place':'pointer-drag'});
   current.interactionLog.at(-1).v2Action=clone(action);
+  current.v2.neutralActions=current.coreState.lastActionResult.accepted?0:Number(current.v2.neutralActions||0)+1;
   return settleFromObjectState(current,interactionPath==='tap-direct'?'tap-select-place':'pointer-drag');
 }
 
@@ -115,13 +118,62 @@ export function carryBridgeV2Blueprint(session){
   return bundleModelToVerticalBlueprint(carryBridgeBundleModel(session.problem));
 }
 
+function choiceId(sourceQuestionId,column,digit){return `${sourceQuestionId}:blueprint:${column}:${digit}`}
+
+export function carryBridgeV21BlueprintChallenge(session){
+  const blueprint=carryBridgeV2Blueprint(session),column=blueprint.exchange?.direction==='ones-to-tens'?'tens':blueprint.exchange?.direction==='tens-to-ones'?'ones':session.problem.operation==='add'?'ones':'tens';
+  const correctDigit=Number(blueprint.columns[column].result),offset=(session.problem.left+session.problem.right)%3;
+  const digits=[correctDigit,(correctDigit+1+offset)%10,(correctDigit+9-offset+10)%10].filter((value,index,list)=>list.indexOf(value)===index);
+  for(let value=0;digits.length<3&&value<=9;value++)if(!digits.includes(value))digits.push(value);
+  const ordered=digits.map((_,index)=>digits[(index+offset)%digits.length]);
+  return {
+    schemaVersion:'2.1.0',challengeId:`${session.problem.sourceQuestionId}:blueprint:${column}`,sourceQuestionId:session.problem.sourceQuestionId,
+    skillId:'g2a.addsub.explain-vertical',operation:session.problem.operation,column,correctDigit,
+    choices:ordered.map(digit=>({id:choiceId(session.problem.sourceQuestionId,column,digit),digit})),attempts:[],complete:false,
+    interactionPath:null,answerInputPresent:false,revealsAnswer:false,evidenceBoundary:clone(session.evidenceBoundary)
+  };
+}
+
+export function applyCarryBridgeV21BlueprintChoice(sourceChallenge,choice,{interactionPath='tap-direct'}={}){
+  if(!CARRY_BRIDGE_V2_PATHS.includes(interactionPath))throw new Error(`Unsupported Carry Bridge V2 path: ${interactionPath}`);
+  const challenge=clone(sourceChallenge),digit=Number(choice?.digit),expectedId=choiceId(challenge.sourceQuestionId,challenge.column,digit);
+  const identityValid=challenge.choices.some(item=>item.id===choice?.id&&item.digit===digit)&&choice?.id===expectedId;
+  const correct=identityValid&&digit===challenge.correctDigit;
+  challenge.attempts.push({index:challenge.attempts.length,choiceId:choice?.id||null,digit:Number.isFinite(digit)?digit:null,accepted:correct,neutral:!correct,code:correct?'blueprint-column-complete':identityValid?'blueprint-digit-neutral':'blueprint-choice-identity-mismatch',interactionPath,rawPointerCoordinatesStored:false});
+  challenge.complete=correct;challenge.interactionPath=interactionPath;
+  return challenge;
+}
+
+const HINT_CUES=Object.freeze({
+  merge:Object.freeze([['pulse-focus',null],['relationship','📦  →  🌉  ←  📦'],['tiny-support','讓兩邊靠近']]),
+  'bundle-ten':Object.freeze([['pulse-focus',null],['relationship','● ● ● ● ●  +  ● ● ● ● ●'],['tiny-support','找一組十個']]),
+  'remove-tens':Object.freeze([['pulse-focus',null],['relationship','📦  →  ⛵'],['tiny-support','照船上的圖搬']]),
+  'split-ten':Object.freeze([['pulse-focus',null],['relationship','📦 10  ↔  ● × 10'],['tiny-support','打開一個十']]),
+  'remove-ones':Object.freeze([['pulse-focus',null],['relationship','●  →  ⛵'],['tiny-support','照船上的圖搬']])
+});
+
+export function carryBridgeV21Hint(sceneId,{idleSignals=0,neutralActions=0,manualRequests=0}={}){
+  const cues=HINT_CUES[sceneId]||Object.freeze([['pulse-focus',null],['relationship','✨'],['tiny-support','看看發光的地方']]);
+  const stage=Math.min(3,Math.max(1,Number(idleSignals||0)+Number(neutralActions||0)+Number(manualRequests||0)));
+  const [cueType,message]=cues[stage-1];
+  return {sceneId,stage,cueType,message,revealsAnswer:false,completesAction:false,returnsControl:true};
+}
+
+export function carryBridgeV21WorldRunPlan({seed=1,length=CARRY_BRIDGE_V21_WORLD_RUN_LENGTH}={}){
+  const cleanSeed=Math.max(1,Math.trunc(Number(seed)||1)),cleanLength=Math.trunc(Number(length));
+  if(cleanLength<5||cleanLength>7)throw new RangeError('Carry Bridge V2.1 world-run must contain 5 to 7 missions');
+  const rotated=CARRY_BRIDGE_V2_RULES.map((_,index)=>CARRY_BRIDGE_V2_RULES[(index+(cleanSeed%CARRY_BRIDGE_V2_RULES.length))%CARRY_BRIDGE_V2_RULES.length]);
+  const rules=Array.from({length:cleanLength},(_,index)=>rotated[index%rotated.length]);
+  return {schemaVersion:'2.1.0',surface:'hidden-v21-world-run',runId:`carry-v21-run-${cleanSeed}-${cleanLength}`,seed:cleanSeed,length:cleanLength,rules,missionSeeds:rules.map((_,index)=>cleanSeed*100+index+1),includesEveryRule:CARRY_BRIDGE_V2_RULES.every(rule=>rules.includes(rule)),persisted:false,rewardWritePerformed:false,progressionWritePerformed:false};
+}
+
 export function carryBridgeV2DebugReadback(session,{pageErrors=[]}={}){
   const base=carryBridgePrototypeDebugReadback(session);
   if(session?.v2?.semanticErrors?.length){base.classification.independentAcquisitionEligible=false;base.classification.reasons=[...new Set([...base.classification.reasons,...session.v2.semanticErrors])];}
   return {
     ...base,
-    schemaVersion:'2.0.0',
-    surface:'hidden-v2-founder-review',
+    schemaVersion:'2.1.0',
+    surface:'hidden-v21-founder-review',
     scene:carryBridgeV2Scene(session),
     childLoop:{answerInputPresent:false,completionSource:'object-state',progressiveDisclosure:true,visibleAffordances:carryBridgeV2Scene(session).visibleAffordances},
     pageErrors:[...pageErrors],
@@ -132,10 +184,13 @@ export function carryBridgeV2DebugReadback(session,{pageErrors=[]}={}){
 export function canonicalCarryBridgeV2Actions(problem){
   const actions=[];
   const shell={problem,coreState:{workspace:problem.operation==='subtract'?{tens:Math.floor(problem.left/10),ones:problem.left%10}:null}};
-  if(problem.operation==='add')actions.push(carryBridgeV2ActionFor(shell,'merge-groups'),carryBridgeV2ActionFor({...shell,coreState:{workspace:{tens:0,ones:(problem.left%10)+(problem.right%10)}}},'bundle-ten',{count:10}));
+  if(problem.operation==='add'){
+    actions.push(carryBridgeV2ActionFor(shell,'merge-groups'));
+    if(problem.expectedExchange.direction==='ones-to-tens')actions.push(carryBridgeV2ActionFor({...shell,coreState:{workspace:{tens:0,ones:(problem.left%10)+(problem.right%10)}}},'bundle-ten',{count:10}));
+  }
   else{
     for(let index=0;index<Math.floor(problem.right/10);index++)actions.push(carryBridgeV2ActionFor(shell,'remove-ten'));
-    actions.push(carryBridgeV2ActionFor(shell,'split-ten',{count:1}));
+    if(problem.expectedExchange.direction==='tens-to-ones')actions.push(carryBridgeV2ActionFor(shell,'split-ten',{count:1}));
     for(let index=0;index<problem.right%10;index++)actions.push(carryBridgeV2ActionFor(shell,'remove-one'));
   }
   return actions;
@@ -146,7 +201,7 @@ export function replayCarryBridgeV2Actions(session,actions,{interactionPath='tap
 }
 
 export function carryBridgeV2PrototypeBoundary(){
-  return {additionMaximum:99,subtractionMinimum:0,exact100Supported:false,normalHomeEntry:false,primaryAnswerEntry:false};
+  return {additionMaximum:99,subtractionMinimum:0,exact100Supported:false,normalHomeEntry:false,primaryAnswerEntry:false,worldRunLengthRange:[5,7]};
 }
 
 export {carryBridgePrototypeAccessEnabled};
