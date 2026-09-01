@@ -24,7 +24,9 @@ The short run contains four missions with different purposes and action shapes:
 3. fulfill an order directly;
 4. open one box, then fulfill an order.
 
-The group actions intentionally avoid ten unrelated taps. Every action supports direct tap, keyboard activation, and pointer drag with the same semantic trace. A five-second idle pulse only makes the current object easier to find; it does not count as help or penalize a child with a slower motor response.
+The group actions intentionally avoid ten unrelated taps. The visible deliveries, candidate groups, filled tray, and star boxes are the action sources; the visible inventory, tray, order zone, sealer, and opening station are their destinations. There is no detached command button. A child either taps a source and then a destination or drags that source onto a destination. Dropping outside a destination returns the object neutrally without advancing or poisoning evidence. A known but unsuitable destination or a wrong candidate quantity also leaves state unchanged, but prevents the interaction trace from being called independent-first-try evidence.
+
+Every valid action supports direct tap, keyboard activation, and pointer drag with the same semantic trace. Quantity choices rotate deterministically with the problem so a fixed screen position is not a reliable solution. A five-second idle pulse only makes the current object easier to find; it does not count as help or penalize a child with a slower motor response.
 
 ## Learning and evidence boundary
 
@@ -36,11 +38,11 @@ The accepted headless carry-bridge core remains the only arithmetic authority. T
 - what can be described as a candidate independent acquisition observation;
 - what cannot be claimed: formal mastery, retrieval, transfer, world completion, progression, reward, or a production-ledger write.
 
-No-regroup missions accept zero exchange actions. Regroup missions require exactly one correct value-preserving exchange. A hint leaves the child in control and makes the session ineligible for independent-acquisition evidence. Invalid object identity is neutral and ineligible.
+No-regroup missions accept zero exchange actions. Regroup missions require exactly one correct value-preserving exchange. Candidate independent-acquisition evidence additionally requires the complete visible source/destination choice trace for that mission. A hint leaves the child in control and makes the session ineligible for independent-acquisition evidence. Invalid object identity, a wrong known target, or a wrong quantity is neutral and ineligible. Ordinary pointer imprecision outside a target is recorded only as motor noise and does not disqualify later valid work.
 
 ## Optional 數學發現
 
-Only the two exchange missions offer the short optional discovery. It first shows the same box/star objects before and after the observed exchange, then states either `10 個一可以換成 1 個十` or `打開 1 個十，就有 10 個一`. A compact vertical record follows as a consequence; it is not another puzzle.
+Only a completed mission with a real `expectedExchange.direction` offers the short optional discovery. Both no-regroup directions are explicitly excluded. The discovery first shows the same box/star objects before and after the observed exchange, then states either `10 個一可以換成 1 個十` or `打開 1 個十，就有 10 個一`. A compact vertical record follows as a consequence; it is not another puzzle.
 
 ## Explicit exclusions and known limits
 
@@ -55,10 +57,11 @@ Only the two exchange missions offer the short optional discovery. It first show
 
 Use the exact immutable deployment URLs supplied in the Draft PR comment.
 
-1. Play the four-mission run by tapping the highlighted group actions. Confirm each mission feels different.
-2. Replay one mission by dragging its action at least 28 CSS pixels; use keyboard Space/Enter on another.
-3. In the second and fourth missions, open `數學發現` and confirm the object change is visible before the compact notation.
-4. Use a hint, complete the mission, and inspect founder readback: completion remains, but independent eligibility is false.
-5. Follow `← Number Quest`, then use the query-created `↩ 回到星箱工坊`. Open `/index.html` without the return query and confirm no V3 link exists.
-6. Reload and exercise the supported mobile, iPad, and Surface viewport URLs. Confirm there are no page/console errors.
-7. After one online load, test the cached URLs offline. No account, API key, or backend is required.
+1. Play the four-mission run by tapping a visible source and then its visible destination. Confirm each mission feels different and quantity scenes offer several groups.
+2. Replay one mission by dragging a visible source onto a valid destination; drop outside once and confirm the scene does not advance. Use keyboard Space/Enter on source and destination in another mission.
+3. Send one source to the visible unsuitable destination and confirm it returns neutrally without changing the inventory.
+4. In the second and fourth missions, open `數學發現` and confirm the object change is visible before the compact notation. Confirm neither no-regroup mission offers the button.
+5. Use a hint, complete the mission, and inspect founder readback: completion remains, but independent eligibility is false.
+6. Follow `← Number Quest`, then use the query-created `↩ 回到星箱工坊`. Open `/index.html` without the return query and confirm no V3 link exists.
+7. Reload and exercise the supported mobile, iPad, and Surface viewport URLs. Confirm there are no page/console errors.
+8. After one online load, test the cached URLs offline. No account, API key, or backend is required.

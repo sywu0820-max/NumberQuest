@@ -4,7 +4,8 @@ import {
   STARBOX_V3_PATHS,STARBOX_V3_PURPOSES,STARBOX_V3_RULES,applyStarboxV3Action,canonicalStarboxV3Actions,
   classifyStarboxV3Session,createStarboxV3RunPlan,createStarboxV3Session,markStarboxV3SupportUsed,
   replayStarboxV3Actions,starboxV3AccessEnabled,starboxV3ActionFor,starboxV3Boundary,starboxV3Discovery,
-  starboxV3FounderReadback,starboxV3Hint,starboxV3NumberQuestReturnUrl,starboxV3ResumeUrl,starboxV3Scene
+  starboxV3ChoiceEvidence,starboxV3Choices,starboxV3FounderReadback,starboxV3Hint,
+  starboxV3NumberQuestReturnUrl,starboxV3ResumeUrl,starboxV3Scene
 } from '../src/grade-2a-starbox-v3.mjs';
 
 const seeded=seed=>()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)/4294967296);
@@ -27,6 +28,7 @@ test('all four missions solve through object actions without mutating their sour
     assert.equal(complete.interactionLog.some(item=>item.action.type==='object-state-complete'),true,`${rule}/${seed}`);
     assert.equal(complete.interactionLog.some(item=>item.action.type==='numeric-answer'),false,`${rule}/${seed}`);
     assert.equal(classifyStarboxV3Session(complete).independentAcquisitionEligible,true,`${rule}/${seed}`);
+    assert.equal(starboxV3ChoiceEvidence(complete).complete,true,`${rule}/${seed}`);
     assert.deepEqual(complete.evidenceBoundary,{ledgerWritePerformed:false,formalMasteryClaimed:false,persisted:false,transferClaimed:false,worldCompletionClaimed:false,progressionWritePerformed:false,rewardWritePerformed:false});
   }
 });
@@ -42,8 +44,8 @@ test('zero-exchange and exactly-one value-preserving exchange cases stay clean',
 test('scene graph has four distinct purposes and only exchange missions expose exchange scenes',()=>{
   assert.equal(new Set(Object.values(STARBOX_V3_PURPOSES)).size,4);
   const expected={
-    'add-no-regroup':['combine','success'],
-    'add-regroup':['combine','scoop-ten','seal-box','success'],
+    'add-no-regroup':['combine','combine','success'],
+    'add-regroup':['combine','combine','scoop-ten','seal-box','success'],
     'sub-no-regroup':['fulfill-boxes','fulfill-stars','success'],
     'sub-regroup':['fulfill-boxes','open-box','fulfill-stars','success']
   };
@@ -51,7 +53,8 @@ test('scene graph has four distinct purposes and only exchange missions expose e
 });
 
 test('packing ten stars is one group-selection plus one sealing action, never ten unrelated taps',()=>{
-  let session=generated('add-regroup',41);session=applyStarboxV3Action(session,starboxV3ActionFor(session,'combine-deliveries'));
+  let session=generated('add-regroup',41);
+  for(const source of starboxV3Choices(session).sources)session=applyStarboxV3Action(session,starboxV3ActionFor(session,'move-delivery',{sourceId:source.id}));
   const scoop=starboxV3ActionFor(session,'scoop-ten-stars');assert.equal(scoop.count,10);assert.equal(scoop.starIds.length,10);
   session=applyStarboxV3Action(session,scoop);assert.equal(session.preparedPack.count,10);assert.equal(starboxV3Scene(session).id,'seal-box');
   session=applyStarboxV3Action(session,starboxV3ActionFor(session,'seal-starbox'));
@@ -72,8 +75,64 @@ test('support is nonpunitive, answer-safe, child-controlled, and cannot claim in
 });
 
 test('object identity tampering is neutral and disqualifies the trace',()=>{
-  const session=generated('add-no-regroup',61),action=starboxV3ActionFor(session,'combine-deliveries');action.deliveryIds[0]='foreign-delivery';
+  const session=generated('add-no-regroup',61),action=starboxV3ActionFor(session,'move-delivery');action.sourceId='foreign-delivery';action.deliveryId='foreign-delivery';
   const result=applyStarboxV3Action(session,action);assert.equal(result.coreState.lastActionResult.neutral,true);assert.ok(result.semanticErrors.includes('v3-object-identity-mismatch'));assert.equal(classifyStarboxV3Session(result).independentAcquisitionEligible,false);
+});
+
+test('visible source and destination choices gate every semantic action',()=>{
+  for(const rule of STARBOX_V3_RULES)for(let seed=1;seed<=120;seed++){
+    let session=generated(rule,seed),guard=0;
+    while(!session.coreState.complete&&guard++<12){
+      const scene=starboxV3Scene(session),choices=starboxV3Choices(session);
+      assert.ok(choices.sources.length>=1,`${rule}/${seed}/${scene.id} source`);
+      assert.ok(choices.targets.length>=2,`${rule}/${seed}/${scene.id} targets`);
+      if(['scoop-ten','fulfill-boxes','fulfill-stars'].includes(scene.id))assert.ok(choices.sources.length>=2,`${rule}/${seed}/${scene.id} quantity choices`);
+      session=applyStarboxV3Action(session,canonicalStarboxV3Actions(session)[0]);
+    }
+    assert.equal(session.coreState.complete,true,`${rule}/${seed}`);
+  }
+});
+
+test('wrong known destinations are neutral, do not advance, and disqualify evidence',()=>{
+  const source=generated('add-no-regroup',62),choices=starboxV3Choices(source),wrong=choices.targets.find(target=>target.id==='packing-tray');
+  const action=starboxV3ActionFor(source,'move-delivery',{sourceId:choices.sources[0].id,targetId:wrong.id});
+  const result=applyStarboxV3Action(source,action);
+  assert.equal(starboxV3Scene(result).id,'combine');assert.deepEqual(result.coreState.workspace,source.coreState.workspace);assert.deepEqual(result.deliveredIds,[]);
+  assert.equal(result.coreState.lastActionResult.neutral,true);assert.ok(result.semanticErrors.includes('v3-wrong-target-choice'));assert.equal(classifyStarboxV3Session(result).independentAcquisitionEligible,false);
+});
+
+test('outside drops are motor noise only and do not poison later independent evidence',()=>{
+  const source=generated('add-no-regroup',63),choice=starboxV3Choices(source).sources[0];
+  const outside=applyStarboxV3Action(source,starboxV3ActionFor(source,'outside-drop',{sourceId:choice.id}),{interactionPath:'pointer-drag'});
+  assert.equal(starboxV3Scene(outside).id,'combine');assert.deepEqual(outside.coreState.workspace,source.coreState.workspace);assert.deepEqual(outside.semanticErrors,[]);
+  assert.equal(outside.interactionLog.at(-1).motorNoiseOnly,true);assert.equal(outside.coreState.lastActionResult.neutral,true);
+  const complete=replayStarboxV3Actions(outside,canonicalStarboxV3Actions(outside),{interactionPath:'pointer-drag'});
+  assert.equal(complete.coreState.complete,true);assert.equal(classifyStarboxV3Session(complete).independentAcquisitionEligible,true);
+});
+
+test('quantity choices vary position and a fixed first-card script cannot reliably solve missions',()=>{
+  for(const rule of ['add-regroup','sub-no-regroup','sub-regroup']){
+    const correctIndexes=new Set();let solvedByFirst=0,total=0;
+    for(let seed=1;seed<=240;seed++){
+      let session=generated(rule,seed),guard=0;
+      while(!session.coreState.complete&&guard++<12){
+        const scene=starboxV3Scene(session),choices=starboxV3Choices(session),canonical=canonicalStarboxV3Actions(session)[0];
+        if(choices.sources.length>1&&scene.id!=='combine'){
+          total++;correctIndexes.add(choices.sources.findIndex(source=>source.id===canonical.sourceId));
+          const first=choices.sources[0],action=starboxV3ActionFor(session,canonical.type,{sourceId:first.id,targetId:canonical.targetId,count:first.count});
+          const next=applyStarboxV3Action(session,action);if(next.interactionLog.at(-1).accepted)solvedByFirst++;session=next.interactionLog.at(-1).accepted?next:applyStarboxV3Action(session,canonical);
+        }else session=applyStarboxV3Action(session,canonical);
+      }
+    }
+    assert.ok(correctIndexes.size>=2,`${rule} correct choice stayed in one position`);assert.ok(solvedByFirst<total*.75,`${rule} first card solved ${solvedByFirst}/${total}`);
+  }
+});
+
+test('independent evidence requires the complete visible-choice trace',()=>{
+  const complete=solve('add-regroup',64),missing=structuredClone(complete);
+  missing.interactionLog=missing.interactionLog.filter(item=>item.action.type!=='scoop-ten-stars');
+  assert.equal(missing.coreState.complete,true);assert.equal(starboxV3ChoiceEvidence(missing).complete,false);
+  assert.equal(classifyStarboxV3Session(missing).independentAcquisitionEligible,false);assert.ok(classifyStarboxV3Session(missing).reasons.includes('v3-visible-choice-trace-required'));
 });
 
 test('fixed scripts cannot shortcut varied problems',()=>{
@@ -82,7 +141,7 @@ test('fixed scripts cannot shortcut varied problems',()=>{
 
 test('math discovery follows observed exchange, shows objects before notation, and is not a puzzle',()=>{
   for(const rule of ['add-regroup','sub-regroup']){const session=solve(rule,81),discovery=starboxV3Discovery(session);assert.equal(discovery.interactivePuzzle,false);assert.equal(discovery.compactConsequence,true);assert.ok(discovery.objectBefore);assert.ok(discovery.objectAfter);assert.ok(['10 個一可以換成 1 個十','打開 1 個十，就有 10 個一'].includes(discovery.statement));assert.ok(discovery.vertical.columns)}
-  assert.throws(()=>starboxV3Discovery(solve('add-no-regroup',82)),/reserved/);
+  for(const rule of ['add-no-regroup','sub-no-regroup']){const session=solve(rule,82);assert.equal(session.problem.expectedExchange.direction,null);assert.throws(()=>starboxV3Discovery(session),/reserved/)}
 });
 
 test('founder readback explains learning purpose without overstating evidence',()=>{

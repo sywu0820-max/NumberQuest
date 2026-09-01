@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Number Quest 星箱工坊 V3.1 Surface Validation</title>
+  <style>body{font:16px system-ui;background:#101b35;color:#fff;margin:0;padding:20px}main{max-width:960px;margin:auto}.pass{color:#79f2ad}iframe{width:100%;height:720px;border:1px solid #ffffff44;border-radius:14px;background:#172443}pre{white-space:pre-wrap;word-break:break-word}</style>
+</head>
+<body>
+<main><h1>星箱工坊 V3.1 child-surface harness</h1><p id="status">RUNNING</p><div id="surfaces"></div><pre id="evidence"></pre></main>
+<script type="module">
+let frame;const frames=[],wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const load=url=>new Promise(resolve=>{frame=document.createElement('iframe');frame.title=`星箱工坊測試表面 ${frames.length+1}`;frame.onload=()=>resolve();frame.src=url;frames.push(frame);document.getElementById('surfaces').append(frame)});
+const doc=()=>frame.contentDocument,founder=()=>JSON.parse(doc().getElementById('founderDebug').textContent);
+const source=()=>doc().querySelector('[data-source]'),target=id=>doc().querySelector(`[data-target="${id}"]`);
+const tap=(from,to)=>{from.click();to.click()};
+const keyboard=(from,to)=>{from.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));from.click();to.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));to.click()};
+const drag=(from,to=null)=>{const data=new DataTransfer();from.dispatchEvent(new DragEvent('dragstart',{bubbles:true,dataTransfer:data}));if(to){to.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer:data}));to.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:data}))}from.dispatchEvent(new DragEvent('dragend',{bubbles:true,dataTransfer:data}))};
+const exactSource=count=>[...doc().querySelectorAll('[data-source]')].find(node=>node.dataset.source.endsWith(`:${count}`));
+const checks={};
+
+await load('../starbox-v3.html?prototype=starbox-v3&case=add-no-regroup&seed=91&founder=1');
+tap(source(),target('packing-tray'));await wait(700);let state=founder();
+checks.invalidTarget={scene:state.scene.id,delivered:state.state.deliveredIds.length,reasons:state.classification.reasons};
+
+await load('../starbox-v3.html?prototype=starbox-v3&case=add-no-regroup&seed=92&founder=1');
+drag(source());await wait(700);state=founder();
+checks.outsideDrop={scene:state.scene.id,delivered:state.state.deliveredIds.length,last:state.interactionLog.at(-1),reasons:state.classification.reasons};
+
+await load('../starbox-v3.html?prototype=starbox-v3&case=add-no-regroup&seed=93&founder=1');
+drag(source(),target('inventory'));await wait(400);keyboard(source(),target('inventory'));await wait(400);state=founder();
+checks.dragKeyboardParity={complete:state.state.complete,paths:state.interactionLog.filter(item=>item.action.type==='move-delivery').map(item=>item.interactionPath),choiceEvidence:state.childLoop.choiceEvidence,successCopy:doc().getElementById('successPurpose').textContent,discoveryVisible:!doc().getElementById('discoveryBtn').hidden};
+
+await load('../starbox-v3.html?prototype=starbox-v3&case=sub-no-regroup&seed=94&founder=1');
+state=founder();tap(exactSource(state.state.remainingToFulfill.tens),target('order-zone'));await wait(400);state=founder();tap(exactSource(state.state.remainingToFulfill.ones),target('order-zone'));await wait(400);state=founder();
+checks.subtractNoRegroup={complete:state.state.complete,direction:state.problem.expectedExchange.direction,discoveryVisible:!doc().getElementById('discoveryBtn').hidden,choiceEvidence:state.childLoop.choiceEvidence};
+
+checks.pageErrors=state.pageErrors;
+const passed=checks.invalidTarget.scene==='combine'&&checks.invalidTarget.delivered===0&&checks.invalidTarget.reasons.includes('v3-wrong-target-choice')&&checks.outsideDrop.scene==='combine'&&checks.outsideDrop.delivered===0&&checks.outsideDrop.last?.motorNoiseOnly===true&&!checks.outsideDrop.reasons.includes('outside-drop')&&checks.dragKeyboardParity.complete&&checks.dragKeyboardParity.paths.includes('pointer-drag')&&checks.dragKeyboardParity.paths.includes('keyboard')&&checks.dragKeyboardParity.choiceEvidence.complete&&checks.dragKeyboardParity.successCopy==='你完成了這批任務。'&&!checks.dragKeyboardParity.discoveryVisible&&checks.subtractNoRegroup.complete&&checks.subtractNoRegroup.direction===null&&!checks.subtractNoRegroup.discoveryVisible&&checks.subtractNoRegroup.choiceEvidence.complete&&checks.pageErrors.length===0;
+document.getElementById('evidence').textContent=JSON.stringify(checks,null,2);document.getElementById('status').className=passed?'pass':'';document.getElementById('status').textContent=passed?'PASS: actual child-surface source/target semantics':'FAIL';
+</script>
+</body>
+</html>

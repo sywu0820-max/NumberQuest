@@ -6,8 +6,16 @@ const read=file=>fs.readFileSync(new URL(`../${file}`,import.meta.url),'utf8');
 test('V3 ships as one hidden Number Quest star-box workshop with four distinct object missions',()=>{
   const html=read('starbox-v3.html'),app=read('starbox-v3.js'),css=read('starbox-v3.css');
   for(const id of ['numberQuestBack','missionSteps','workbench','actionDock','hintBtn','successPanel','discoveryDialog','founderDebug'])assert.match(html,new RegExp(`id="${id}"`));
-  for(const token of ['combine-deliveries','scoop-ten-stars','seal-starbox','fulfill-boxes','open-starbox','fulfill-stars','pointer-drag','keyboard','candidate-independent-acquisition-observation'])assert.match(`${app}\n${read('src/grade-2a-starbox-v3.mjs')}`,new RegExp(token));
+  for(const token of ['move-delivery','scoop-ten-stars','seal-starbox','fulfill-boxes','open-starbox','fulfill-stars','pointer-drag','keyboard','candidate-independent-acquisition-observation'])assert.match(`${app}\n${read('src/grade-2a-starbox-v3.mjs')}`,new RegExp(token));
   assert.match(css,/touch-action:none/);assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);assert.match(css,/min-height:4[46]px/);
+});
+
+test('visible objects are the operative source and destination controls with real drop validation',()=>{
+  const app=read('starbox-v3.js'),html=read('starbox-v3.html');
+  for(const token of ['data-source','data-target','draggable="true"','dragstart','ondrop','elementFromPoint','outside-drop','v3-wrong-quantity-choice'])assert.match(app,new RegExp(token));
+  assert.doesNotMatch(`${app}\n${html}`,/object-action|makeActionButton/);
+  assert.match(app,/expectedExchange\.direction!=null/);assert.doesNotMatch(app,/rule\.includes\(['"]regroup['"]\)/);
+  assert.match(app,/你完成了這批任務。/);assert.doesNotMatch(app,/你剛才會了|證明你會了|已經學會/);
 });
 
 test('child surface preserves the single warehouse metaphor and avoids worksheet-era language',()=>{
@@ -34,12 +42,18 @@ test('slow motor interaction is not silently classified as hint use',()=>{
 });
 
 test('offline shell caches every V3 dependency and retains protected predecessor evidence',()=>{
-  const worker=read('sw.js');for(const asset of ['starbox-v3.html','starbox-v3.css?v=3-1','starbox-v3.js?v=3-1','starbox-v3-return.js?v=3-1','grade-2a-starbox-v3.mjs?v=3-1','grade-2a-carry-bridge-core.mjs'])assert.match(worker,new RegExp(asset.replace(/[.?]/g,'\\$&')));
-  assert.match(worker,/number-quest-v09-/);assert.match(worker,/number-quest-v08-/);assert.match(worker,/number-quest-v10-11-starbox-v3/);
+  const worker=read('sw.js');for(const asset of ['starbox-v3.html','starbox-v3.css?v=3-6','starbox-v3.js?v=3-6','starbox-v3-return.js?v=3-1','grade-2a-starbox-v3.mjs?v=3-6','grade-2a-carry-bridge-core.mjs'])assert.match(worker,new RegExp(asset.replace(/[.?]/g,'\\$&')));
+  assert.match(worker,/number-quest-v09-/);assert.match(worker,/number-quest-v08-/);assert.match(worker,/number-quest-v10-16-starbox-v31/);
 });
 
 test('shipped V3 browser harness covers all rules, all interaction paths, support, tampering, and boundaries',()=>{
   const harness=read('tests/grade-2a-starbox-v3-browser-harness.html');
-  for(const token of ['allRules','allPaths','exchangeIntegrity','supportExclusion','tamperExclusion','discoveryContinuity','runDistinctness','navigationReversible','noRuntimeWrites','exact100Supported'])assert.match(harness,new RegExp(token));
+  for(const token of ['allRules','allPaths','exchangeIntegrity','supportExclusion','tamperExclusion','choiceEvidence','invalidTarget','outsideDrop','choicePositionVariation','noRegroupDiscoveryExcluded','discoveryContinuity','runDistinctness','navigationReversible','noRuntimeWrites','exact100Supported'])assert.match(harness,new RegExp(token));
   assert.doesNotMatch(harness,/localStorage|sessionStorage|indexedDB/);
+});
+
+test('shipped V3.1 child-surface harness exercises invalid, outside, drag, keyboard, and exact discovery behavior',()=>{
+  const harness=read('tests/grade-2a-starbox-v31-surface-harness.html');
+  for(const token of ['invalidTarget','outsideDrop','motorNoiseOnly','dragKeyboardParity','pointer-drag','keyboard','subtractNoRegroup','discoveryVisible','successCopy'])assert.match(harness,new RegExp(token));
+  assert.match(harness,/starbox-v3\.html\?prototype=starbox-v3/);assert.doesNotMatch(harness,/localStorage|sessionStorage|indexedDB/);
 });

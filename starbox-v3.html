@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#172443">
   <title>Number Quest · 星箱工坊</title>
-  <link rel="stylesheet" href="starbox-v3.css?v=3-1">
-  <script>window.__NQ_STARBOX_ERRORS__=[];addEventListener('error',event=>window.__NQ_STARBOX_ERRORS__.push(String(event.error?.stack||event.message||'page error')));addEventListener('unhandledrejection',event=>window.__NQ_STARBOX_ERRORS__.push(String(event.reason?.stack||event.reason||'unhandled rejection')))</script>
+  <link rel="stylesheet" href="starbox-v3.css?v=3-6">
+  <script>window.__NQ_STARBOX_ERRORS__=[];addEventListener('error',event=>{const detail=String(event.error?.stack||event.message||'page error');window.__NQ_STARBOX_ERRORS__.push(detail);document.documentElement.dataset.bootError=`${detail} @ ${event.filename||'inline'}:${event.lineno||0}:${event.colno||0}`});addEventListener('unhandledrejection',event=>window.__NQ_STARBOX_ERRORS__.push(String(event.reason?.stack||event.reason||'unhandled rejection')))</script>
 </head>
 <body>
   <main id="starboxApp" class="starbox-app">
@@ -68,6 +68,6 @@
       <output id="founderDebug"></output>
     </aside>
   </main>
-  <script type="module" src="starbox-v3.js?v=3-1"></script>
+  <script type="module" src="starbox-v3.js?v=3-6"></script>
 </body>
 </html>
