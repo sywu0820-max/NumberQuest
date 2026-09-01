@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#173f65">
+<title>交換橋島 · Number Quest Hidden V2</title>
+<link rel="stylesheet" href="carry-bridge-v2.css?v=v2-5">
+<script>window.__NQ_CARRY_V2_ERRORS__=[];addEventListener('error',event=>window.__NQ_CARRY_V2_ERRORS__.push(String(event.error?.stack||event.message||'page error')));addEventListener('unhandledrejection',event=>window.__NQ_CARRY_V2_ERRORS__.push(String(event.reason?.stack||event.reason||'unhandled rejection')))</script>
+</head>
+<body>
+<main id="prototypeGate" class="gate">
+  <section><span aria-hidden="true">🔒</span><h1>隱藏測試入口</h1><a href="index.html">回到 Number Quest</a></section>
+</main>
+
+<main id="prototypeApp" class="app" hidden>
+  <header class="nq-header">
+    <a class="nq-home" href="index.html" aria-label="回到 Number Quest"><span aria-hidden="true">✦</span><b>NUMBER QUEST</b></a>
+    <div class="world-name"><span aria-hidden="true">🌉</span><strong>交換橋島</strong><small>隱藏 V2 試玩 · 不記錄進度</small></div>
+    <button id="soundToggle" class="icon-button" type="button" aria-label="切換音效提示" aria-pressed="true">♪</button>
+  </header>
+
+  <section id="playScene" class="play-scene" aria-labelledby="missionTitle">
+    <div class="mission-strip">
+      <span id="missionIcon" aria-hidden="true">🚚</span>
+      <div><h1 id="missionTitle">讓貨物在橋上見面</h1><output id="missionStatus" aria-live="polite"></output></div>
+      <button id="hintButton" class="hint-orb" type="button" aria-label="看動作提示">💡</button>
+    </div>
+
+    <div id="islandStage" class="island-stage">
+      <section id="mergeScene" class="scene-layer merge-scene" aria-label="讓兩批貨物會合" hidden>
+        <button id="cargoA" class="cargo-island cargo-a" type="button" aria-label="移動第一批貨物"></button>
+        <div id="mergeBridge" class="merge-bridge" aria-hidden="true"><span>➜</span><i>🌉</i><span>⬅</span></div>
+        <button id="cargoB" class="cargo-island cargo-b" type="button" aria-label="移動第二批貨物"></button>
+      </section>
+
+      <section id="workScene" class="scene-layer work-scene" aria-label="操作貨物" hidden>
+        <div id="cargoField" class="cargo-field"></div>
+        <button id="tenMachine" class="ten-machine" type="button" aria-label="把剛好十個一換成一個十" hidden>
+          <span class="machine-mouth" aria-hidden="true">⚙</span>
+          <span id="machineSlots" class="machine-slots" aria-hidden="true"></span>
+          <b id="machineLabel">10 → 10</b>
+        </button>
+        <button id="openingDock" class="opening-dock" type="button" aria-label="打開一個十成為十個一" hidden><span aria-hidden="true">📦</span><b>10</b><i>⇣</i><span class="released-ones" aria-hidden="true">••••••••••</span></button>
+        <div id="departingBoat" class="departing-boat" aria-label="要離開的貨物" hidden><span aria-hidden="true">⛵</span><div><small>還要帶走</small><b id="boatNeed"></b></div></div>
+      </section>
+
+      <section id="celebrateScene" class="scene-layer celebrate-scene" aria-label="任務完成" hidden>
+        <div class="bridge-glow" aria-hidden="true">✨</div>
+        <div class="finished-cargo"><span aria-hidden="true">📦</span><b id="finishedValue"></b><small>貨物安全通過！</small></div>
+        <div class="celebrate-actions">
+          <button id="showBlueprint" class="primary-action" type="button">看橋的秘密圖</button>
+          <button id="newMission" class="secondary-action" type="button">再玩一座橋</button>
+        </div>
+      </section>
+    </div>
+
+    <output id="feedback" class="feedback" aria-live="polite"></output>
+  </section>
+
+  <section id="blueprintScene" class="blueprint-scene" aria-labelledby="blueprintTitle" hidden>
+    <button id="closeBlueprint" class="back-button" type="button">← 回到橋上</button>
+    <div class="blueprint-card">
+      <span aria-hidden="true">🗺️</span><h1 id="blueprintTitle">橋的秘密圖</h1>
+      <p id="blueprintRelation"></p>
+      <div id="verticalBlueprint" class="vertical-blueprint" aria-label="直式藍圖"></div>
+      <small>剛才搬動的貨物，原來也能畫成這張圖。</small>
+    </div>
+  </section>
+
+  <aside id="founderPanel" class="founder-panel" hidden>
+    <b>Founder V2 readback</b>
+    <label>場景<select id="caseRuleSelect"><option value="add-regroup">加法交換</option><option value="sub-regroup">減法交換</option></select></label>
+    <button id="resetCase" type="button">重開同題</button>
+    <pre id="prototypeDebug"></pre>
+  </aside>
+</main>
+<script type="module" src="carry-bridge-v2.js?v=v2-3"></script>
+</body>
+</html>
