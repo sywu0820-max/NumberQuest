@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#172443">
+  <title>Number Quest · 十的核心玩具</title>
+  <link rel="stylesheet" href="ten-core.css?v=0-1">
+  <script>window.__NQ_TEN_CORE_ERRORS__=[];addEventListener('error',event=>window.__NQ_TEN_CORE_ERRORS__.push(String(event.error?.stack||event.message||'page error')));addEventListener('unhandledrejection',event=>window.__NQ_TEN_CORE_ERRORS__.push(String(event.reason?.stack||event.reason||'unhandled rejection')))</script>
+</head>
+<body>
+  <header class="nq-shell">
+    <a id="numberQuestBack" class="back" href="index.html">← Number Quest</a>
+    <div class="nq-mark" aria-label="Number Quest"><i aria-hidden="true">✦</i><strong>NUMBER QUEST</strong></div>
+    <span aria-hidden="true"></span>
+  </header>
+  <main id="tenCoreApp" class="ten-core-app">
+    <section class="tabletop" aria-label="十顆球和十格框">
+      <div id="looseTray" class="loose-tray" aria-label="分開的十顆球"></div>
+      <div class="frame-side">
+        <div id="tenLabel" class="ten-label" aria-live="polite" hidden>10</div>
+        <div id="tenFrame" class="ten-frame" role="group" aria-label="透明十格框">
+          <div id="slots" class="slots"></div>
+        </div>
+        <div id="relation" class="relation" aria-live="polite" hidden>10 個一 = 1 個十</div>
+      </div>
+    </section>
+    <output id="tenCoreDebug" hidden aria-hidden="true"></output>
+  </main>
+  <script type="module" src="ten-core.js?v=0-1"></script>
+</body>
+</html>

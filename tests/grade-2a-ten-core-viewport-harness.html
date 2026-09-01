@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title>Ten-Core viewport matrix</title>
+  <style>body{font:16px system-ui;background:#101b35;color:#fff;padding:20px}.pass{color:#79f2ad}iframe{position:absolute;left:-10000px;top:0;border:0}pre{white-space:pre-wrap}</style>
+</head>
+<body>
+  <h1>Ten-Core viewport matrix</h1>
+  <p id="status">RUNNING</p>
+  <pre id="evidence"></pre>
+  <script>
+    const devices=[
+      {name:'mobile',width:390,height:844},
+      {name:'ipad-portrait',width:768,height:1024},
+      {name:'ipad-landscape',width:1024,height:768},
+      {name:'surface',width:1368,height:912}
+    ];
+    const waitFor=(read,timeout=12000)=>new Promise((resolve,reject)=>{const started=Date.now(),poll=()=>{const value=read();if(value)return resolve(value);if(Date.now()-started>timeout)return reject(new Error('viewport timeout'));setTimeout(poll,25)};poll()});
+    const inspect=doc=>({
+      count:doc.querySelectorAll('[data-ball-id]').length,
+      overflowX:doc.documentElement.scrollWidth>doc.documentElement.clientWidth,
+      errors:[...(doc.defaultView.__NQ_TEN_CORE_ERRORS__||[])]
+    });
+    const results=[];
+    (async()=>{
+      for(const device of devices){
+        const frame=document.createElement('iframe');
+        frame.style.width=`${device.width}px`;frame.style.height=`${device.height}px`;
+        frame.src=`../ten-core.html?prototype=ten-core-v0&founder=1&viewport=${device.name}`;
+        document.body.append(frame);
+        await waitFor(()=>frame.contentDocument?.querySelectorAll('[data-ball-id]').length===10&&frame.contentDocument);
+        const doc=frame.contentDocument,win=frame.contentWindow,nodes=new Map([...doc.querySelectorAll('[data-ball-id]')].map(node=>[node.dataset.ballId,node]));
+        const initial={...inspect(doc),innerWidth:win.innerWidth,innerHeight:win.innerHeight,minTouch:Math.min(...[...nodes.values()].map(node=>Math.min(node.getBoundingClientRect().width,node.getBoundingClientRect().height)))};
+        for(let index=0;index<10;index++)doc.querySelector('#looseTray>[data-ball-id]').click();
+        await waitFor(()=>JSON.parse(doc.getElementById('tenCoreDebug').textContent).grouped===true);
+        const grouped={...inspect(doc),inside:doc.querySelectorAll('#slots>[data-slot]>[data-ball-id]').length,label:!doc.getElementById('tenLabel').hidden,relation:!doc.getElementById('relation').hidden,sameNodes:[...nodes].every(([id,node])=>doc.querySelector(`[data-ball-id="${id}"]`)===node)};
+        doc.getElementById('tenFrame').click();
+        await waitFor(()=>JSON.parse(doc.getElementById('tenCoreDebug').textContent).placedCount===0);
+        const reopened={...inspect(doc),loose:doc.querySelectorAll('#looseTray>[data-ball-id]').length,sameNodes:[...nodes].every(([id,node])=>doc.querySelector(`[data-ball-id="${id}"]`)===node)};
+        results.push({device,initial,grouped,reopened});frame.remove();
+      }
+      const passed=results.every(({device,initial,grouped,reopened})=>initial.innerWidth===device.width&&initial.innerHeight===device.height&&initial.count===10&&initial.minTouch>=44&&!initial.overflowX&&initial.errors.length===0&&grouped.count===10&&grouped.inside===10&&grouped.label&&grouped.relation&&grouped.sameNodes&&!grouped.overflowX&&grouped.errors.length===0&&reopened.count===10&&reopened.loose===10&&reopened.sameNodes&&!reopened.overflowX&&reopened.errors.length===0);
+      document.getElementById('evidence').textContent=JSON.stringify(results,null,2);
+      document.getElementById('status').className=passed?'pass':'';
+      document.getElementById('status').textContent=passed?'PASS: Ten-Core viewport matrix':'FAIL: Ten-Core viewport matrix';
+    })().catch(error=>{document.getElementById('status').textContent=`FAIL: ${error.stack||error}`});
+  </script>
+</body>
+</html>
