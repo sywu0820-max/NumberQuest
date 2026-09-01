@@ -1,5 +1,7 @@
-# Make-Ten Overflow microtoy v0
+# Make-Ten Overflow microtoy v0.1
 
 Candidate C branches directly from frozen PR #20 head `140d492c76b7c60c635e594865a7f74f53479855`. It tests whether a child can combine two visible groups, choose exactly ten of the same stable objects, close those ten as one ten, and reopen them while unchanged leftovers remain visible.
 
 Hidden founder route: `make-ten-overflow.html?prototype=make-ten-overflow-v0&a=6&b=7&variant=0&founder=1`. Source counts are 1–9 with totals 10–18. Case-scoped object IDs and varied orders prevent a trace from one case being replayed as proof in another. Nine or eleven selected objects are structurally ineligible to group. `label=0` disables the compact after-the-fact relationship. There is no arithmetic question, task, success state, persistence, learning evidence, or ordinary homepage entry.
+
+Motion-first v0.1 keeps that arithmetic contract unchanged. Dragging is the primary surface: the actual object node follows the pointer or finger, springs into its real slot after a valid drop, and returns to its stable source home after an invalid, outside, or cancelled drop. The tenth selected object immediately triggers a cosmetic gather/settle of those same ten nodes; animation timing is never consulted by the state reducer. Reopening releases those nodes to stable source homes, so leftover nodes do not move or get recreated. Tap and keyboard remain equivalent fallbacks. Native reduced-motion preference, plus the hidden `motion=reduce` verification switch, applies state changes immediately without depending on animation duration.
