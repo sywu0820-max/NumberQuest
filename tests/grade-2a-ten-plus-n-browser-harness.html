@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>10+n browser harness</title><style>body{font:16px system-ui;background:#101b35;color:white}.pass{color:#7fda9d}iframe{position:absolute;left:-10000px}</style></head>
+<body><h1>10+n harness</h1><p id="status">RUNNING</p><pre id="evidence"></pre>
+<script type="module">
+const variants=[0,4,9],results=[];
+for(const n of variants){
+  const frame=document.createElement('iframe');frame.width=390;frame.height=844;frame.src=`../ten-plus-n.html?prototype=ten-plus-n-v0&founder=1&n=${n}`;document.body.append(frame);await new Promise(resolve=>frame.onload=resolve);
+  const doc=frame.contentDocument,debug=()=>JSON.parse(doc.getElementById('debug').textContent),nodes=new Map([...doc.querySelectorAll('[data-ball-id],[data-extra-id]')].map(node=>[node.dataset.ballId||node.dataset.extraId,node])),initial=debug();
+  doc.getElementById('tenFrame').click();await new Promise(resolve=>setTimeout(resolve,80));const opened=debug(),ball=doc.querySelector('#coreLoose>[data-ball-id]'),slot=doc.querySelector('[data-slot]'),ballRect=ball.getBoundingClientRect(),slotRect=slot.getBoundingClientRect(),fire=(type,x,y,buttons)=>ball.dispatchEvent(new PointerEvent(type,{bubbles:true,pointerType:'mouse',pointerId:1,clientX:x,clientY:y,buttons}));
+  fire('pointerdown',ballRect.x+ballRect.width/2,ballRect.y+ballRect.height/2,1);fire('pointermove',slotRect.x+slotRect.width/2,slotRect.y+slotRect.height/2,1);fire('pointerup',slotRect.x+slotRect.width/2,slotRect.y+slotRect.height/2,0);
+  while(debug().corePlacedCount<10)doc.querySelector('#coreLoose>[data-ball-id]').click();await new Promise(resolve=>setTimeout(resolve,80));const reclosed=debug(),same=[...nodes].every(([id,node])=>doc.querySelector(`[data-ball-id="${id}"],[data-extra-id="${id}"]`)===node);
+  results.push({n,initial,opened,reclosed,same,count:doc.querySelectorAll('[data-ball-id],[data-extra-id]').length,overflow:doc.documentElement.scrollWidth>doc.documentElement.clientWidth,errors:reclosed.pageErrors});frame.remove();
+}
+const passed=results.every(result=>result.initial.totalQuantity===10+result.n&&result.initial.numeral===String(10+result.n)&&!result.opened.showNumeral&&result.reclosed.numeral===String(10+result.n)&&result.same&&result.count===10+result.n&&!result.overflow&&!result.errors.length);
+document.getElementById('status').textContent=passed?'PASS: 10+n browser':'FAIL';document.getElementById('status').className=passed?'pass':'';document.getElementById('evidence').textContent=JSON.stringify(results,null,2);
+</script></body></html>
