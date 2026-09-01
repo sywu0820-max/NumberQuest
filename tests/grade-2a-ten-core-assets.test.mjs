@@ -12,7 +12,7 @@ test('child surface excludes story, lesson, assessment, command, and success UI'
 });
 
 test('physical balls and slots are controls; no candidate card or detached command path exists',()=>{
-  const app=read('ten-core.js');for(const token of ['dataset.ballId','data-slot','pointerdown','pointerup','dragstart','drop','elementFromPoint','nextTenCoreEmptySlot'])assert.match(app,new RegExp(token.replace('.','\\.')));assert.doesNotMatch(app,/candidate|makeActionButton|object-action|source-target|numeric-answer/i);
+  const app=read('ten-core.js');for(const token of ['dataset.ballId','data-slot','pointerdown','pointermove','pointerup','elementFromPoint','nextTenCoreEmptySlot','draggable=false'])assert.match(app,new RegExp(token.replace('.','\\.')));assert.doesNotMatch(app,/dragstart|dragend|dataTransfer|candidate|makeActionButton|object-action|source-target|numeric-answer/i);
 });
 
 test('same DOM balls move by append without replacement and reverse through the frame',()=>{
@@ -26,7 +26,7 @@ test('idle cue is visual-only and no runtime write path exists',()=>{
 test('ordinary Number Quest has no public Ten-Core entry',()=>{assert.doesNotMatch(read('index.html'),/ten-core\.html|ten-core-v0/)});
 
 test('offline shell caches the exact microtoy dependency chain and preserves predecessor cache evidence',()=>{
-  const worker=read('sw.js');for(const asset of ['ten-core.html','ten-core.css?v=0-1','ten-core.js?v=0-1','grade-2a-ten-core.mjs?v=0-1'])assert.match(worker,new RegExp(asset.replace(/[.?]/g,'\\$&')));assert.match(worker,/number-quest-v10-11-ten-core-v0/);assert.match(worker,/number-quest-v09-/);assert.match(worker,/number-quest-v08-/);assert.match(worker,/pathname\.endsWith\('\/ten-core\.html'\)\?c\.match\('\.\/ten-core\.html'\)/);assert.match(read('ten-core.js'),/serviceWorker\.register\('\.\/sw\.js'\)/);
+  const worker=read('sw.js');for(const asset of ['ten-core.html','ten-core.css?v=0-1','ten-core.js?v=0-2','grade-2a-ten-core.mjs?v=0-1'])assert.match(worker,new RegExp(asset.replace(/[.?]/g,'\\$&')));assert.match(worker,/number-quest-v10-12-ten-core-v0/);assert.match(worker,/number-quest-v09-/);assert.match(worker,/number-quest-v08-/);assert.match(worker,/pathname\.endsWith\('\/ten-core\.html'\)\?c\.match\('\.\/ten-core\.html'\)/);assert.match(read('ten-core.js'),/serviceWorker\.register\('\.\/sw\.js'\)/);
 });
 
 test('touch, focus, reduced-motion, and compact responsive rules are present',()=>{
@@ -35,6 +35,6 @@ test('touch, focus, reduced-motion, and compact responsive rules are present',()
 
 test('shipped browser evidence covers semantic, same-node surface, and device viewport paths',()=>{
   const semantic=read('tests/grade-2a-ten-core-browser-harness.html'),surface=read('tests/grade-2a-ten-core-surface-harness.html'),viewports=read('tests/grade-2a-ten-core-viewport-harness.html');
-  assert.match(semantic,/outsidePreserved/);assert.match(surface,/sameNodes/);assert.match(surface,/pointerDrag/);
+  assert.match(semantic,/outsidePreserved/);assert.match(surface,/sameNodes/);assert.match(surface,/pointerDrag/);assert.match(surface,/new PointerEvent/);
   for(const token of ['mobile','ipad-portrait','ipad-landscape','surface','minTouch','sameNodes','overflowX'])assert.match(viewports,new RegExp(token));
 });
