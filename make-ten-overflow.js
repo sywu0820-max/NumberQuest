@@ -7,12 +7,13 @@ const a=Math.max(1,Math.min(9,number('a',6)));
 const b=Math.max(1,Math.min(9,number('b',7)));
 const variant=Math.max(0,Math.min(9999,number('variant',0)));
 const showLabel=params.get('label')!=='0';
+const showSecondary=params.get('secondary')!=='0';
 const founder=params.get('founder')==='1';
-const reducedMotion=params.get('motion')==='reduce'||matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reducedMotion=params.get('motion')==='reduce'||(params.get('motion')!=='full'&&matchMedia('(prefers-reduced-motion: reduce)').matches);
 const balls=new Map(),sourceHomes=new Map(),slots=[];
 let state;
 try{state=createMakeTenState(a,b,variant)}catch{state=createMakeTenState(6,7,variant)}
-let suppressTap=false,activeDrag=null,lastMotion='initial';
+let suppressTap=false,activeDrag=null,lastMotion='initial',meaningPhase='hidden',primaryTimer=null,secondaryTimer=null;
 
 function build(){
   for(let i=0;i<10;i++){const slot=document.createElement('div');slot.className='slot';slot.dataset.slot=String(i);$('slots').append(slot);slots.push(slot)}
@@ -21,6 +22,7 @@ function build(){
     home.className='source-home';home.dataset.homeId=id;home.dataset.source=source;$(source==='a'?'sourceA':'sourceB').append(home);sourceHomes.set(id,home);
     ball.type='button';ball.className='ball';ball.draggable=false;ball.dataset.objectId=id;ball.dataset.source=source;ball.setAttribute('aria-label','球');home.append(ball);bind(ball);balls.set(id,ball);
   }
+  $('sourceACount').textContent=String(state.case.sourceA);$('sourceBCount').textContent=String(state.case.sourceB);
   $('frame').addEventListener('click',event=>{if(event.target.closest('.ball'))return;if(state.grouped)openGroup()});
   $('frame').addEventListener('keydown',event=>{if(state.grouped&&(event.key==='Enter'||event.key===' ')){event.preventDefault();openGroup()}});
   render();$('app').hidden=false;
@@ -35,8 +37,16 @@ function render(){
   $('frame').tabIndex=snap.grouped?0:-1;
   $('frame').setAttribute('role',snap.grouped?'button':'group');
   $('frame').setAttribute('aria-label',snap.grouped?'一個十；點一下打開':'透明十格框');
-  $('relation').textContent=snap.showRelation?snap.relation:'';
-  if(founder)$('debug').textContent=JSON.stringify({...snap,nodeIds:[...balls.keys()],homeIds:[...sourceHomes.keys()],motion:{reduced:reducedMotion,last:lastMotion,active:activeDrag?.id||null},pageErrors:window.__NQ_MAKE_TEN_ERRORS__});
+  const primaryVisible=snap.showRelation&&(meaningPhase==='primary'||meaningPhase==='secondary'),secondaryVisible=snap.showRelation&&showSecondary&&meaningPhase==='secondary';
+  $('meaning').hidden=!primaryVisible;$('relation').textContent=primaryVisible?snap.primaryRelation:'';$('sourceRelation').hidden=!secondaryVisible;$('sourceRelation').textContent=secondaryVisible?snap.secondaryRelation:'';
+  if(founder)$('debug').textContent=JSON.stringify({...snap,nodeIds:[...balls.keys()],homeIds:[...sourceHomes.keys()],motion:{reduced:reducedMotion,last:lastMotion,active:activeDrag?.id||null},meaning:{phase:meaningPhase,primaryVisible,secondaryVisible,primary:snap.primaryRelation,secondary:snap.secondaryRelation},pageErrors:window.__NQ_MAKE_TEN_ERRORS__});
+}
+
+function rewindMeaning(){clearTimeout(primaryTimer);clearTimeout(secondaryTimer);primaryTimer=secondaryTimer=null;meaningPhase='hidden'}
+function beginMeaningReveal(){
+  rewindMeaning();if(!showLabel||!state.grouped){render();return}
+  if(reducedMotion){meaningPhase=showSecondary?'secondary':'primary';render();return}
+  primaryTimer=setTimeout(()=>{if(!state.grouped)return;meaningPhase='primary';render();if(showSecondary)secondaryTimer=setTimeout(()=>{if(state.grouped){meaningPhase='secondary';render()}},520)},1100);
 }
 
 function rect(node){const r=node.getBoundingClientRect();return {left:r.left,top:r.top,width:r.width,height:r.height}}
@@ -52,7 +62,7 @@ function transition(action){const out=applyMakeTenAction(state,action);state=out
 function maybeGroup(){
   if(state.grouped||state.selectedIds.length!==10)return false;
   const out=transition({type:'group-selection'});render();
-  if(out.result.accepted){lastMotion='exact-ten-gather';animateGrouping(out.result.objectIds);return true}
+  if(out.result.accepted){lastMotion='exact-ten-gather';animateGrouping(out.result.objectIds);beginMeaningReveal();return true}
   return false;
 }
 function animateGrouping(ids){
@@ -68,7 +78,7 @@ function selectWithFallback(id,method){
 }
 function openGroup(){
   if(!state.grouped)return;
-  const moving=[...state.selectedIds],before=new Map(moving.map(id=>[id,rect(balls.get(id))])),out=transition({type:'open-group'});lastMotion='release-ten';render();
+  rewindMeaning();const moving=[...state.selectedIds],before=new Map(moving.map(id=>[id,rect(balls.get(id))])),out=transition({type:'open-group'});lastMotion='release-ten';render();
   if(out.result.accepted){$('frame').classList.add('releasing');moving.forEach((id,index)=>flip(balls.get(id),before.get(id),{delay:index*18}));setTimeout(()=>$('frame').classList.remove('releasing'),reducedMotion?0:720)}
   render();
 }
