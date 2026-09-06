@@ -72,7 +72,7 @@
     .key{min-height:67px;border-radius:18px;background:#222f3d;border:1px solid #36495d;color:#e3ecf5;font-size:28px;font-weight:950;box-shadow:0 5px 0 #0b1118}
     .key:active{transform:translateY(3px);box-shadow:0 2px 0 #0b1118}
     .key.action{font-size:21px}.key.delete{background:#342b24;border-color:#5d4935;color:#e8c58e}.key.submit-key{background:#2d6c4b;border-color:#3f9367;color:#eafff3}
-    .feedback{min-height:34px;text-align:center;font-size:19px;font-weight:900;margin-top:13px}
+    .feedback{min-height:42px;text-align:center;font-size:21px;font-weight:900;margin:0 0 8px}
     .feedback.ok{color:#75d5a0}.feedback.no{color:#e38b8b}
     .result{text-align:center}
     .trophy{font-size:70px;margin-bottom:5px}
@@ -136,6 +136,7 @@
       <div id="timer" class="timer">00:00.0</div>
     </div>
     <div class="bar"><div id="progressBar"></div></div>
+    <div id="feedback" class="feedback" aria-live="polite"></div>
     <div class="question"><div id="equation" class="equation">7 × 8 = ?</div></div>
 
     <div id="answerDisplay" class="answer-display empty" aria-live="polite">請按數字</div>
@@ -153,7 +154,6 @@
       <button class="key" data-digit="0">0</button>
       <button class="key action submit-key" data-action="submit">答題 ✓</button>
     </div>
-    <div id="feedback" class="feedback" aria-live="polite"></div>
   </section>
 
   <section id="result" class="panel result hidden">
@@ -314,7 +314,7 @@
     const value=Number(answerText),q=questions[index],ok=value===q.answer;
     if(ok){correct++;$('#feedback').textContent='答對了！✨';$('#feedback').className='feedback ok'}
     else{$('#feedback').textContent=`差一點～正確答案是 ${q.answer}`;$('#feedback').className='feedback no'}
-    setTimeout(()=>{index++;if(index>=selectedCount)finishGame();else updateQuestion()},ok?1200:2000);
+    setTimeout(()=>{index++;if(index>=selectedCount)finishGame();else updateQuestion()},ok?2000:3000);
   }
 
   $$('.count-btn').forEach(btn=>btn.addEventListener('click',()=>{
