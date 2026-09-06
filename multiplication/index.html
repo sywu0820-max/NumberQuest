@@ -35,7 +35,7 @@
 </main>
 <script>
 (()=>{const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],HOME=$('#home'),PLAY=$('#play'),RESULT=$('#result'),KEY='multiplicationQuestHistoryV1';let selectedCount=50,questions=[],index=0,correct=0,startMs=0,tick=null,locked=false;
-const readHistory=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return[]}},writeHistory=rows=>localStorage.setItem(KEY,JSON.stringify(rows.slice(0,50)));
+const readHistory=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return[]}},writeHistory=rows=>localStorage.setItem(KEY,JSON.stringify(rows));
 function formatTime(ms,decimal=false){const total=Math.max(0,ms)/1000,m=Math.floor(total/60),s=total-m*60;return decimal?`${String(m).padStart(2,'0')}:${s.toFixed(1).padStart(4,'0')}`:`${String(m).padStart(2,'0')}:${String(Math.floor(s)).padStart(2,'0')}`}
 function esc(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function renderHistory(){const rows=readHistory(),el=$('#records');if(!rows.length){el.innerHTML='<div class="empty">還沒有紀錄。完成第一場挑戰後，成績會出現在這裡 ✨</div>';return}el.innerHTML=rows.map(r=>`<div class="record"><div class="date"><strong>${esc(r.date)}</strong><br><span>${r.count} 題挑戰</span></div><div><span>分數</span><br><b class="score">${r.score}</b></div><div><span>答對</span><br><strong>${r.correct}/${r.count}</strong></div><div><span>時間</span><br><strong>${esc(r.time)}</strong></div><div class="avg"><span>平均</span><br><strong>${r.avg.toFixed(1)}s</strong></div></div>`).join('')}
