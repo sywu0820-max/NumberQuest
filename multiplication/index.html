@@ -314,7 +314,7 @@
     const value=Number(answerText),q=questions[index],ok=value===q.answer;
     if(ok){correct++;$('#feedback').textContent='答對了！✨';$('#feedback').className='feedback ok'}
     else{$('#feedback').textContent=`差一點～正確答案是 ${q.answer}`;$('#feedback').className='feedback no'}
-    setTimeout(()=>{index++;if(index>=selectedCount)finishGame();else updateQuestion()},ok?2000:3000);
+    setTimeout(()=>{index++;if(index>=selectedCount)finishGame();else updateQuestion()},ok?1500:3000);
   }
 
   $$('.count-btn').forEach(btn=>btn.addEventListener('click',()=>{
